@@ -7,6 +7,7 @@ package Abstraction
  * source: https://github.com/ahmadsalim/Rascal-Light
  */
 
+import java.util.NoSuchElementException
 import language.implicitConversions
 
 sealed trait IntegerW
@@ -19,6 +20,7 @@ case class IntegerVal(value: Int) extends IntegerW {  //Value
 case object IntegerNegInf extends IntegerW {    //Negative Infinite
   override def toString: String = "-∞"
 }
+
 
 object IntegerW {
   implicit def intToIntegerW(i: Int): IntegerW = IntegerVal(i)
@@ -40,7 +42,7 @@ object IntegerW {
     case (IntegerVal(v1), IntegerVal(v2)) => IntegerVal(Math.min(v1, v2))
   }
 
-  def min(iws: IntegerW*): IntegerW = iws.fold(IntegerInf)(min2)
+  def min(iws: IntegerW*): IntegerW = iws.fold(IntegerInf)(min2) //* to pass parameters
 
   private
   def max2(iw1: IntegerW, iw2: IntegerW): IntegerW = (iw1, iw2) match {
@@ -228,6 +230,7 @@ case class Intervals(mlb: IntegerW = IntegerNegInf, mub: IntegerW = IntegerInf) 
 }
 
 object Intervals {
+  val Negative = Intervals(IntegerNegInf, IntegerVal(0)) //ergänzt
   val Positive = Intervals(IntegerVal(0), IntegerInf)
   val Unbounded = Intervals()
 }
