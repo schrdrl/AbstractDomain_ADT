@@ -1,66 +1,103 @@
 package Abstraction
 
-import Abstraction.IntegerW.*
+import Abstraction.IntegerW.{*, max, min}
 import Abstraction.Intervals._
+
 import java.io._
 import Abstraction.Powerset.PowersetLattice
 import Abstraction.{ConcreteAbstractGalois, Lattice, Powerset}
 
 import scala.collection.immutable.Nil.{:::, head}
+import scala.runtime.Nothing$
 
 
 /**
- * Weitere Funktionen: sum, prod, ++, concat, intersect
+ * Main Methods:
+ * -head
+ * -tail
+ * -length
+ * -interval
+ * -minList
+ * -maxList
+ * -cons
+ * -nil
+ *
+ * instances:
+ * -Lattice
+ * -ConcreteAbstractGalois
+ *
+ * Extensions:
+ * -sum
+ * -prod
+ * -concat
+ * -intersect
  */
 
-sealed trait Components //h,tail,elem
 
-case class Head(h: Intervals) extends Components
-
-case class Tail(a: AList[Intervals]) extends Components
-
-case class Elem(e: AList[Intervals]) extends Components
-
-
-sealed trait AList[+Intervals] { //"behaviour"
-  def intervals = Intervals(mlb = IntegerNegInf, mub = IntegerInf) //initialisiert
-}
-
+sealed trait AList[+IntegerW]  //"behaviour"
 case object Nil extends AList[Nothing]
+case class Cons[IntegerW](head: IntegerW, tail: AList[IntegerW]) extends AList[IntegerW]
+case class Many[IntegerW](elem: AList[IntegerW]) extends AList[IntegerW]
 
-case class Cons[Intervals](head: Intervals, tail: AList[Intervals]) extends AList[Intervals]
-
-case class Many[Intervals](elem: AList[Intervals]) extends AList[Intervals]
 
 object AList { //case class
 
-
-  //Exception Handling with 'Option'
-  def head[Intervals](l: AList[Intervals]): Option[Intervals] = l match {
+  def head (l: AList[IntegerW]): Option[IntegerW] = l match {
     case Nil => None
     case Cons(h, _) => Some(h)
     case Many(e) => head(e)
   }
 
-  def tail[Intervals](l: AList[Intervals]): Option[AList[Intervals]] = l match {
+  def tail (l: AList[IntegerW]): Option[AList[IntegerW]] = l match {
     case Nil => None
     case Cons(_, t) => Some(t)
     case Many(e) => tail(e)
   }
 
-
-  //Length: 0 or IntegerInf
-  def length(l: AList[Intervals]): Intervals = l match {
-    case Nil => (IntegerVal(0), IntegerVal(0))
-    case Cons(h, t) => IntegerVal(h) widen(IntegerVal(0), IntegerInf) //1 + length(t)
-    case Many(e) => (IntegerVal(0), IntegerInf) //0 widen (1 + length(e))
+  def length(l: AList[IntegerW]): Intervals = l match {
+    case Nil => Intervals(IntegerVal(0), IntegerVal(0))
+    case Cons(h, t) => ??? //1 + length(t)
+    case Many(e) => ???//0 widen (1 + length(e))
     //Many: (IntegerVal(0),IntegerVal(0)) widen (IntegerVal(0),IntegerInf)
-
   }
 
-  //TODO nil()
-  //TODO cons()
-  //TODO many()
+  def interval(l: AList[IntegerW]) : Intervals = l match {
+    case Nil => Unbounded
+    case Cons(h,t) => Intervals(min(h, minList(t)),max(h, maxList(t)))
+    case Many(e) => Intervals(minList(e),maxList(e))
+  }
+
+
+  def minList(l: AList[IntegerW]) : IntegerW = l match {
+    case Nil => ???
+    case Cons(h,t) => ???
+    case Many(e) => ???
+  }
+
+  def maxList(l: AList[IntegerW]) : IntegerW = l match {
+    case Nil => ???
+    case Cons(h,t) => ???
+    case Many(e) => ???
+  }
+
+  //TODO nil() -> equivalent to IntegerW
+  //TODO cons() -> ::
+  //TODO many() -> ::
+
+  //min
+  //max
+
+  def concat(l1: AList[Intervals], l2: AList[Intervals]): AList[Intervals] = l1 match {
+    case Nil => l2
+    case Cons(h, t) => ???
+    case Many(e) => ???
+  }
+
+  def intersect[Intervals](l1: AList[Intervals], l2: AList[Intervals]): AList[Intervals] = l1 match {
+    case Nil => l2
+    case Cons(h, t) => ???
+    case Many(e) => ???
+  }
 
   def sum(al: AList[Intervals]): Int = al match {
     case Nil => 0
@@ -75,15 +112,11 @@ object AList { //case class
     case Many(e) => head(e) * product(tail(e))
   }
 
-  //TODO concat -> Union
-  def concat[Intervals](l1: AList[Intervals], l2: AList[Intervals]): AList[Intervals] = l1 match {
-    case Nil => l2
-    case Cons(h, t) => Cons(h, concat(t, l2))
-    case Many(e) => Cons(head(e), concat(tail(e), l2))
-    //TODO Widening
-  }
 
-  //TODO intersect
+
+
+
+
 
 
   implicit val AListLattice = new Lattice[AList[Intervals]] {
@@ -158,11 +191,7 @@ object AList { //case class
 
 }
 
-object AList {
-  val Nil = Nil
-  val Cons = Cons(Head, Tail)
-  val Many = Many(Elem)
-}
+
 
 /**
  * Cases:
