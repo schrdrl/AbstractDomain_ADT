@@ -10,62 +10,72 @@ import Abstraction.{ConcreteAbstractGalois, Lattice, Powerset}
 import scala.collection.immutable.Nil.{:::, head}
 import scala.runtime.Nothing$
 
-
 /**
- * Main Methods:
- * -head
- * -tail
- * -length
- * -interval
- * -minList
- * -maxList
- * -cons
- * -nil
+ * TODO add Documentation
  *
- * instances:
- * -Lattice
- * -ConcreteAbstractGalois
- *
- * Extensions:
- * -sum
- * -prod
- * -concat
- * -intersect
+ * @param intervals
  */
+case class ALists(intervals: Intervals) {
+  import intervals.Interval //import inner Class
+  type AInt = Interval  //alias
 
 
-sealed trait AList[+IntegerW]  //"behaviour"
-case object Nil extends AList[Nothing]
-case class Cons[IntegerW](head: IntegerW, tail: AList[IntegerW]) extends AList[IntegerW]
-case class Many[IntegerW](elem: AList[IntegerW]) extends AList[IntegerW]
+  sealed trait AList //"behaviour"
+  case object ANil extends AList
+  case class ACons(head: AInt, tail: AList) extends AList
+  case class AMany(elem: AInt) extends AList
 
+  sealed trait AOption[+A]
+  case object ANone extends AOption[Nothing]
+  case class ASome[A](get: A) extends AOption[A]
+  case class AMaybe[A](get: A) extends AOption[A]
 
-object AList { //case class
-
-  def head (l: AList[IntegerW]): Option[IntegerW] = l match {
-    case Nil => None
-    case Cons(h, _) => Some(h)
-    case Many(e) => head(e)
+  def head (l: AList): AOption[AInt] = l match {
+    case ANil => ANone
+    case ACons(h, _) => ASome(h)
+    case AMany(e) => AMaybe(e) //AMany = ANil ≀ ACons
   }
 
-  def tail (l: AList[IntegerW]): Option[AList[IntegerW]] = l match {
-    case Nil => None
-    case Cons(_, t) => Some(t)
-    case Many(e) => tail(e)
+  /**
+   * TODO: case ACons
+   *  -> without asking for variable 'Interval'
+   *  -> not recursive
+   *  t = AMaybe ANone ≀ (Interval(IntegerNegInf, IntegerInf))
+   *    -> split in two cases
+   */
+  def tail (l: AList): AOption[AInt] = l match {
+    case ANil => ANone
+    case ACons(_, ANil) => ANone
+    case ACons(_, t) => AMaybe(Interval(IntegerNegInf, IntegerInf)) // TODO check intervall
+    case AMany(e) => AMaybe(e)
   }
 
-  def length(l: AList[IntegerW]): Intervals = l match {
-    case Nil => Intervals(IntegerVal(0), IntegerVal(0))
-    case Cons(h, t) => ??? //1 + length(t)
-    case Many(e) => ???//0 widen (1 + length(e))
-    //Many: (IntegerVal(0),IntegerVal(0)) widen (IntegerVal(0),IntegerInf)
+  def length(l: AList): AOption[AInt] = l match {
+    case ANil => ANone
+    case ACons(_, _) => ASome(Interval(IntegerVal(1), IntegerInf))
+    case AMany(_) => ASome(Interval(IntegerVal(0), IntegerInf)) //TODO check ASome or AMaybe
   }
 
-  def interval(l: AList[IntegerW]) : Intervals = l match {
-    case Nil => Unbounded
-    case Cons(h,t) => Intervals(min(h, minList(t)),max(h, maxList(t)))
-    case Many(e) => Intervals(minList(e),maxList(e))
+  //TODO Option[Int], AOption[AInt]
+  def isConcreteElementOf_Int(i: Int, ai: AInt): Boolean ={
+    intervals.contains(ai, i)
   }
+
+
+  def isConcreteElementOf_List(l: List[Int], al:AList): Boolean = (l, al) match{
+    case (Nil, ANil) => true
+    //case (Cons(h,t), ACons(e))
+    //case (Cons(h,t), AMany(e))
+  }
+
+  def isConcreteElementOf_Option(o: Option[Int], ao: AOption[AInt]): Boolean = (o,ao) match {
+    case (None, ANone) => true
+    //case (Some, ASome)
+    //case (Some, AMaybe)
+  }
+/**
+
+
 
 
   def minList(l: AList[IntegerW]) : IntegerW = l match {
@@ -80,12 +90,10 @@ object AList { //case class
     case Many(e) => ???
   }
 
-  //TODO nil() -> equivalent to IntegerW
+  //TODO nil() -> 'equivalent' to IntegerW
   //TODO cons() -> ::
   //TODO many() -> ::
 
-  //min
-  //max
 
   def concat(l1: AList[Intervals], l2: AList[Intervals]): AList[Intervals] = l1 match {
     case Nil => l2
@@ -188,8 +196,9 @@ object AList { //case class
     }
   }
 
-
+*/
 }
+
 
 
 
@@ -229,3 +238,27 @@ object AList { //case class
  * => (Many,Many)
  *
  */
+
+
+/**
+ * Main Methods:
+ * -head
+ * -tail
+ * -length
+ * -interval
+ * -minList
+ * -maxList
+ * -cons
+ * -nil
+ *
+ * instances:
+ * -Lattice
+ * -ConcreteAbstractGalois
+ *
+ * Extensions:
+ * -sum
+ * -prod
+ * -concat
+ * -intersect
+ */
+
