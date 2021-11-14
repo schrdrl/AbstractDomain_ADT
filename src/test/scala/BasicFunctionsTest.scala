@@ -1,13 +1,24 @@
+import Abstraction._
+import org.scalatest.funsuite.AnyFunSuite
 
 
 
-import Abstraction.Intervals
-import jdk.internal.vm.vector.VectorSupport.test
-import org.scalatest.funsuite._
-import Abstraction.ALists
 
 
-class BasicFunctionsTest {
+class BasicFunctionsTest extends AnyFunSuite {
+
+
+
+  test("Head of AMany"){
+
+    val a = Intervals.Positive
+    val b = ALists(a)
+
+
+  }
+
+
+
 
   //head ANil
   //head ACons

@@ -230,7 +230,7 @@ case class Intervals(mlb: IntegerW = IntegerNegInf, mub: IntegerW = IntegerInf) 
 }
 
 object Intervals {
-  val Negative = Intervals(IntegerNegInf, IntegerVal(0)) //ergänzt
+  val Negative = Intervals(IntegerNegInf, IntegerVal(0)) //added component
   val Positive = Intervals(IntegerVal(0), IntegerInf)
   val Unbounded = Intervals()
 }
