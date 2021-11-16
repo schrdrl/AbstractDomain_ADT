@@ -12,7 +12,6 @@ case class ALists(intervals: Intervals){
   import intervals.Interval //import inner Class
   type AInt = Interval  //alias
 
-  def aInterval = intervals.makeInterval(intervals.mub, intervals.mlb)
 
   sealed trait AList  //"behaviour"
   case object ANil extends AList
@@ -32,12 +31,14 @@ case class ALists(intervals: Intervals){
 
 
 
-
   def aTail (l: AList): AOption[AInt] = l match {
     case ANil | ACons(_, ANil) => ANone
-    case ACons(_, ACons(_,t)) => ASome(Interval(IntegerNegInf, IntegerInf))
+
+
+    case ACons(_, ACons(h,t)) => ???
+
     case ACons(_, AMany(e)) =>AMaybe(e)
-    case AMany(e) => AMaybe(e)
+    case AMany(e) => AMaybe(e) //AMany = ANil ≀ ACons(e, Many(e))
   }
 
 
@@ -57,11 +58,20 @@ case class ALists(intervals: Intervals){
   def isConcreteElementOf_List(l: List[Int], al:AList): Boolean = (l, al) match{
     case (Nil, ANil) => true
     case (Nil, _) => false
-    case (l, al) => for(elem <- l){
-                      if(!isConcreteElementOf_Int(elem, aInterval)){
-                        return false
-                      }
-                    }true
+    case (Nil, AMany(_)) => true ////AMany = ANil ≀ ACons(e, Many(e))
+    case (x::xs, ANil) => false
+    case (x::xs, ACons(ax, axs)) =>
+      isConcreteElementOf_Int(x, ax) && isConcreteElementOf_List(xs, axs)
+      //\gamma(ACons(ax, axs)) = ???
+      // x = 1, xs = 2::3::Nil
+      // ax [-1,+7], axs = ???
+
+      ???
+    case (x::xs, AMany(ax)) =>
+      isConcreteElementOf_Int(x, ax) && isConcreteElementOf_List(xs, al)
+      // \gamma(AMany(ax)) = \gamma(ANil) \union \gamma(ACons(ax, AMany(ax)))
+      ???
+
   }
 
 
@@ -69,18 +79,33 @@ case class ALists(intervals: Intervals){
   def isConcreteElementOf_Option[Int](o: Option[Int], ao: AOption[AInt]): Boolean = (o,ao) match {
     case (None, ANone) => true
     case (None, _) => false
+    case (None, AMaybe(_)) => true
     case (Some(_), ANone) => false
-    case (o, ao) => ???
+    case (Some(_), ASome(_)) => ???
+    case (Some(_), AMaybe(_)) => ???
+    // \gamma(AMaybe(ax)) = \gamma(ANone) \union \gamma(ASome(_)))
   }
 
 
 
+  def widening (l1: AList, l2: AList): AList = (l1,l2) match {
+    case (ANil , ANil) => ANil
+    case (ANil, ACons(_,_)) | (ACons(_,_), ANil)=> ???
+    case (ANil, AMany(_)) | (AMany(_), ANil)=> ???
+    case (ACons(_,_), ACons(_,_)) => ???
+    case (ACons(_,_), AMany(_)) | (AMany(_), ACons(_,_)) => ???
+    case (AMany(_), AMany(_)) => ???
+  }
+
+  def gamma(da: AList, bound: Int): List[Int] = da match {
+    case ANil => Nil
+    case ACons(h, t) => ???
+    case AMany(e) => ???
+  }
+
+
 /*
 
-
-  //TODO nil() -> 'equivalent' to IntegerW
-  //TODO cons() -> ::
-  //TODO many() -> ::
 
 
   def concat(l1: AList[Intervals], l2: AList[Intervals]): AList[Intervals] = l1 match {
