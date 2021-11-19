@@ -3,9 +3,11 @@ package Abstraction
 
 
 /**
- * TODO add Documentation
- *
- * @param intervals
+ * AList is an abstract domain of numerical lists (belonging to algebraic data types)
+ * It is described by an interval and has three types:
+ * -ANil: describes the empty AList
+ * -ACons(h,t): has a specified head with associated interval and a tail of type AList
+ * -AMany(e): contains both types ANil and ACons
  */
 case class ALists(intervals: Intervals){
   import intervals.Interval //import inner Class
@@ -29,7 +31,6 @@ case class ALists(intervals: Intervals){
     case ACons(h, _) => ASome(h)
     case AMany(e) => AMaybe(e) //AMany = ANil ≀ ACons(e, Many(e))
   }
-
 
 
   def aTail (l: AList): AOption[AInt] = l match {
@@ -129,9 +130,9 @@ case class ALists(intervals: Intervals){
 
 
   def widen_Mixed(al: AList, i: AInt) : AOption[AInt] = al match {
-    case ANil => AMaybe(i) //i can be an empty interval
+    case ANil => ASome(i)
     case ACons(h,t)=>{
-      val k : AInt = intervals.Lattice.widen(h,i)
+      val k : AInt = intervals.Lattice.widen(i,h)
       widen_Mixed(t, k)
 
     } //ASome(widen_Mixed(intervals.Lattice.widen(h,i)), t)

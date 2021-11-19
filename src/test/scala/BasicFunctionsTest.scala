@@ -73,20 +73,23 @@ class BasicFunctionsTest extends AnyFunSuite {
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
     val d = b.ANil
-    val e = b.ACons(c, d) //ACons([-1,5], ANil) => ANone
-    val f = b.ACons(c, e) // ACons([-1,5],ACons([-1,5], ANil)) =>
-    val g = b.ACons(c, f) // ACons([-1,5],ACons([-1,5],ACons([-1,5], ANil)))
+    val e = b.ACons(c, d) //ACons([-1,5], ANil) => ANone => passt
+    val f = b.ACons(c, e) // ACons([-1,5],ACons([-1,5], ANil)) =>  ASome([-1;5]) => passt
+    val g = b.ACons(c, f) // ACons([-1,5],ACons([-1,5],ACons([-1,5], ANil))) => ASome([-1;5]) => passt
 
     val h = b.intervals.Interval(IntegerVal(5),IntegerVal(12))
-    val i = b.ACons(c, b.ACons(h, b.ANil))
+    val i = b.ACons(c, b.ACons(h, b.ANil)) //  ASome([5;12]) => passt
 
-    val j = b.ACons(c, b.ACons(h, f)) //TODO upper bound
+    val j = b.ACons(c, b.ACons(h, f)) // ist: AMaybe([-1;∞]) soll: ASome([-1;12])
+
     println(b.aTail(e))
     println(b.aTail(f))
     println(b.aTail(g))
     println(b.aTail(i))
     println(b.aTail(j))
 
+    val k = b.ACons(h, b.ACons(b.intervals.Interval(IntegerNegInf, IntegerVal(100)),b.ANil))
+    println(b.aTail(k))
   }
 
 
