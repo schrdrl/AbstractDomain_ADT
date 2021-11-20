@@ -59,46 +59,40 @@ case class ALists(intervals: Intervals){
   }
 
 
-/*
+
+  //TODO check last two cases
   def isConcreteElementOf_List(l: List[Int], al:AList): Boolean = (l, al) match{
     case (Nil, ANil) => true
     case (Nil, ACons(_,_)) => false
     case (Nil, AMany(_)) => true //AMany = ANil ≀ ACons(e, Many(e))
     case (x::xs, ANil) => false
-    case (x::xs, ACons(ax, axs)) =>
-     // isConcreteElementOf_Int(x, ax) && isConcreteElementOf_List(xs, axs)
-
-      val j : Boolean =  isConcreteElementOf_Int(x, ax)
-      val k : AOption[AInt] = widen_AInt(axs, axs) //TODO saubere Variante überlegen
-      var i : Boolean = true
-      for(l <- xs){
-         val m : Boolean = isConcreteElementOf_AOption(l, k)
-        if(m == false){
+    case (x::xs, ACons(ax, axs)) => {
+      val j: Boolean = isConcreteElementOf_Int(x, ax)
+      val k: AOption[AInt] = widen_AInt(axs, axs) //TODO saubere Variante überlegen
+      var i: Boolean = true
+      for (l <- xs) {
+        val m: Boolean = isConcreteElementOf_AOption(l, k)
+        if (m == false) {
           i = false
         }
       }
-    j && i
-
-    //TODO
+      j && i
+    }
     case (x::xs, AMany(ax)) =>
       isConcreteElementOf_Int(x, ax) && isConcreteElementOf_List(xs, al)
-     // val j : Boolean =  isConcreteElementOf_Int(x, ax)
-      // \gamma(AMany(ax)) = \gamma(ANil) \union \gamma(ACons(ax, AMany(ax))) (union deprecated use ++)
-      ???
+    // \gamma(AMany(ax)) = \gamma(ANil) \union \gamma(ACons(ax, AMany(ax)))
   }
-*/
-/*
-  def isConcreteElementOf_Option[Int](o: Option[Int], ao: AOption[AInt]): Boolean = (o,ao) match {
+
+
+  def isConcreteElementOf_Option(o: Option[Int], ao: AOption[AInt]): Boolean = (o,ao) match {
     case (None, ANone) => true
-    case (None, _) => false
+    case (None, ASome(_)) => false
     case (None, AMaybe(_)) => true
     case (Some(_), ANone) => false
-    case (Some(h1), ASome(h2)) => ???//intervals.contains(h2, h1)
-    case (Some(h1), AMaybe(h2)) => ??? // intervals.contains(h2, h1)
+    case (Some(h1), ASome(h2)) => intervals.contains(h2, h1)
+    case (Some(h1), AMaybe(h2)) => intervals.contains(h2, h1)
     // \gamma(AMaybe(ax)) = \gamma(ANone) \union \gamma(ASome(_)))
   }
-*/
-
 
 
 
@@ -197,9 +191,6 @@ case class ALists(intervals: Intervals){
     case Cons(h, t) => ???
     case Many(e) => ???
   }
-
-
-
 
   implicit val AListLattice = new Lattice[AList[Intervals]] {
     override def bot: AList[Intervals] = Nil
