@@ -6,54 +6,57 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class BasicFunctionsTest extends AnyFunSuite {
 
+ /***************
+  *Tests aHead  *
+  **************/
   test("Head of ANil"){
 
     val a = Intervals.Positive
     val b = ALists(a)
     val c = b.aHead(b.ANil)
-    assert(c. equals(b.ANone))
+    assert(c.equals(b.ANone))
   }
 
   test("Head of AMany"){
-    val a = Intervals.Positive
+    val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
-    val d =b.AMany(c)
-
-    assert(b.aHead(d).equals(b.aHead(b.AMany(c))))
+    val d = b.AMany(c)
+    assert(b.aHead(d).equals(b.AMaybe(c)))
   }
 
   test("Head of ACons"){
-    val a = Intervals.Positive
+    val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
-    val d =b.ACons(c, b.ANil)
-
-    assert(b.aHead(d).equals(b.aHead(b.ACons(c, b.ANil))))
-    assert(b.aHead(d).equals(b.aHead(b.ACons(c, b.AMany(c)))))
-
+    val d = b.ACons(c, b.ANil)
+    val e = b.ACons(c, b.AMany(c))
+    assert(b.aHead(d).equals(b.ASome(c)))
+    assert(b.aHead(d).equals(b.aHead(e)))
   }
 
-
+  /***************
+   *Tests aTail  *
+   **************/
   test("Tail of ANil"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.ANil
-    println(b.aTail(c))
+    assert(b.aTail(c).equals(b.ANone))
   }
 
-  test("Tail of ACons"){
+  test("Tail of ACons (not nested)"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
     val d = b.ANil
     val e = b.AMany(c)
-    val f = b.ACons(c, d)
-    val g = b.ACons(c, e)
+    val f = b.ACons(c, d) //ACons([-1,5], ANil)
+    val g = b.ACons(c, e) //ACons([-1,5], AMany([-1,5]))
 
-    println(b.aTail(f))
-    println(b.aTail(g))
-
+    assert(b.aTail(f).equals(b.ANone))
+    assert(b.aTail(g).equals(b.AMaybe(c)))
+    assert(!b.aTail(g).equals(b.ANone)) //not ANil
   }
 
   test("Tail of AMany"){
@@ -61,72 +64,59 @@ class BasicFunctionsTest extends AnyFunSuite {
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
     val d = b.AMany(c)
-    println(b.aTail(d))
-
-
+    assert(b.aTail(d).equals(b.AMaybe(c)))
   }
 
   test("Tail of nested ACons"){
     val a = Intervals.Unbounded
     val b = ALists(a)
+
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
-    val d = b.ANil
-    val e = b.ACons(c, d) //ACons([-1,5], ANil) => ANone => passt
-    val f = b.ACons(c, e) // ACons([-1,5],ACons([-1,5], ANil)) =>  ASome([-1;5]) => passt
-    val g = b.ACons(c, f) // ACons([-1,5],ACons([-1,5],ACons([-1,5], ANil))) => ASome([-1;5]) => passt
+    val d = b.intervals.Interval(IntegerVal(5),IntegerVal(12))
+    val e = b.intervals.Interval(IntegerNegInf, IntegerVal(100))
+    val f = b.intervals.Interval(IntegerVal(-1),IntegerVal(12))
 
-    val h = b.intervals.Interval(IntegerVal(5),IntegerVal(12))
-    val i = b.ACons(c, b.ACons(h, b.ANil)) //  ASome([5;12]) => passt
+    val g = b.ANil
+    val h = b.ACons(c, g) //ACons([-1,5], ANil)
+    val i = b.ACons(c, h) // ACons([-1,5],ACons([-1,5], ANil))
+    val j = b.ACons(c, i) // ACons([-1,5],ACons([-1,5],ACons([-1,5], ANil)))
 
-    val j = b.ACons(c, b.ACons(h, f)) // ist: AMaybe([-1;∞]) soll: ASome([-1;12])
+    val k = b.ACons(c, b.ACons(d,g)) // ACons([-1,5], ACons([5,12], ANil))
+    val l = b.ACons(c, b.ACons(d,h)) //ACons([-1,5], ACons([5,12], ACons([-1,5], ANil)))
+    val m = b.ACons(d, b.ACons(e, k)) //ACons([5, 12], ACons([-∞, 100],ACons([-1,5], ACons([5,12], ANil))))
 
-    println(b.aTail(e))
-    println(b.aTail(f))
-    println(b.aTail(g))
-    println(b.aTail(i))
-    println(b.aTail(j))
-
-    val k = b.ACons(h, b.ACons(b.intervals.Interval(IntegerNegInf, IntegerVal(100)),b.ANil))
-    println(b.aTail(k))
-  }
-
-
-  test("Widen Function"){
-    val a = Intervals.Unbounded
-    val b = ALists(a)
-    val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
-    val d = b.intervals.Interval(IntegerVal(3),IntegerVal(8))
-    val e = b.ANil
-    val f = b.AMany(c)
-    val g = b.AMany(d)
-    val h = b.ACons(c,e)
-    val i = b.ACons(d,f)
-
-    println(b.widen_AInt(e,f))
-    println(b.widen_AInt(e,h))
-    println(b.widen_AInt(e,i))
-    println(b.widen_AInt(f,g))
-    println(b.widen_AInt(h,i))
-    println(b.widen_AInt(g,h))
-
-
+    assert(b.aTail(h).equals(b.ANone))
+    assert(b.aTail(i).equals(b.ASome(c)))
+    assert(b.aTail(j).equals(b.ASome(c)))
+    assert(b.aTail(k).equals(b.ASome(d)))
+    assert(b.aTail(l).equals(b.ASome(f)))
+    assert(b.aTail(m).equals(b.ASome(e)))
 
   }
 
-
+  /***************
+   *Tests aLength  *
+   **************/
   test("Length ANil"){
     val a = Intervals.Unbounded
     val b = ALists(a)
-    println(b.aLength(b.ANil))
+    val c = b.ANil
+    assert(b.aLength(c).equals(b.ANone))
   }
 
   test("Length ACons"){
     val a = Intervals.Unbounded
     val b = ALists(a)
+
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
-    println(b.aLength(b.ACons(c, b.ANil)))
     val d = b.intervals.Interval(IntegerVal(3),IntegerVal(8))
-    println(b.aLength(b.ACons(c, b.AMany(d))))
+    val e = b.intervals.Interval(IntegerVal(1), IntegerInf)
+
+    val f = b.ACons(c, b.ANil)
+    val g = b.ACons(c, b.AMany(d))
+
+    assert(b.aLength(f).equals(b.ASome(e)))
+    assert(b.aLength(g).equals(b.ASome(e)))
   }
 
 
@@ -134,146 +124,202 @@ class BasicFunctionsTest extends AnyFunSuite {
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
-    println(b.aLength(b.AMany(c)))
+    val d = b.intervals.Interval(IntegerVal(0),IntegerInf)
+    val e = b.AMany(c)
+    assert(b.aLength(e).equals(b.ASome(d)))
   }
 
-  //isConcreteElementOf_Int
+  /**********************************
+   *Tests: isConcreteElementOf_Int  *
+   **********************************/
 
-  test("Integer Is concrete Element of AInt"){
+
+  test("Integer is concrete element of AInt"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
     val d = b.intervals.Interval(IntegerVal(3),IntegerVal(8))
-    val e = 2
-    println(b.isConcreteElementOf_Int(e,c))
-    println(b.isConcreteElementOf_Int(e,d))
-    val f = b.intervals.Interval(IntegerVal(0), IntegerInf)
-    val g = b.intervals.Interval(IntegerNegInf, IntegerVal(0))
-    println(b.isConcreteElementOf_Int(e,f))
-    println(b.isConcreteElementOf_Int(e,g))
+    val e = b.intervals.Interval(IntegerVal(0), IntegerInf)
+    val f = b.intervals.Interval(IntegerNegInf, IntegerVal(0))
+
+    val g = 2
+    val h = -2
+
+    assert(b.isConcreteElementOf_Int(g,c))
+    assert(!b.isConcreteElementOf_Int(g,d))
+    assert(b.isConcreteElementOf_Int(g,e))
+    assert(!b.isConcreteElementOf_Int(g,f))
+
+    assert(!b.isConcreteElementOf_Int(h,c))
+    assert(!b.isConcreteElementOf_Int(h,d))
+    assert(!b.isConcreteElementOf_Int(h,e))
+    assert(b.isConcreteElementOf_Int(h,f))
   }
 
+  /**********************************
+   *Tests: isConcreteElementOf_List *
+   **********************************/
 
-  //isConcreteElementOf_List
-
-  test("empty list is concrete Element of ANil"){
+  test("Empty list is concrete element of ANil"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = Nil
     val d = b.ANil
-    println(b.isConcreteElementOf_List(c,d))
+    assert(b.isConcreteElementOf_List(c,d))
   }
 
-  test("empty list is not concrete Element of ACons"){
+  test("Empty list is not concrete element of ACons"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
     val d = Nil
     val e = b.ACons(c,b.ANil)
-    println(b.isConcreteElementOf_List(d,e))
+    assert(!b.isConcreteElementOf_List(d,e))
   }
 
-  test("empty list is concrete Element of AMany"){
+  test("Empty list is concrete element of AMany"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
     val d = List()
     val e = b.AMany(c)
-    println(b.isConcreteElementOf_List(d,e))
+    assert(b.isConcreteElementOf_List(d,e))
   }
 
-  test("List is not concrete Element of ANil"){
+  test("Non-empty list is not concrete element of ANil"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.ANil
     val d = List(1,2,3,4)
-    println(b.isConcreteElementOf_List(d,c))
+    assert(!b.isConcreteElementOf_List(d,c))
   }
 
-  test("List is concrete Element of ACons"){
+  test("Non-empty list is concrete element of ACons"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = List(1,2,3,4)
+
     val d = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
-    val e = b.ACons(d, b.ACons(d, b.ANil)) //true
-    println(b.isConcreteElementOf_List(c,e))
-    val f = b.intervals.Interval(IntegerVal(5),IntegerVal(8))
-    val g = b.ACons(d, b.ACons(f, b.ANil))
-    println(b.isConcreteElementOf_List(c,g)) //false
+    val e = b.intervals.Interval(IntegerVal(5),IntegerVal(8))
+
+    val f = b.ACons(d, b.ACons(d, b.ANil)) // ACons([-1,5], ACons([-1,5], ANil))
+    val g = b.ACons(d, b.ACons(e, b.ANil)) //ACons([5,8], ANil)
+    val h = b.ACons(d, b.ACons(e, f)) //ACons([5,8], ACons([-1,5], ACons([-1,5], ANil)))
+
+    assert(b.isConcreteElementOf_List(c,f))
+    assert(!b.isConcreteElementOf_List(c,g))
+    assert(b.isConcreteElementOf_List(c,h))
   }
 
-  test("List is concrete Element of AMany"){
+  test("Non-empty list is concrete element of AMany"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = List(1,2,3,4)
+
     val d = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
-    val e = b.AMany(d)
-    println(b.isConcreteElementOf_List(c,e))//true
-    val f = b.intervals.Interval(IntegerVal(-1),IntegerVal(3))
-    val g = b.AMany(f)
-    println(b.isConcreteElementOf_List(c,g))//false
+    val e = b.intervals.Interval(IntegerVal(-1),IntegerVal(3))
+    val f = b.intervals.Interval(IntegerVal(5),IntegerVal(8))
+
+    val g = b.AMany(d)
+    val h = b.AMany(e)
+    val i = b.AMany(f)
+
+    assert(b.isConcreteElementOf_List(c,g))
+    assert(!b.isConcreteElementOf_List(c,h))
+    assert(!b.isConcreteElementOf_List(c,i))
 
   }
 
-  //isConcreteElementOf_Option
-  test("None is concrete Element of ANone"){
+  /**********************************
+   *Tests: isConcreteElementOf_Option *
+   **********************************/
+  test("None is concrete element of ANone"){
     val a = Intervals.Unbounded
     val b = ALists(a)
-    val c = None
-    val d = b.ANone
-    println(b.isConcreteElementOf_Option(c, d))
+    assert(b.isConcreteElementOf_Option(None, b.ANone))
   }
 
-  test("None is not concrete Element of ASome"){
+  test("None is not concrete element of ASome"){
     val a = Intervals.Unbounded
     val b = ALists(a)
-    val c = None
-    val d = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
-    val e = b.ASome(d)
-    println(b.isConcreteElementOf_Option(c, e))
+    val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
+    assert(!b.isConcreteElementOf_Option(None, b.ASome(c)))
   }
 
-  test("None is concrete Element of AMaybe"){
+  test("None is concrete element of AMaybe"){
     val a = Intervals.Unbounded
     val b = ALists(a)
-    val c = None
-    val d = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
-    val e = b.AMaybe(d)
-    println(b.isConcreteElementOf_Option(c, e))
+    val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
+    println(b.isConcreteElementOf_Option(None, b.AMaybe(c)))
   }
 
-  test("Some is not concrete Element of ANone"){
+  test("Some is not concrete element of ANone"){
     val a = Intervals.Unbounded
     val b = ALists(a)
-    val c = Some(1)
-    val d = b.ANone
-    println(b.isConcreteElementOf_Option(c, d))
+    assert(!b.isConcreteElementOf_Option(Some(1), b.ANone))
   }
 
-  test("Some is concrete Element of ASome"){
+  test("Some is concrete element of ASome"){
     val a = Intervals.Unbounded
     val b = ALists(a)
-    val c = Some(1)
-    val d = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
-    val e = b.ASome(d)
-    println(b.isConcreteElementOf_Option(c, e))
 
-    val f = b.intervals.Interval(IntegerVal(3),IntegerVal(4))
-    val g = b.ASome(f)
-    println(b.isConcreteElementOf_Option(c, g))
+    val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
+    val d = b.intervals.Interval(IntegerVal(3),IntegerVal(4))
+
+    val e = b.ASome(c)
+    val f = b.ASome(d)
+
+    assert(b.isConcreteElementOf_Option(Some(1), e))
+    assert(!b.isConcreteElementOf_Option(Some(1), f))
   }
+
   test("Some is concrete Element of AMaybe"){
     val a = Intervals.Unbounded
     val b = ALists(a)
-    val c = Some(1)
-    val d = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
-    val e = b.AMaybe(d)
-    println(b.isConcreteElementOf_Option(c, e))
 
-    val f = b.intervals.Interval(IntegerVal(3),IntegerVal(4))
-    val g = b.AMaybe(f)
-    println(b.isConcreteElementOf_Option(c, g))
+    val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
+    val d = b.intervals.Interval(IntegerVal(3),IntegerVal(4))
+
+    val e = b.AMaybe(c)
+    val f = b.AMaybe(d)
+
+    assert(b.isConcreteElementOf_Option(Some(1), e))
+    assert(!b.isConcreteElementOf_Option(Some(1), f))
   }
+
+
+  /********************
+   *Tests widen_AInt  *
+   ********************/
+
+  test("Widen AInt"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+
+    val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
+    val d = b.intervals.Interval(IntegerVal(3),IntegerVal(8))
+    val e = b.intervals.Interval(IntegerVal(-1),IntegerVal(8))
+
+    val f = b.ANil
+    val g = b.AMany(c)
+    val h = b.AMany(d)
+    val i = b.ACons(c,f)
+    val j = b.ACons(d,f)
+
+    assert(b.widen_AInt(f,g).equals(b.AMaybe(c)))
+  //TODO find Combinations
+
+
+
+  }
+
+  /********************
+   *Tests widen_AOption  *
+   ********************/
+
+  /********************
+   *Tests widen_Mixed  *
+   ********************/
 
 
 }

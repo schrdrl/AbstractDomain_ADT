@@ -40,7 +40,7 @@ case class ALists(intervals: Intervals){
     case AMany(e) => AMaybe(e) //AMany = ANil ≀ ACons(e, Many(e))
   }
 
-
+  //TODO recheck
   def aLength(l: AList): AOption[AInt] = l match {
     case ANil => ANone
     case ACons(_, _) => ASome(Interval(IntegerVal(1), IntegerInf))
@@ -52,15 +52,17 @@ case class ALists(intervals: Intervals){
     intervals.contains(ai, i)
   }
 
-  def isConcreteElementOf_AOption(i: Int, ai: AOption[AInt]): Boolean = ai match{
+  /*Method is used in sConcreteElementOf_List case (x::xs, ACons(xs, axs) to return the interval of axs(tail)
+   *TODO more "elegant way" to use interval of a tail?
+   */
+
+  def isConcreteElementOf_Int2(i: Int, ai: AOption[AInt]): Boolean = ai match{
     case ANone => false
     case ASome(h) => intervals.contains(h, i)
     case AMaybe(h) => intervals.contains(h, i)
   }
 
-
-
-  //TODO check last two cases
+ //TODO recheck
   def isConcreteElementOf_List(l: List[Int], al:AList): Boolean = (l, al) match{
     case (Nil, ANil) => true
     case (Nil, ACons(_,_)) => false
@@ -68,10 +70,10 @@ case class ALists(intervals: Intervals){
     case (x::xs, ANil) => false
     case (x::xs, ACons(ax, axs)) => {
       val j: Boolean = isConcreteElementOf_Int(x, ax)
-      val k: AOption[AInt] = widen_AInt(axs, axs) //TODO saubere Variante überlegen
+      val k: AOption[AInt] = widen_AInt(axs, axs) //returns the interval of the tail
       var i: Boolean = true
       for (l <- xs) {
-        val m: Boolean = isConcreteElementOf_AOption(l, k)
+        val m: Boolean = isConcreteElementOf_Int2(l, k)
         if (m == false) {
           i = false
         }
@@ -80,10 +82,13 @@ case class ALists(intervals: Intervals){
     }
     case (x::xs, AMany(ax)) =>
       isConcreteElementOf_Int(x, ax) && isConcreteElementOf_List(xs, al)
-    // \gamma(AMany(ax)) = \gamma(ANil) \union \gamma(ACons(ax, AMany(ax)))
   }
 
 
+  /* TODO recheck
+   *\gamma(AMaybe(ax)) = \gamma(ANone) \union \gamma(ASome(_)))
+   *Is Splitted in two seperate cases instead of using \union
+   */
   def isConcreteElementOf_Option(o: Option[Int], ao: AOption[AInt]): Boolean = (o,ao) match {
     case (None, ANone) => true
     case (None, ASome(_)) => false
@@ -91,53 +96,42 @@ case class ALists(intervals: Intervals){
     case (Some(_), ANone) => false
     case (Some(h1), ASome(h2)) => intervals.contains(h2, h1)
     case (Some(h1), AMaybe(h2)) => intervals.contains(h2, h1)
-    // \gamma(AMaybe(ax)) = \gamma(ANone) \union \gamma(ASome(_)))
+
   }
 
 
 
-  //widened interval from two ALists
+  /* TODO recheck
+   * widened interval from two ALists
+   */
   def widen_AInt (l1: AList, l2: AList): AOption[AInt] = (l1,l2) match {
     case (ANil , ANil) => ANone
     case (ANil, ACons(h,t)) => widen_Mixed(t, h)
-
     case (ACons(h,t), ANil)=>  widen_Mixed(t, h)
     case (ANil, AMany(e)) => AMaybe(e)
     case (AMany(e), ANil)=> AMaybe(e)
-
     case (ACons(h1,t1), ACons(h2,t2)) => {
       val i : AInt= intervals.Lattice.widen(h1, h2)
       val j : AOption[AInt] = widen_AInt(t1, t2)
-      widen_AOption2(i,j)
+      widen_AOption(i,j)
     }
     case (ACons(h,t), AMany(e))  => {
       ASome(intervals.Lattice.widen(h,e))
-      val i : AInt = intervals.Lattice.widen(h,e)  //AInt
+      val i : AInt = intervals.Lattice.widen(h,e)
       widen_Mixed(t, i)
-
     }
     case(AMany(e), ACons(h,t)) => {
       ASome(intervals.Lattice.widen(h,e))
       ASome(intervals.Lattice.widen(h,e))
-      val i : AInt = intervals.Lattice.widen(h,e)  //AInt
+      val i : AInt = intervals.Lattice.widen(h,e)
       widen_Mixed(t, i)
-
     }
     case (AMany(e1), AMany(e2)) => AMaybe(intervals.Lattice.widen(e1,e2))
   }
 
-  //redundant?
-  def widen_AOption1(ao1 :AOption[AInt], ao2: AOption[AInt]) : AOption[AInt] = (ao1, ao2) match {
-    case (ANone, ANone) => ANone
-    case (ANone, ASome(i)) => ASome(i)
-    case (ANone, AMaybe(i)) => AMaybe(i)
-    case(ASome(i1), ASome(i2)) => ASome(intervals.Lattice.widen(i1,i2))
-    case(AMaybe(i1), AMaybe(i2)) => AMaybe(intervals.Lattice.widen(i1,i2))
-    case(ASome(i1), AMaybe(i2)) => AMaybe(intervals.Lattice.widen(i1,i2))
-  }
 
-  def widen_AOption2(ao1 :AInt, ao2: AOption[AInt]) : AOption[AInt] = ao2 match {
-    case ANone => AMaybe(ao1) //ao1 can be an empty interval
+  def widen_AOption(ao1 :AInt, ao2: AOption[AInt]) : AOption[AInt] = ao2 match {
+    case ANone => AMaybe(ao1)
     case ASome(i) => ASome(intervals.Lattice.widen(ao1,i))
     case AMaybe(i) => AMaybe(intervals.Lattice.widen(ao1,i))
   }
@@ -145,16 +139,14 @@ case class ALists(intervals: Intervals){
 
   def widen_Mixed(al: AList, i: AInt) : AOption[AInt] = al match {
     case ANil => ASome(i)
-    case ACons(h,t)=>{
-      val k : AInt = intervals.Lattice.widen(i,h)
-      widen_Mixed(t, k)
-
-    } //ASome(widen_Mixed(intervals.Lattice.widen(h,i)), t)
+    case ACons(h,t) => widen_Mixed(t, intervals.Lattice.widen(i,h))
     case AMany(e) => AMaybe(intervals.Lattice.widen(i, e))
   }
 
 
 /*
+  Currently Not used code but maybe still usefull
+
 
   //widen whole AList with interval
   def widen_AList(l1: AList, l2: AList): AList = (l1, l2) match { //evtl nur auf l1 matchen
@@ -169,17 +161,14 @@ case class ALists(intervals: Intervals){
     case (AMany(e1), AMany(e2)) => AMany(intervals.Lattice.widen(e1,e2))
   }
 
+   def widen_AOption1(ao1 :AOption[AInt], ao2: AOption[AInt]) : AOption[AInt] = (ao1, ao2) match {
+   case (ANone, ANone) => ANone
+   case (ANone, ASome(i)) => ASome(i)
+   case (ANone, AMaybe(i)) => AMaybe(i)
+   case(ASome(i1), ASome(i2)) => ASome(intervals.Lattice.widen(i1,i2))
+   case(AMaybe(i1), AMaybe(i2)) => AMaybe(intervals.Lattice.widen(i1,i2))
+   case(ASome(i1), AMaybe(i2)) => AMaybe(intervals.Lattice.widen(i1,i2))
 
-
-
-
-
-
-
-*/
-
-
-/*
   def concat(l1: AList[Intervals], l2: AList[Intervals]): AList[Intervals] = l1 match {
     case Nil => l2
     case Cons(h, t) => ???
