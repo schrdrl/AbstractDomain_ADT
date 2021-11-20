@@ -114,14 +114,106 @@ class BasicFunctionsTest extends AnyFunSuite {
 
 
   }
-  //length ANil
-  //length ACons
-  //length AMany
+
+
+  test("Length ANil"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    println(b.aLength(b.ANil))
+  }
+
+  test("Length ACons"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
+    println(b.aLength(b.ACons(c, b.ANil)))
+    val d = b.intervals.Interval(IntegerVal(3),IntegerVal(8))
+    println(b.aLength(b.ACons(c, b.AMany(d))))
+  }
+
+
+  test("Length AMany"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
+    println(b.aLength(b.AMany(c)))
+  }
 
   //isConcreteElementOf_Int
 
+  test("Integer Is concrete Element of AInt"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
+    val d = b.intervals.Interval(IntegerVal(3),IntegerVal(8))
+    val e = 2
+    println(b.isConcreteElementOf_Int(e,c))
+    println(b.isConcreteElementOf_Int(e,d))
+    val f = b.intervals.Interval(IntegerVal(0), IntegerInf)
+    val g = b.intervals.Interval(IntegerNegInf, IntegerVal(0))
+    println(b.isConcreteElementOf_Int(e,f))
+    println(b.isConcreteElementOf_Int(e,g))
+  }
+
+  /*
   //isConcreteElementOf_List
 
+  test("empty list is concrete Element of ANil"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = Nil
+    val d = b.ANil
+    println(b.isConcreteElementOf_List(c,d))
+  }
+
+  test("empty list is not concrete Element of ACons"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
+    val d = Nil
+    val e = b.ACons(c,b.ANil)
+    println(b.isConcreteElementOf_List(d,e))
+  }
+
+  test("empty list is concrete Element of AMany"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
+    val d = Nil
+    val e = b.AMany(c)
+    println(b.isConcreteElementOf_List(d,e))
+  }
+
+  test("List is not concrete Element of ANil"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.ANil
+    val d = List(1,2,3,4)
+    println(b.isConcreteElementOf_List(d,c))
+  }
+
+  test("List is concrete Element of ACons"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = List(1,2,3,4)
+    val d = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
+    val e = b.ACons(d, b.ACons(d, b.ANil)) //true
+    println(b.isConcreteElementOf_List(c,e))
+    val f = b.intervals.Interval(IntegerVal(5),IntegerVal(8))
+    val g = b.ACons(d, b.ACons(f, b.ANil))
+    println(b.isConcreteElementOf_List(c,g)) //false
+  }
+
+  test("List is concrete Element of AMany"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = List(1,2,3,4)
+    val d = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
+    val e = b.AMany(d) //true
+    println(b.isConcreteElementOf_List(c,e))
+
+  }
+*/
   //isConcreteElementOf_Option
 
 
