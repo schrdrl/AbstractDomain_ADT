@@ -154,7 +154,7 @@ case class Intervals(mlb: IntegerW = IntegerNegInf, mub: IntegerW = IntegerInf) 
 
     override def widen(i1: Interval, i2: Interval, bound: Int): Interval = {
       val newlb = if (IntegerW.<(i2.lb, i1.lb)) i2.lb else i1.lb
-      val newub = if (IntegerW.<(i1.ub, i2.ub)) i1.ub else i1.ub
+      val newub = if (IntegerW.<(i1.ub, i2.ub)) i2.ub else i1.ub
       Interval(newlb, newub)
     }
   }

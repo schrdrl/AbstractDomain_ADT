@@ -25,14 +25,16 @@ case class ALists(intervals: Intervals){
   case class ASome[A](get: A) extends AOption[A]
   case class AMaybe[A](get: A) extends AOption[A]
 
-
+/*Method returns the head of aList object, which is of type AOption[AInt]
+*/
   def aHead (l: AList): AOption[AInt] = l match {
     case ANil => ANone
     case ACons(h, _) => ASome(h)
     case AMany(e) => AMaybe(e) //AMany = ANil ≀ ACons(e, Many(e))
   }
 
-
+  /*Method returns the tail of aList object, which is of type AOption[AInt]
+  */
   def aTail (l: AList): AOption[AInt] = l match {
     case ANil | ACons(_, ANil) => ANone
     case ACons(_, ACons(h,t)) => widen_Mixed(t, h)
@@ -41,28 +43,38 @@ case class ALists(intervals: Intervals){
   }
 
   //TODO recheck
+  /*Method returns the length of aList object, which is of type AOption[AInt]
+*/
   def aLength(l: AList): AOption[AInt] = l match {
     case ANil => ANone
     case ACons(_, _) => ASome(Interval(IntegerVal(1), IntegerInf))
     case AMany(_) => ASome(Interval(IntegerVal(0), IntegerInf))
   }
 
-
+  /*Method checks whether an integer value is a concrete Element of an Interval.
+   *It takes two parameters, an integer and an interval of type AInt and returns a boolean
+   */
   def isConcreteElementOf_Int(i: Int, ai: AInt): Boolean ={
     intervals.contains(ai, i)
   }
 
-  /*Method is used in sConcreteElementOf_List case (x::xs, ACons(xs, axs) to return the interval of axs(tail)
+  /*
+   *Method checks whether an integer value is a concrete Element of an Interval.
+   *It takes two parameters, an integer and an interval of type AOption[AInt] and returns a boolean
+   *
    *TODO more "elegant way" to use interval of a tail?
    */
-
   def isConcreteElementOf_Int2(i: Int, ai: AOption[AInt]): Boolean = ai match{
     case ANone => false
     case ASome(h) => intervals.contains(h, i)
     case AMaybe(h) => intervals.contains(h, i)
   }
 
- //TODO recheck
+  /*Method checks whether a list is a concrete Element of AList.
+   *It takes two parameters, a list with integer values and a abstract AList and returns a boolean
+   *
+   *TODO recheck
+   */
   def isConcreteElementOf_List(l: List[Int], al:AList): Boolean = (l, al) match{
     case (Nil, ANil) => true
     case (Nil, ACons(_,_)) => false
@@ -85,9 +97,12 @@ case class ALists(intervals: Intervals){
   }
 
 
-  /* TODO recheck
-   *\gamma(AMaybe(ax)) = \gamma(ANone) \union \gamma(ASome(_)))
-   *Is Splitted in two seperate cases instead of using \union
+  /*Method checks whether an Option[Int] is a concrete Element of an interval AOption[AInt].
+   *It takes two parameters, an integer and an interval of type AInt and returns a boolean
+   *
+   * TODO recheck
+   * \gamma(AMaybe(ax)) = \gamma(ANone) \union \gamma(ASome(_)))
+   * Is Splitted in two seperate cases instead of using \union
    */
   def isConcreteElementOf_Option(o: Option[Int], ao: AOption[AInt]): Boolean = (o,ao) match {
     case (None, ANone) => true
@@ -100,9 +115,8 @@ case class ALists(intervals: Intervals){
   }
 
 
-
-  /* TODO recheck
-   * widened interval from two ALists
+  /*Method returns the widened interval of two ALists
+   *TODO recheck
    */
   def widen_AInt (l1: AList, l2: AList): AOption[AInt] = (l1,l2) match {
     case (ANil , ANil) => ANone
@@ -129,19 +143,29 @@ case class ALists(intervals: Intervals){
     case (AMany(e1), AMany(e2)) => AMaybe(intervals.Lattice.widen(e1,e2))
   }
 
-
+  /*Method returns the widened interval of intervals of type AInt and AOption[AInt]
+   *TODO recheck
+   */
   def widen_AOption(ao1 :AInt, ao2: AOption[AInt]) : AOption[AInt] = ao2 match {
-    case ANone => AMaybe(ao1)
+    case ANone => AMaybe(ao1) //TODO or ASome
+    //widen (i, ANone) => AMaybe with i not unbounded Interval
     case ASome(i) => ASome(intervals.Lattice.widen(ao1,i))
     case AMaybe(i) => AMaybe(intervals.Lattice.widen(ao1,i))
   }
 
 
+
+  /*Method returns the widened interval of an AList and an interval of type AInt
+   *TODO recheck
+   */
   def widen_Mixed(al: AList, i: AInt) : AOption[AInt] = al match {
-    case ANil => ASome(i)
+    case ANil => AMaybe(i) //TODO or ASome
+    //widen (i, ANone) => AMaybe with i not unbounded Interval
     case ACons(h,t) => widen_Mixed(t, intervals.Lattice.widen(i,h))
     case AMany(e) => AMaybe(intervals.Lattice.widen(i, e))
   }
+
+
 
 
 /*

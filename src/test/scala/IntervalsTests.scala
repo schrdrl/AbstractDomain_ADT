@@ -30,6 +30,7 @@ class IntervalsTests extends AnyFunSuite {
   }
 
   test("List of integers are concrete elements of positive interval"){
+    //TODO
   }
 
 }
