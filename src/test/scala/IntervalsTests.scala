@@ -76,10 +76,13 @@ class IntervalsTests extends AnyFunSuite {
     val b = a.Interval(IntegerVal(0), IntegerVal(0))
     val c = a.Interval(IntegerVal(1), IntegerVal(1))
     val d = a.Interval(IntegerVal(0), IntegerVal(1))
+    val e = a.Interval(IntegerVal(2), IntegerVal(2))
 
+    println(a.Lattice.widen(b,b))
     println(a.Lattice.widen(b,c))
     println(a.Lattice.widen(c,b))
     println(a.Lattice.widen(b,d))
+    println(a.Lattice.widen(c,e))
   }
 
 }

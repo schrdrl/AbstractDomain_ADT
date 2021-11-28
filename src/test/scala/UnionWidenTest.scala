@@ -117,35 +117,52 @@ class UnionWidenTest extends AnyFunSuite {
     val b = ALists(a)
     var i = 0 //initial
     val axs1 = b.ANil //initial
-    val axs2 = b.ACons(b.intervals.Interval(IntegerVal(i), IntegerVal(i)), axs1)
+    val i_head1 = b.intervals.Interval(IntegerVal(i), IntegerVal(i))
+    val axs2 = b.ACons(i_head1, axs1)
     val axs3 = b.widen_AList(axs1, axs2)
     var axs4 = axs3
 
-    while (i<4){
+    val x = b.intervals.Interval(IntegerVal(0), IntegerInf)
 
-      var axs5 = b.ACons(b.intervals.Interval(IntegerVal(i), IntegerVal(i)), axs4)
+    while (i<4){
+      var i_head2 = b.intervals.Lattice.widen(i_head1, b.intervals.Interval(IntegerVal(i), IntegerVal(i)))
+      var axs5 = b.ACons(i_head2, axs4)
       var axs6 = b.widen_AList(axs4,axs5)
 
-      print("(" +i +")" +"before loop: ")
+      print("(" +i +")" +"interval head: ")
+      println(b.intervals.Interval(IntegerVal(i), IntegerVal(i)))
+      print("(" +i +")" +"axs before loop: ")
       if(i == 0) println(axs1)
       else println(axs4)
+
+      if(i>1) assert(axs4.equals(b.AMany(x)))
+
+      if(i != 0) assert(i_head2.equals(x))
 
       print("(" +i +")" +"after loop: ")
       if (i==0) println(axs2)
       else println(axs5)
 
+      if(i>1) assert(axs5.equals(b.ACons(x, b.AMany(x))))
+
       print("(" +i +")" +"after widen: ")
       if(i==0) println(axs3)
       else println(axs6)
-      print("axs for next iteration:")
+      if(i != 0) assert(axs6.equals(b.AMany(x)))
+
+      print("axs for next iteration: ")
       axs4 = axs6
       println(axs4)
       println("")
 
+      if(i != 0) assert(axs4.equals(b.AMany(x)))
       i += 1
-    }
 
+
+    }
   }
+
+
 
 
   test("widen with ANil"){
@@ -221,15 +238,54 @@ class UnionWidenTest extends AnyFunSuite {
    ***********************/
 
   test("widen with ANone"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
+    val d = b.intervals.Interval(IntegerVal(5), IntegerVal(8))
 
+    val e = b.ANone
+    val f = b.ASome(c)
+    val g = b.AMaybe(d)
+
+    println(b.widen_AOption(e,e)) //returns: ANone
+    println(b.widen_AOption(e,f)) //returns: AMaybe([-1;3])
+    println(b.widen_AOption(e,g)) //returns: AMaybe([5;8])
+    println(b.widen_AOption(g,e)) //returns: AMaybe([5;8])
   }
 
   test("widen with ASome"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
+    val d = b.intervals.Interval(IntegerVal(5), IntegerVal(8))
+    val e = b.intervals.Interval(IntegerVal(8), IntegerVal(12))
 
+    val f = b.ASome(c)
+    val g = b.AMaybe(d)
+    val h = b.ASome(e)
+
+    println(b.widen_AOption(f,f)) //returns: ASome([-1;3])
+    println(b.widen_AOption(g,f)) //returns: AMaybe([-∞;8])
+    println(b.widen_AOption(f,g)) //returns: AMaybe([-1;∞])
+    println(b.widen_AOption(f,h)) //returns: ASome([-1;∞])
   }
 
   test("widen with AMaybe"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
+    val d = b.intervals.Interval(IntegerVal(5), IntegerVal(8))
+    val e = b.intervals.Interval(IntegerVal(8), IntegerVal(12))
 
+    val f = b.AMaybe(c)
+    val g = b.AMaybe(d)
+    val h = b.ASome(e)
+
+    println(b.widen_AOption(f,f)) //returns: AMaybe([-1;3])
+    println(b.widen_AOption(g,f)) //returns: AMaybe([-∞;8])
+    println(b.widen_AOption(f,g)) //returns: AMaybe([-1;∞])
+    println(b.widen_AOption(f,h)) //returns: ASome([-1;∞])
+    println(b.widen_AOption(h,f)) //returns: AMaybe([-∞;12])
   }
 
 }
