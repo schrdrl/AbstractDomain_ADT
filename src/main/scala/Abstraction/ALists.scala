@@ -34,15 +34,6 @@ case class ALists(intervals: Intervals){
   }
 
   /*Method returns the tail of aList object, which is of type AOption[AInt]
-  //TODO aTail -> returns  AOption[AInt] or  AOption[AList]
-  //Here: which interval describes tail
-  def aTail(l: AList): AOption[AInt] = l match {
-    case ANil  => ANone
-    case ACons(_, ANil) => ANone
-    case ACons(_, ACons(h,t)) => widen_AOption(ASome(h), aTail(t))
-    case ACons(_, AMany(e)) =>AMaybe(e)
-    case AMany(e) => AMaybe(e) //AMany = ANil ≀ ACons(e, Many(e))
-  }
 */
   def aTail(l: AList): AOption[AList] = l match {
     case ANil => ANone
@@ -94,14 +85,16 @@ case class ALists(intervals: Intervals){
   }
 
 
-  //TODO recheck: oder mit Output Set[AList]
-  //Possible to put everything in a set
+
   def union_AList(al1: AList, al2: AList) : AList = (al1, al2) match {
     case (ANil, ANil) => ANil
     case (ANil, AMany(e)) => AMany(e)
+    case (AMany(e), ANil) => AMany(e)
     case (ANil, ACons(a,as)) => union_AList(AMany(a), as)
+    case (ACons(a,as), ANil) => union_AList(AMany(a), as)
     case (AMany(a), AMany(b)) => AMany(intervals.union_Interval(a,b))
     case (ACons(a,as), AMany(e)) => union_AList(AMany(intervals.union_Interval(a,e)), as)
+    case (AMany(e), ACons(a,as)) => union_AList(AMany(intervals.union_Interval(a,e)), as)
     case (ACons(a,as), ACons(b, bs)) => ACons(intervals.union_Interval(a,b), union_AList(as,bs))
   }
 
@@ -134,6 +127,18 @@ case class ALists(intervals: Intervals){
 
 
 
+
+/*
+//TODO aTail -> returns  AOption[AInt] or AOption[AList]
+//Here: which interval describes tail
+def aTail(l: AList): AOption[AInt] = l match {
+  case ANil  => ANone
+  case ACons(_, ANil) => ANone
+  case ACons(_, ACons(h,t)) => widen_AOption(ASome(h), aTail(t))
+  case ACons(_, AMany(e)) =>AMaybe(e)
+  case AMany(e) => AMaybe(e) //AMany = ANil ≀ ACons(e, Many(e))
+  }
+*/
 
 
 

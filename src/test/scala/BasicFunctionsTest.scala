@@ -10,7 +10,7 @@ class BasicFunctionsTest extends AnyFunSuite {
   **************/
   test("Head of ANil"){
 
-    val a = Intervals.Positive
+    val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.aHead(b.ANil)
     assert(c.equals(b.ANone))
@@ -53,8 +53,10 @@ class BasicFunctionsTest extends AnyFunSuite {
     val f = b.ACons(c, d) //ACons([-1,5], ANil)
     val g = b.ACons(c, e) //ACons([-1,5], AMany([-1,5]))
 
-    assert(b.aTail(f).equals(b.ANone))
-    assert(b.aTail(g).equals(b.AMaybe(c)))
+
+    assert(b.aTail(f).equals(b.ASome(b.ANil)))
+    assert(!b.aTail(f).equals(b.ANone)) //not ANil
+    assert(b.aTail(g).equals(b.ASome(b.AMany(c))))
     assert(!b.aTail(g).equals(b.ANone)) //not ANil
   }
 
@@ -73,7 +75,6 @@ class BasicFunctionsTest extends AnyFunSuite {
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
     val d = b.intervals.Interval(IntegerVal(5),IntegerVal(12))
     val e = b.intervals.Interval(IntegerNegInf, IntegerVal(100))
-    val f = b.intervals.Interval(IntegerVal(-1),IntegerVal(12))
 
     val g = b.ANil
     val h = b.ACons(c, g) //ACons([-1,5], ANil)
@@ -84,18 +85,16 @@ class BasicFunctionsTest extends AnyFunSuite {
     val l = b.ACons(c, b.ACons(d,h)) //ACons([-1,5], ACons([5,12], ACons([-1,5], ANil)))
     val m = b.ACons(d, b.ACons(e, k)) //ACons([5, 12], ACons([-∞, 100],ACons([-1,5], ACons([5,12], ANil))))
 
-    //assert(b.aTail(h).equals(b.ANone))
-    //assert(b.aTail(i).equals(b.AMaybe(c)))
-    //assert(b.aTail(j).equals(b.AMaybe(c)))
-    //assert(b.aTail(k).equals(b.AMaybe(d)))
-    println(b.aTail(h))
-    println(b.aTail(i))
-    println(b.aTail(j))
-    println(b.aTail(k))
-    println(b.aTail(l))
-    println(b.aTail(m))
-    //assert(b.aTail(l).equals(b.AMaybe(f)))
-    //assert(b.aTail(m).equals(b.AMaybe(e)))
+    val n = b.ACons(d, b.ANil)
+    val o = b.ACons(d, h)
+    val p = b.ACons(e, k)
+
+    assert(b.aTail(h).equals(b.ASome(b.ANil)))
+    assert(b.aTail(i).equals(b.ASome(h)))
+    assert(b.aTail(j).equals(b.ASome(i)))
+    assert(b.aTail(k).equals(b.ASome(n)))
+    assert(b.aTail(l).equals(b.ASome(o)))
+    assert(b.aTail(m).equals(b.ASome(p)))
 
   }
 

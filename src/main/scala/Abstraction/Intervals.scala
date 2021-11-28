@@ -228,7 +228,6 @@ case class Intervals(mlb: IntegerW = IntegerNegInf, mub: IntegerW = IntegerInf) 
   }
 
   //added union_Interval
-  //TODO Testing
   def union_Interval(i1: Interval, i2:Interval) : Interval ={
     val newlb = if (IntegerW.<(i2.lb, i1.lb)) i2.lb else i1.lb
     val newub = if (IntegerW.<(i1.ub, i2.ub)) i2.ub else i1.ub
