@@ -8,6 +8,7 @@ package Abstraction
  * -ANil: describes the empty AList
  * -ACons(h,t): has a specified head with associated interval and a tail of type AList
  * -AMany(e): contains both types ANil and ACons
+ * !!!!!!!!!!!
  */
 case class ALists(intervals: Intervals){
   import intervals.Interval //import inner Class
