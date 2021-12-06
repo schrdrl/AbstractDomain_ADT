@@ -12,7 +12,7 @@ class UnionWidenTest extends AnyFunSuite {
     val b = ALists(a)
     val c = b.ANil
 
-    assert(b.union_AList(c,c).equals(b.ANil))
+    assert(b.union_AList(c,c) == b.ANil)
   }
 
   test("Union ANil and AMany"){
@@ -22,8 +22,8 @@ class UnionWidenTest extends AnyFunSuite {
     val d = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
     val e = b.AMany(d)
 
-    assert(b.union_AList(c,e).equals(e))
-    assert(b.union_AList(e,c).equals(b.union_AList(c,e)))
+    assert(b.union_AList(c,e) == e)
+    assert(b.union_AList(e,c) == b.union_AList(c,e))
   }
 
   test("Union ANil and ASome"){
@@ -37,10 +37,10 @@ class UnionWidenTest extends AnyFunSuite {
 
     val h = b.intervals.Interval(IntegerVal(-1), IntegerVal(8))
 
-    assert(b.union_AList(c,f).equals(b.AMany(d)))
-    assert(b.union_AList(c,f).equals(b.union_AList(f,c)))
-    assert(b.union_AList(c,g).equals(b.AMany(h)))
-    assert(b.union_AList(c,g).equals(b.union_AList(g,c)))
+    assert(b.union_AList(c,f) == b.AMany(d))
+    assert(b.union_AList(c,f) == b.union_AList(f,c))
+    assert(b.union_AList(c,g) == b.AMany(h))
+    assert(b.union_AList(c,g) == b.union_AList(g,c))
   }
 
   test("Union AMany and AMany"){
@@ -52,8 +52,8 @@ class UnionWidenTest extends AnyFunSuite {
     val f = b.AMany(c)
     val g = b.AMany(d)
 
-    assert(b.union_AList(f,g).equals(b.AMany(e)))
-    assert(b.union_AList(f,g).equals(b.union_AList(g,f)))
+    assert(b.union_AList(f,g) == b.AMany(e))
+    assert(b.union_AList(f,g) == b.union_AList(g,f))
   }
 
   test("Union ACons and AMany"){
@@ -65,15 +65,15 @@ class UnionWidenTest extends AnyFunSuite {
     val f = b.AMany(c)
     val g = b.ACons(d, b.ANil)
 
-    assert(b.union_AList(f,g).equals(b.AMany(e)))
-    assert(b.union_AList(f,g).equals(b.union_AList(g,f)))
+    assert(b.union_AList(f,g) == b.AMany(e))
+    assert(b.union_AList(f,g) == b.union_AList(g,f))
 
     val h = b.intervals.Interval(IntegerVal(-13), IntegerVal(-5))
     val i = b.ACons(d, b.AMany(h))
     val j = b.intervals.Interval(IntegerVal(-13), IntegerVal(8))
 
-    assert(b.union_AList(f,i).equals(b.AMany(j)))
-    assert(b.union_AList(f,i).equals(b.union_AList(i,f)))
+    assert(b.union_AList(f,i) == b.AMany(j))
+    assert(b.union_AList(f,i) == b.union_AList(i,f))
   }
 
   test("Union ACons and ACons"){
@@ -90,14 +90,14 @@ class UnionWidenTest extends AnyFunSuite {
     val j = b.ACons(c, b.ACons(d, b.ANil))
     val k = b.ACons(d, b.ACons(d, b.AMany(f)))
 
-    assert(b.union_AList(h,i).equals(b.ACons(e,b.ANil)))
-    assert(b.union_AList(h,i).equals(b.union_AList(i,h)))
-    assert(b.union_AList(h,j).equals(b.ACons(c,b.AMany(d))))
-    assert(b.union_AList(h,j).equals(b.union_AList(j,h)))
-    assert(b.union_AList(h,k).equals(b.ACons(e,b.AMany(g))))
-    assert(b.union_AList(h,k).equals(b.union_AList(k,h)))
-    assert(b.union_AList(j,k).equals(b.ACons(e,b.ACons(d, b.AMany(f)))))
-    assert(b.union_AList(j,k).equals(b.union_AList(k,j)))
+    assert(b.union_AList(h,i) == b.ACons(e,b.ANil))
+    assert(b.union_AList(h,i) == b.union_AList(i,h))
+    assert(b.union_AList(h,j) == b.ACons(c,b.AMany(d)))
+    assert(b.union_AList(h,j) == b.union_AList(j,h))
+    assert(b.union_AList(h,k) == b.ACons(e,b.AMany(g)))
+    assert(b.union_AList(h,k) == b.union_AList(k,h))
+    assert(b.union_AList(j,k) == b.ACons(e,b.ACons(d, b.AMany(f))))
+    assert(b.union_AList(j,k) == b.union_AList(k,j))
   }
 
 
@@ -135,34 +135,32 @@ class UnionWidenTest extends AnyFunSuite {
       if(i == 0) println(axs1)
       else println(axs4)
 
-      if(i>1) assert(axs4.equals(b.AMany(x)))
+      if(i>1) assert(axs4 == b.AMany(x))
 
-      if(i != 0) assert(i_head2.equals(x))
+      if(i != 0) assert(i_head2 == x)
 
       print("(" +i +")" +"after loop: ")
       if (i==0) println(axs2)
       else println(axs5)
 
-      if(i>1) assert(axs5.equals(b.ACons(x, b.AMany(x))))
+      if(i>1) assert(axs5 == b.ACons(x, b.AMany(x)))
 
       print("(" +i +")" +"after widen: ")
       if(i==0) println(axs3)
       else println(axs6)
-      if(i != 0) assert(axs6.equals(b.AMany(x)))
+      if(i != 0) assert(axs6 == b.AMany(x))
 
       print("axs for next iteration: ")
       axs4 = axs6
       println(axs4)
       println("")
 
-      if(i != 0) assert(axs4.equals(b.AMany(x)))
+      if(i != 0) assert(axs4 == b.AMany(x))
       i += 1
 
 
     }
   }
-
-
 
 
   test("widen with ANil"){
@@ -179,9 +177,9 @@ class UnionWidenTest extends AnyFunSuite {
     val i = b.ACons(e, g) //ACons([6,8], AMany([-1,4]))
     val j = b.ACons(d, b.ACons(e,c)) //ACons([-1,4], ACons([6,8], ANil))
 
-    assert(b.widen_AList(c,g).equals(b.AMany(d)))
-    assert(b.widen_AList(h,c).equals(b.AMany(e)))
-    assert(!b.widen_AList(h,c).equals(b.ANil))
+    assert(b.widen_AList(c,g) == b.AMany(d))
+    assert(b.widen_AList(h,c) == b.AMany(e))
+    assert(!(b.widen_AList(h,c) == b.ANil))
 
     //TODO
     println(b.widen_AList(c,i)) //AMany([-∞;8])

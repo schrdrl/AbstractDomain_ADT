@@ -7,6 +7,8 @@ package Abstraction
  * source: https://github.com/ahmadsalim/Rascal-Light
  */
 
+import Abstraction.Intervals.Unbounded
+
 import java.util.NoSuchElementException
 import language.implicitConversions
 
@@ -20,6 +22,7 @@ case class IntegerVal(value: Int) extends IntegerW {  //Value
 case object IntegerNegInf extends IntegerW {    //Negative Infinite
   override def toString: String = "-∞"
 }
+
 
 
 object IntegerW {
@@ -146,11 +149,12 @@ case class Intervals(mlb: IntegerW = IntegerNegInf, mub: IntegerW = IntegerInf) 
 
     override def top: Interval = Interval(mlb, mub)
 
+ //lub is not union and glb not intersect -> Supremum and Infimum
     override def lub(i1: Interval, i2: Interval): Interval =
       Interval(IntegerW.min(i1.lb, i2.lb), IntegerW.max(i1.ub, i2.ub))
 
     override def glb(i1: Interval, i2: Interval): Interval =
-      Interval(IntegerW.max(i1.lb, i2.lb), IntegerW.max(i1.ub, i2.ub))
+      Interval(IntegerW.max(i1.lb, i2.lb), IntegerW.max(i1.ub, i2.ub))  //TODO max, min?
 
     override def widen(i1: Interval, i2: Interval, bound: Int): Interval = {
       val newlb = if (IntegerW.<(i2.lb, i1.lb)) mlb else i1.lb
@@ -227,11 +231,35 @@ case class Intervals(mlb: IntegerW = IntegerNegInf, mub: IntegerW = IntegerInf) 
     makeInterval(IntegerVal(0), i2.ub)
   }
 
+  //added contains_Interval
+  //i1: interval is checked whether it is in i2
+  def contains_Interval(i1: Interval, i2: Interval): Boolean ={
+    IntegerW.<=(i2.lb, i1.lb) && IntegerW.<=(i1.ub, i2.ub)
+  }
+
   //added union_Interval
   def union_Interval(i1: Interval, i2:Interval) : Interval ={
     val newlb = if (IntegerW.<(i2.lb, i1.lb)) i2.lb else i1.lb
     val newub = if (IntegerW.<(i1.ub, i2.ub)) i2.ub else i1.ub
     Interval(newlb, newub)
+  }
+
+  //added intersect_Interval
+  //TODO test
+  def intersect_Interval(i1: Interval, i2:Interval) : Interval ={
+    if(i1 == i2){
+      i1
+    }else {
+      val newlb = if (IntegerW.<(i1.lb, i2.lb)) i2.lb else if (IntegerW.<(i2.lb, i1.lb)) i1.lb else mub
+      val newub = if (IntegerW.<(i1.ub, i2.ub)) i1.ub else if(IntegerW.<(i2.ub, i1.ub)) i2.ub else mlb
+      val newInterval = Interval(newlb, newub)
+      println(newInterval)
+      if(contains_Interval(newInterval, i1) && contains_Interval(newInterval, i2)){
+        Interval(newlb, newub)
+      }else{
+        Interval(mub, mlb)
+      }
+    }
   }
 
 }
@@ -241,3 +269,4 @@ object Intervals {
   val Positive = Intervals(IntegerVal(0), IntegerInf)
   val Unbounded = Intervals()
 }
+

@@ -19,11 +19,16 @@ case class ALists(intervals: Intervals){
   case class ACons(head: AInt, tail: AList) extends AList
   case class AMany(elem: AInt) extends AList
 
-
   sealed trait AOption[+A]
   case object ANone extends AOption[Nothing]
   case class ASome[A](get: A) extends AOption[A]
   case class AMaybe[A](get: A) extends AOption[A]
+
+  sealed trait ABool
+  case object ATrue extends ABool
+  case object AFalse extends ABool
+  case object AUnknown extends ABool
+
 
 /*Method returns the head of aList object, which is of type AOption[AInt]
 */
@@ -41,12 +46,19 @@ case class ALists(intervals: Intervals){
     case AMany(e) => AMaybe(AMany(e))
   }
 
-  /*Method returns the length of aList object, which is of type AOption[AInt]
-*/
+  //Method returns the length of aList object, which is of type AOption[AInt]
+
   def aLength(l: AList): AOption[AInt] = l match {
     case ANil => ANone
     case ACons(_, _) => ASome(Interval(IntegerVal(1), IntegerInf))
     case AMany(_) => ASome(Interval(IntegerVal(0), IntegerInf))
+  }
+
+  // Method checks whether a given AList is Nil
+  def isNil(l: AList): ABool = l match {
+    case ANil => ATrue
+    case ACons(_,_) => AFalse
+    case AMany(_) => AUnknown
   }
 
   /*Method checks whether an integer value is a concrete Element of an Interval.
@@ -98,6 +110,32 @@ case class ALists(intervals: Intervals){
     case (ACons(a,as), ACons(b, bs)) => ACons(intervals.union_Interval(a,b), union_AList(as,bs))
   }
 
+  //TODO test
+  def intersect_AList(al1: AList, al2: AList) : AList = (al1, al2) match {
+    case (ANil, ANil) => ANil
+    case (ANil, AMany(_)) | (AMany(_), ANil) => ANil
+    case (ANil, ACons(_,_)) | (ACons(_,_), ANil) => ANil
+    case (AMany(a), AMany(b)) => AMany(intervals.intersect_Interval(a,b))
+      //if(intervals.intersect_Interval(a,b) != intervals.Interval(IntegerInf, IntegerNegInf)) AMany(intervals.intersect_Interval(a,b)) else ANil
+    case (ACons(a,as), AMany(e)) =>  ???
+    case (AMany(e), ACons(a,as)) => ???
+    case (ACons(a,as), ACons(b, bs)) => ACons(intervals.intersect_Interval(a,b),intersect_AList(as, bs))
+  }
+
+  //TODO test
+  def subset_AList(al1: AList, al2: AList) : Boolean = (al1, al2) match {
+    case (ANil, ANil) => true
+    case (ANil, AMany(e)) => true
+    case (AMany(e), ANil) => false
+    case (ANil, ACons(a,as)) => true
+    case (ACons(a,as), ANil) => false
+    case (AMany(a), AMany(b)) => intervals.contains_Interval(a,b)
+    case (ACons(a,as), AMany(e)) => intervals.contains_Interval(a,e) && subset_AList(as, al2)
+    case (AMany(e), ACons(a,as)) => intervals.contains_Interval(e,a) && subset_AList(al1, as)
+    case (ACons(a,as), ACons(b, bs)) =>intervals.contains_Interval(a,b) && subset_AList(as, bs)
+
+  }
+
   //widen -> not symmetric
   def widen_AList(al1: AList, al2: AList) : AList = (al1, al2) match {
     case (ANil, ANil) => ANil
@@ -123,22 +161,35 @@ case class ALists(intervals: Intervals){
     case (ASome(a), AMaybe(b)) => AMaybe(intervals.Lattice.widen(a,b))
   }
 
+  //TODO Hilfsfunktion für Loops
+  //TODO wie mit ANone umgehen?
+  def justAList(ao: AOption[AList]) : AList = ao match {
+    case ASome(e) => e
+    case AMaybe(e) => e
+  }
+
+  implicit def Lattice: Lattice[AList] = new Lattice[AList] {
+
+    override def bot: AList = ACons(intervals.Lattice.bot, ANil)
+
+    override def top: AList = AMany(intervals.Lattice.top)
+
+    override def lub(a1: AList, a2: AList): AList = intersect_AList(a1: AList, a2: AList)
+
+    override def glb(a1: AList, a2: AList): AList = union_AList(a1: AList, a2: AList)
+
+    override def <=(a1: AList, a2: AList): Boolean = subset_AList(a1: AList, a2: AList)
+
+    override def widen(a1: AList, a2: AList, bound: Int): AList = widen_AList(a1: AList, a2: AList)
+  }
+
+
 }
 
 
 
 
-/*
-//TODO aTail -> returns  AOption[AInt] or AOption[AList]
-//Here: which interval describes tail
-def aTail(l: AList): AOption[AInt] = l match {
-  case ANil  => ANone
-  case ACons(_, ANil) => ANone
-  case ACons(_, ACons(h,t)) => widen_AOption(ASome(h), aTail(t))
-  case ACons(_, AMany(e)) =>AMaybe(e)
-  case AMany(e) => AMaybe(e) //AMany = ANil ≀ ACons(e, Many(e))
-  }
-*/
+
 
 
 

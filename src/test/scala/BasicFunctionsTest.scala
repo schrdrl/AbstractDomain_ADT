@@ -13,7 +13,7 @@ class BasicFunctionsTest extends AnyFunSuite {
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.aHead(b.ANil)
-    assert(c.equals(b.ANone))
+    assert(c == b.ANone)
   }
 
   test("Head of AMany"){
@@ -21,7 +21,7 @@ class BasicFunctionsTest extends AnyFunSuite {
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
     val d = b.AMany(c)
-    assert(b.aHead(d).equals(b.AMaybe(c)))
+    assert(b.aHead(d) == b.AMaybe(c))
   }
 
   test("Head of ACons"){
@@ -30,8 +30,8 @@ class BasicFunctionsTest extends AnyFunSuite {
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
     val d = b.ACons(c, b.ANil)
     val e = b.ACons(c, b.AMany(c))
-    assert(b.aHead(d).equals(b.ASome(c)))
-    assert(b.aHead(d).equals(b.aHead(e)))
+    assert(b.aHead(d) == b.ASome(c))
+    assert(b.aHead(d) == b.aHead(e))
   }
 
   /***************
@@ -41,7 +41,7 @@ class BasicFunctionsTest extends AnyFunSuite {
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.ANil
-    assert(b.aTail(c).equals(b.ANone))
+    assert(b.aTail(c) == b.ANone)
   }
 
   test("Tail of ACons (not nested)"){
@@ -54,10 +54,10 @@ class BasicFunctionsTest extends AnyFunSuite {
     val g = b.ACons(c, e) //ACons([-1,5], AMany([-1,5]))
 
 
-    assert(b.aTail(f).equals(b.ASome(b.ANil)))
-    assert(!b.aTail(f).equals(b.ANone)) //not ANil
-    assert(b.aTail(g).equals(b.ASome(b.AMany(c))))
-    assert(!b.aTail(g).equals(b.ANone)) //not ANil
+    assert(b.aTail(f) == b.ASome(b.ANil))
+    assert(!(b.aTail(f) == b.ANone)) //not ANil
+    assert(b.aTail(g) == b.ASome(b.AMany(c)))
+    assert(!(b.aTail(g) == b.ANone)) //not ANil
   }
 
   test("Tail of AMany"){
@@ -65,7 +65,7 @@ class BasicFunctionsTest extends AnyFunSuite {
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
     val d = b.AMany(c)
-    assert(b.aTail(d).equals(b.AMaybe(b.AMany(c))))
+    assert(b.aTail(d) == b.AMaybe(b.AMany(c)))
   }
 
   test("Tail of nested ACons"){
@@ -89,12 +89,12 @@ class BasicFunctionsTest extends AnyFunSuite {
     val o = b.ACons(d, h)
     val p = b.ACons(e, k)
 
-    assert(b.aTail(h).equals(b.ASome(b.ANil)))
-    assert(b.aTail(i).equals(b.ASome(h)))
-    assert(b.aTail(j).equals(b.ASome(i)))
-    assert(b.aTail(k).equals(b.ASome(n)))
-    assert(b.aTail(l).equals(b.ASome(o)))
-    assert(b.aTail(m).equals(b.ASome(p)))
+    assert(b.aTail(h) == b.ASome(b.ANil))
+    assert(b.aTail(i) == b.ASome(h))
+    assert(b.aTail(j) == b.ASome(i))
+    assert(b.aTail(k) == b.ASome(n))
+    assert(b.aTail(l) == b.ASome(o))
+    assert(b.aTail(m) == b.ASome(p))
 
   }
 
@@ -105,7 +105,7 @@ class BasicFunctionsTest extends AnyFunSuite {
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.ANil
-    assert(b.aLength(c).equals(b.ANone))
+    assert(b.aLength(c) == b.ANone)
   }
 
   test("Length ACons"){
@@ -119,8 +119,8 @@ class BasicFunctionsTest extends AnyFunSuite {
     val f = b.ACons(c, b.ANil)
     val g = b.ACons(c, b.AMany(d))
 
-    assert(b.aLength(f).equals(b.ASome(e)))
-    assert(b.aLength(g).equals(b.ASome(e)))
+    assert(b.aLength(f) == b.ASome(e))
+    assert(b.aLength(g) == b.ASome(e))
   }
 
 
@@ -130,7 +130,7 @@ class BasicFunctionsTest extends AnyFunSuite {
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
     val d = b.intervals.Interval(IntegerVal(0),IntegerInf)
     val e = b.AMany(c)
-    assert(b.aLength(e).equals(b.ASome(d)))
+    assert(b.aLength(e) == b.ASome(d))
   }
 
   /**********************************
