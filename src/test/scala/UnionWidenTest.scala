@@ -279,11 +279,15 @@ class UnionWidenTest extends AnyFunSuite {
     val g = b.AMaybe(d)
     val h = b.ASome(e)
 
-    println(b.widen_AOption(f,f)) //returns: AMaybe([-1;3])
-    println(b.widen_AOption(g,f)) //returns: AMaybe([-∞;8])
-    println(b.widen_AOption(f,g)) //returns: AMaybe([-1;∞])
-    println(b.widen_AOption(f,h)) //returns: ASome([-1;∞])
-    println(b.widen_AOption(h,f)) //returns: AMaybe([-∞;12])
+    val i = b.intervals.Interval(IntegerVal(-1), IntegerInf)
+    val j = b.intervals.Interval(IntegerNegInf, IntegerVal(8))
+    val k = b.intervals.Interval(IntegerNegInf, IntegerVal(12))
+
+    assert(b.widen_AOption(f,f) == f) //AMaybe([-1;3])
+    assert(b.widen_AOption(g,f) == b.AMaybe(j)) //AMaybe([-∞;8])
+    assert(b.widen_AOption(f,g) == b.AMaybe(i)) //AMaybe([-1;∞])
+    assert(b.widen_AOption(f,h) == b.AMaybe(i)) //AMaybe([-1;∞])
+    assert(b.widen_AOption(h,f) == b.AMaybe(k)) //AMaybe([-∞;12])
   }
 
 }

@@ -97,7 +97,6 @@ case class ALists(intervals: Intervals){
   }
 
 
-
   def union_AList(al1: AList, al2: AList) : AList = (al1, al2) match {
     case (ANil, ANil) => ANil
     case (ANil, AMany(e)) => AMany(e)
@@ -117,23 +116,23 @@ case class ALists(intervals: Intervals){
     case (ANil, ACons(_,_)) | (ACons(_,_), ANil) => ANil
     case (AMany(a), AMany(b)) => AMany(intervals.intersect_Interval(a,b))
       //if(intervals.intersect_Interval(a,b) != intervals.Interval(IntegerInf, IntegerNegInf)) AMany(intervals.intersect_Interval(a,b)) else ANil
-    case (ACons(a,as), AMany(e)) =>  ???
-    case (AMany(e), ACons(a,as)) => ???
+    case (ACons(a,as), AMany(e)) =>  intersect_AList(AMany(intervals.intersect_Interval(a,e)),as)
+    case (AMany(e), ACons(a,as)) =>  intersect_AList(AMany(intervals.intersect_Interval(e,a)),as)
     case (ACons(a,as), ACons(b, bs)) => ACons(intervals.intersect_Interval(a,b),intersect_AList(as, bs))
   }
 
-  //TODO test
+  //TODO nested ACons
+  //left AList is subset of right AList
   def subset_AList(al1: AList, al2: AList) : Boolean = (al1, al2) match {
     case (ANil, ANil) => true
-    case (ANil, AMany(e)) => true
-    case (AMany(e), ANil) => false
-    case (ANil, ACons(a,as)) => true
-    case (ACons(a,as), ANil) => false
+    case (ANil, AMany(_)) => true
+    case (AMany(_), ANil) => true
+    case (ANil, ACons(_,_)) => true
+    case (ACons(_,_), ANil) => false
     case (AMany(a), AMany(b)) => intervals.contains_Interval(a,b)
     case (ACons(a,as), AMany(e)) => intervals.contains_Interval(a,e) && subset_AList(as, al2)
     case (AMany(e), ACons(a,as)) => intervals.contains_Interval(e,a) && subset_AList(al1, as)
-    case (ACons(a,as), ACons(b, bs)) =>intervals.contains_Interval(a,b) && subset_AList(as, bs)
-
+    case (ACons(a,as), ACons(b, bs)) => intervals.contains_Interval(a,b) && subset_AList(as, bs)
   }
 
   //widen -> not symmetric
