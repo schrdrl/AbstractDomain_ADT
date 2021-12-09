@@ -91,61 +91,63 @@ class SubsetIntersectTests extends AnyFunSuite {
     val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
     val d = b.intervals.Interval(IntegerVal(5), IntegerVal(8))
 
-    val e = b.ACons(c, b.ACons(c, b.AMany(c)))
-    val f = b.ACons(c, b.ACons(c, b.AMany(d)))
-    val g = b.ACons(c, b.ACons(c, b.ANil))
-    val h = b.ACons(c, b.ACons(d, b.AMany(c)))
+    val e = b.ACons(c, b.ACons(c, b.AMany(c))) //ACons(c, ACons(c, AMany(c)))
+    val f = b.ACons(c, b.ACons(c, b.AMany(d))) //ACons(c, ACons(c, AMany(d)))
+    val g = b.ACons(c, b.ACons(c, b.ANil))      //ACons(c, ACons(c, ANil))
+    val h = b.ACons(c, b.ACons(d, b.AMany(c)))  //ACons(c, ACons(d, AMany(c)))
 
     val i = b.ANil
     val j = b.AMany(c)
     val k = b.AMany(d)
     val l = b.ACons(c, b.ANil)
     val m = b.ACons(d, b.AMany(c))
-    val n = b.ACons(c, b.ACons(c, b.ACons(c, b.ANil)))
-    val o = b.ACons(c, b.ACons(c, b.ACons(c, b.AMany(c))))
-    val p = b.ACons(c, b.ACons(d, b.ACons(c, b.ANil)))
-    val q = b.ACons(c, b.ACons(c, b.ACons(d, b.ANil)))
+    val n = b.ACons(c, b.ACons(c, b.ACons(c, b.ANil))) //ACons(c, ACons(c, ACons(c, ANil)))
+    val o = b.ACons(c, b.ACons(c, b.ACons(c, b.AMany(c)))) //ACons(c, ACons(c, ACons(c, AMany(c))))
+    val p = b.ACons(c, b.ACons(d, b.ACons(c, b.ANil))) // ACons(c, ACons(d, ACons(c, ANil)))
+    val q = b.ACons(c, b.ACons(c, b.ACons(d, b.ANil))) //ACons(c, ACons(c, ACons(d, ANil)))
 
     assert(!b.subset_AList(e,i)) // -> false
     assert(!b.subset_AList(f,i)) // -> false
     assert(b.subset_AList(e,g)) // -> true
     assert(b.subset_AList(g,e)) // -> true
-    assert(!b.subset_AList(e,h)) // -> false
+
     assert(b.subset_AList(e,j)) // -> true
     assert(!b.subset_AList(f,j)) // -> false
     assert(b.subset_AList(g,j)) // -> true
     assert(!b.subset_AList(h,j)) // -> false
+
     assert(!b.subset_AList(e,k)) // -> false
     assert(!b.subset_AList(e,h)) // -> false
+
     assert(!b.subset_AList(e,l)) // -> false
     assert(!b.subset_AList(f,l)) // -> false
     assert(!b.subset_AList(g,l)) // -> false
     assert(!b.subset_AList(h,l)) // -> false
+
     assert(!b.subset_AList(e,m)) // -> false
     assert(!b.subset_AList(f,m)) // -> false
     assert(!b.subset_AList(g,m)) // -> false
     assert(!b.subset_AList(h,m)) // -> false
 
-    //TODO recheck
-    println(b.subset_AList(e,n))
-    println(b.subset_AList(f,n))
-    println(b.subset_AList(g,n))
-    println(b.subset_AList(h,n))
+    assert(b.subset_AList(e,n))  // -> true
+    assert(!b.subset_AList(f,n)) // -> false
+    assert(b.subset_AList(g,n))  // -> true
+    assert(!b.subset_AList(h,n)) // -> false
 
-    println(b.subset_AList(e,o))
-    println(b.subset_AList(f,o))
-    println(b.subset_AList(g,o))
-    println(b.subset_AList(h,o))
+    assert(b.subset_AList(e,o))  // -> true
+    assert(!b.subset_AList(f,o)) // -> false
+    assert(b.subset_AList(g,o)) // -> true
+    assert(!b.subset_AList(h,o)) // -> false
 
-    println(b.subset_AList(e,p))
-    println(b.subset_AList(f,p))
-    println(b.subset_AList(g,p))
-    println(b.subset_AList(h,p))
+    assert(!b.subset_AList(e,p)) // -> false
+    assert(!b.subset_AList(f,p)) // -> false
+    assert(!b.subset_AList(g,p)) // -> false
+    assert(b.subset_AList(h,p)) // -> true
 
-    println(b.subset_AList(e,q)) // -> false
-    println(b.subset_AList(f,q)) // ???
-    println(b.subset_AList(g,q)) // ???
-    println(b.subset_AList(h,q)) // -> false
+    assert(!b.subset_AList(e,q)) // -> false
+    assert(b.subset_AList(f,q)) // -> true
+    assert(b.subset_AList(g,q)) // -> true
+    assert(!b.subset_AList(h,q)) // -> false
   }
 
 

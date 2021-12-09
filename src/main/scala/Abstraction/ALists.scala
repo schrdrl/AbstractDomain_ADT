@@ -121,7 +121,6 @@ case class ALists(intervals: Intervals){
     case (ACons(a,as), ACons(b, bs)) => ACons(intervals.intersect_Interval(a,b),intersect_AList(as, bs))
   }
 
-  //TODO nested ACons
   //left AList is subset of right AList
   def subset_AList(al1: AList, al2: AList) : Boolean = (al1, al2) match {
     case (ANil, ANil) => true
