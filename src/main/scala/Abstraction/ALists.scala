@@ -109,16 +109,34 @@ case class ALists(intervals: Intervals){
     case (ACons(a,as), ACons(b, bs)) => ACons(intervals.union_Interval(a,b), union_AList(as,bs))
   }
 
-  //TODO test
+
+  /**
+   * cases:
+   * (ANil, ANil) | (ANil, AMany) | (ANil, ACons) | (AMany, ANil) |(ACons, ANil) = ANil
+   * (AMany, AMany) = AMany
+   * (ACons, ACons) = ACons
+   * (AMany, ACons) | (ACons, AMany) = ACons
+   *
+   * intersect(AMany(c), ACons(c, AMany(c)) = AMany(c)
+   * intersect(AMany(c), ACons(c, AMany(d)) = ANil
+   * intersect(AMany(c), ACons(c, ANil)) = ACons(c, ANil)
+   * intersect(AMany(c), ACons(d, AMany(c)) = ANil
+   *
+   * with AMany = ACons | ANil
+   */
+
   def intersect_AList(al1: AList, al2: AList) : AList = (al1, al2) match {
     case (ANil, ANil) => ANil
     case (ANil, AMany(_)) | (AMany(_), ANil) => ANil
     case (ANil, ACons(_,_)) | (ACons(_,_), ANil) => ANil
-    case (AMany(a), AMany(b)) => AMany(intervals.intersect_Interval(a,b))
-      //if(intervals.intersect_Interval(a,b) != intervals.Interval(IntegerInf, IntegerNegInf)) AMany(intervals.intersect_Interval(a,b)) else ANil
-    case (ACons(a,as), AMany(e)) =>  intersect_AList(AMany(intervals.intersect_Interval(a,e)),as)
-    case (AMany(e), ACons(a,as)) =>  intersect_AList(AMany(intervals.intersect_Interval(e,a)),as)
-    case (ACons(a,as), ACons(b, bs)) => ACons(intervals.intersect_Interval(a,b),intersect_AList(as, bs))
+    case (AMany(a), AMany(b)) =>
+      if(intervals.intersect_Interval(a,b) != intervals.Interval(IntegerInf, IntegerNegInf)) AMany(intervals.intersect_Interval(a,b)) else ANil
+    case (ACons(a,as), AMany(e)) =>
+      if(intervals.intersect_Interval(a,e) != intervals.Interval(IntegerInf, IntegerNegInf)) ACons(intervals.intersect_Interval(a,e), intersect_AList(as, al2)) else ANil
+    case (AMany(e), ACons(a,as)) =>
+      if(intervals.intersect_Interval(e,a) != intervals.Interval(IntegerInf, IntegerNegInf)) ACons(intervals.intersect_Interval(e,a), intersect_AList(al1, as)) else ANil
+    case (ACons(a,as), ACons(b, bs)) =>
+      if(intervals.intersect_Interval(a,b) != intervals.Interval(IntegerInf, IntegerNegInf)) ACons(intervals.intersect_Interval(a,b),intersect_AList(as, bs)) else ANil
   }
 
   //left AList is subset of right AList

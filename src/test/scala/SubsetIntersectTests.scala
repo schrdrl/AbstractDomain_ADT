@@ -150,5 +150,105 @@ class SubsetIntersectTests extends AnyFunSuite {
     assert(!b.subset_AList(h,q)) // -> false
   }
 
+  /*****************
+   * Intersection  *
+   *****************/
+
+  test("Intersect with ANil"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
+
+    val d = b.ANil
+    val e = b.AMany(c)
+    val f = b.ACons(c, b.ANil)
+
+    assert(b.intersect_AList(d, d) == b.ANil)
+    assert(b.intersect_AList(d, e) == b.ANil)
+    assert(b.intersect_AList(e, d) ==  b.intersect_AList(d, e))
+    assert(b.intersect_AList(d, f) == b.ANil)
+    assert(b.intersect_AList(f, d) == b.intersect_AList(d, f))
+  }
+
+  test("Intersect with AMany"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
+    val d = b.intervals.Interval(IntegerVal(5), IntegerVal(8))
+
+    val e = b.AMany(c)
+    val f = b.AMany(d)
+    val g = b.ANil
+    val h = b.ACons(c, b.ANil)
+    val i = b.ACons(c, b.AMany(c))
+    val j = b.ACons(c, b.AMany(d))
+
+    assert(b.intersect_AList(e,e) == b.AMany(c))
+    assert(b.intersect_AList(e,f) == b.ANil)
+    assert(b.intersect_AList(f,e) == b.ANil)
+    assert(b.intersect_AList(e,g) == b.ANil)
+    assert(b.intersect_AList(e,h) == h)
+    assert(b.intersect_AList(e,i) == i)
+    assert(b.intersect_AList(e,j) == h)
+  }
+
+
+  test("Intersect with ACons"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
+    val d = b.intervals.Interval(IntegerVal(5), IntegerVal(8))
+
+    val e = b.ACons(c, b.ANil)
+    val f = b.ACons(c, b.AMany(c))
+    val g = b.ACons(d, b.AMany(c))
+
+    val h = b.ANil
+    val i = b.AMany(c)
+    val j = b.AMany(d)
+
+    assert(b.intersect_AList(e,e) == e)
+    assert(b.intersect_AList(e,f) == e)
+    assert(b.intersect_AList(f,e) == b.intersect_AList(e,f))
+    assert(b.intersect_AList(e,g) == b.ANil)
+    assert(b.intersect_AList(e,h) == b.ANil)
+    assert(b.intersect_AList(e,i) == e)
+    assert(b.intersect_AList(e,j) == b.ANil)
+    assert(b.intersect_AList(g,j) == b.ACons(d, b.ANil))
+  }
+
+
+  test("Intersect with nested ACons"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
+    val d = b.intervals.Interval(IntegerVal(5), IntegerVal(8))
+
+    val e = b.ACons(c, b.ACons(c, b.AMany(c)))
+    val f = b.ACons(c, b.ACons(c, b.ACons(c, b.ANil)))
+    val g = b.ACons(c, b.ACons(d, b.ACons(c,b.ANil)))
+
+    val h = b.ACons(c, b.ANil)
+    val i = b.ACons(c, b.AMany(c))
+    val j = b.ACons(d, b.AMany(c))
+
+    val k = b.ANil
+    val l = b.AMany(c)
+    val m = b.AMany(d)
+
+    assert(b.intersect_AList(e,e) == e)
+    assert(b.intersect_AList(e,f) == f)
+    assert(b.intersect_AList(f,e) == b.intersect_AList(e,f))
+    assert(b.intersect_AList(e,g) == h)
+    assert(b.intersect_AList(h,g) == b.intersect_AList(g,h))
+    assert(b.intersect_AList(g,h) == h)
+    assert(b.intersect_AList(e,i) == e)
+    assert(b.intersect_AList(f,i) == f)
+    assert(b.intersect_AList(g,j) == b.ANil)
+    assert(b.intersect_AList(f,k) == b.ANil)
+    assert(b.intersect_AList(e,l) == e)
+    assert(b.intersect_AList(e,m) == b.ANil)
+    assert(b.intersect_AList(g,m) == b.ANil)
+  }
 
 }
