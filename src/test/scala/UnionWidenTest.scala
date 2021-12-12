@@ -2,9 +2,9 @@ import Abstraction._
 import org.scalatest.funsuite.AnyFunSuite
 
 class UnionWidenTest extends AnyFunSuite {
-  /***************
+  /*********************
    *Tests union_AList  *
-   **************/
+   *********************/
 
 
   test("Union ANil and ANil"){
@@ -181,13 +181,11 @@ class UnionWidenTest extends AnyFunSuite {
     assert(b.widen_AList(h,c) == b.AMany(e))
     assert(!(b.widen_AList(h,c) == b.ANil))
 
-    //TODO
-    println(b.widen_AList(c,i)) //AMany([-∞;8])
-    println(b.widen_AList(i,c))
+    assert(b.widen_AList(c,i) == b.AMany(b.intervals.Interval(IntegerNegInf, IntegerVal(8)))) //AMany([-∞;8])
+    assert(b.widen_AList(i,c) == b.widen_AList(c,i))
 
-    println(b.widen_AList(c,j))
-    println(b.widen_AList(j,c))
-
+    assert(b.widen_AList(c,j) == b.AMany(b.intervals.Interval(IntegerVal(-1), IntegerInf)))
+    assert(b.widen_AList(j,c) == b.widen_AList(c,j))
   }
 
   test("widen with ACons"){
@@ -203,16 +201,17 @@ class UnionWidenTest extends AnyFunSuite {
 
     val g = b.ACons(c, b.ACons(d, b.ANil))
     val h = b.ACons(c, b.ACons(c, b.ACons(e, b.ANil)))
+    val i = b.intervals.Interval(IntegerNegInf, IntegerVal(2))
+    val j = b.intervals.Interval(IntegerVal(1), IntegerInf)
 
-    println(b.widen_AList(g,h)) //returns: ACons([1;1],ACons([-∞;2],AMany([5;5])))
-    println(b.widen_AList(h,g)) //returns: ACons([1;1],ACons([1;∞],AMany([5;5])))
+    assert(b.widen_AList(g,h) == b.ACons(c, b.ACons(i, b.AMany(e)))) //returns: ACons([1;1],ACons([-∞;2],AMany([5;5])))
+    assert(b.widen_AList(h,g) == b.ACons(c, b.ACons(j, b.AMany(e)))) //returns: ACons([1;1],ACons([1;∞],AMany([5;5])))
 
-    val i = b.AMany(f)
-    println(b.widen_AList(g,i)) //returns: AMany([1;∞])
-    println(b.widen_AList(i,g)) //returns: AMany([1;2])
-    println(b.widen_AList(h,i)) //returns: AMany([1;∞])
-    println(b.widen_AList(i,h)) //returns: AMany([1;∞])
-
+    val k = b.AMany(f)
+    assert(b.widen_AList(g,k) == b.AMany(j)) //returns: AMany([1;∞])
+    assert(b.widen_AList(k,g) == b.AMany(f)) //returns: AMany([1;2])
+    assert(b.widen_AList(h,k) == b.AMany(j)) //returns: AMany([1;∞])
+    assert(b.widen_AList(k,h) == b.AMany(j)) //returns: AMany([1;∞])
   }
 
   test("widen with AMany"){
@@ -224,9 +223,9 @@ class UnionWidenTest extends AnyFunSuite {
     val e = b.AMany(c)
     val f = b.AMany(d)
 
-    println(b.widen_AList(e,f)) //returns: AMany([-1;∞])
-    println(b.widen_AList(e,e)) //returns: AMany([-1;3])
-    println(b.widen_AList(f,e)) //returns: AMany([-∞;8])
+    assert(b.widen_AList(e,f) == b.AMany(b.intervals.Interval(IntegerVal(-1), IntegerInf))) //returns: AMany([-1;∞])
+    assert(b.widen_AList(e,e) == e) //returns: AMany([-1;3])
+    assert(b.widen_AList(f,e) == b.AMany(b.intervals.Interval(IntegerNegInf, IntegerVal(8)))) //returns: AMany([-∞;8])
   }
 
 
@@ -245,10 +244,10 @@ class UnionWidenTest extends AnyFunSuite {
     val f = b.ASome(c)
     val g = b.AMaybe(d)
 
-    println(b.widen_AOption(e,e)) //returns: ANone
-    println(b.widen_AOption(e,f)) //returns: AMaybe([-1;3])
-    println(b.widen_AOption(e,g)) //returns: AMaybe([5;8])
-    println(b.widen_AOption(g,e)) //returns: AMaybe([5;8])
+    assert(b.widen_AOption(e,e) == e) //returns: ANone
+    assert(b.widen_AOption(e,f) == b.AMaybe(c)) //returns: AMaybe([-1;3])
+    assert(b.widen_AOption(e,g) == g) //returns: AMaybe([5;8])
+    assert(b.widen_AOption(g,e) == g) //returns: AMaybe([5;8])
   }
 
   test("widen with ASome"){
@@ -262,10 +261,11 @@ class UnionWidenTest extends AnyFunSuite {
     val g = b.AMaybe(d)
     val h = b.ASome(e)
 
-    println(b.widen_AOption(f,f)) //returns: ASome([-1;3])
-    println(b.widen_AOption(g,f)) //returns: AMaybe([-∞;8])
-    println(b.widen_AOption(f,g)) //returns: AMaybe([-1;∞])
-    println(b.widen_AOption(f,h)) //returns: ASome([-1;∞])
+    assert(b.widen_AOption(f,f) == f) //returns: ASome([-1;3])
+    assert(b.widen_AOption(g,f) == b.AMaybe(b.intervals.Interval(IntegerNegInf, IntegerVal(8)))) //returns: AMaybe([-∞;8])
+    assert(b.widen_AOption(f,g) == b.AMaybe(b.intervals.Interval(IntegerVal(-1), IntegerInf))) //returns: AMaybe([-1;∞])
+    assert(b.widen_AOption(f,g) != b.widen_AOption(g,f))
+    assert(b.widen_AOption(f,h) == b.ASome(b.intervals.Interval(IntegerVal(-1), IntegerInf))) //returns: ASome([-1;∞])
   }
 
   test("widen with AMaybe"){
