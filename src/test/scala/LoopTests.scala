@@ -7,7 +7,6 @@ class LoopTests extends AnyFunSuite {
    * tests: Loop Abstract                                  *
    * Tests are just using the abstract type AList          *
    * ****************************************************** */
-
   test("Loop Abstract 1 (n = 0, ASome)") {
     /**
      * int n
