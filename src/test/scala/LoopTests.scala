@@ -2,7 +2,6 @@ import Abstraction.{ALists, IntegerVal, Intervals}
 import org.scalatest.funsuite.AnyFunSuite
 
 class LoopTests extends AnyFunSuite {
-
   /** *******************************************************
    * tests: Loop Abstract                                  *
    * Tests are just using the abstract type AList          *
