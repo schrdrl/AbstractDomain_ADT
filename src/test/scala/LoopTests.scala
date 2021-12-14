@@ -44,7 +44,6 @@ class LoopTests extends AnyFunSuite {
     assert(n >= 0)
   }
 
-
   test("Loop Abstract 1 (n = 0, AMaybe)") {
     /**
      * int n
