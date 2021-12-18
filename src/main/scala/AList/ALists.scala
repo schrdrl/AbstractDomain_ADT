@@ -178,7 +178,7 @@ case class ALists(intervals: Intervals){
   //TODO wie mit ANone umgehen?
   def justAList(ao: AOption[AList]) : AList = ao match {
     case ASome(e) => e
-    case AMaybe(e) => e
+    case AMaybe(e) | ANone => ??? //TODO Fail
   }
 
 
