@@ -1,4 +1,4 @@
-package Abstraction
+package AList
 
 /**
  * Implementation of abstract Integers and Intervals. It is used as an alternative to APRON
@@ -7,7 +7,7 @@ package Abstraction
  * source: https://github.com/ahmadsalim/Rascal-Light
  */
 
-import Abstraction.Intervals.Unbounded
+import AList.Intervals.Unbounded
 
 import java.util.NoSuchElementException
 import language.implicitConversions

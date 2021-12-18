@@ -1,4 +1,4 @@
-import Abstraction.{ALists, IntegerVal, Intervals}
+import AList.{ALists, IntegerVal, Intervals}
 import org.scalatest.funsuite.AnyFunSuite
 
 class LoopTests extends AnyFunSuite {
@@ -14,6 +14,7 @@ class LoopTests extends AnyFunSuite {
      * xs = xs.tail
      * n++
      * }
+     * assert isNil == xs
      */
     val a = Intervals.Unbounded
     val b = ALists(a)

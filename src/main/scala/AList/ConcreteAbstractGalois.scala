@@ -1,4 +1,4 @@
-package Abstraction
+package AList
 
 /**
  * Implementation of the galois connection between two partially ordered Sets.

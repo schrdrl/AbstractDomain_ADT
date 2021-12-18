@@ -1,4 +1,4 @@
-package Abstraction
+package AList
 
 /**
  * Implementation of a Lattice with it's properties.

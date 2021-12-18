@@ -1,4 +1,4 @@
-package Abstraction
+package AList
 
 object Powerset {
   implicit def PowersetLattice[A]: Lattice[Set[A]] = new Lattice[Set[A]] {

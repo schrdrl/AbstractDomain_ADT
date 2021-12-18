@@ -1,6 +1,4 @@
-package Abstraction
-
-
+package AList
 
 /**
  * AList is an abstract domain of numerical lists (belonging to algebraic data types)
@@ -12,7 +10,6 @@ package Abstraction
 case class ALists(intervals: Intervals){
   import intervals.Interval //import inner Class
   type AInt = Interval  //alias
-
 
   sealed trait AList  //"behaviour"
   case object ANil extends AList
@@ -184,6 +181,9 @@ case class ALists(intervals: Intervals){
     case AMaybe(e) => e
   }
 
+
+
+
   implicit def Lattice: Lattice[AList] = new Lattice[AList] {
 
     override def bot: AList = ACons(intervals.Lattice.bot, ANil)
@@ -197,6 +197,7 @@ case class ALists(intervals: Intervals){
     override def <=(a1: AList, a2: AList): Boolean = subset_AList(a1: AList, a2: AList)
 
     override def widen(a1: AList, a2: AList, bound: Int): AList = widen_AList(a1: AList, a2: AList)
+
   }
 
 

@@ -1,4 +1,4 @@
-import Abstraction.{IntegerInf, IntegerNegInf, IntegerVal, Intervals}
+import AList.{IntegerInf, IntegerNegInf, IntegerVal, Intervals}
 import org.scalatest.funsuite.AnyFunSuite
 
 class IntervalsTests extends AnyFunSuite {
