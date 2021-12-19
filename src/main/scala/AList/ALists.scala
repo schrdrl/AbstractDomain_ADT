@@ -184,6 +184,7 @@ case class ALists(intervals: Intervals){
   def ===(a : ABool, b: ABool) : ABool = (a,b) match {
     case (AFalse, AFalse)| (ATrue, ATrue) => ATrue
     case (AFalse, ATrue) | (ATrue, AFalse)  => AFalse
+    case (AUnknown, ATrue) | (ATrue, AUnknown) | (AUnknown, AFalse) | (AFalse, AUnknown)=> ATrue
   }
 
   def ===[AInt](a : AInt, b: AInt) : ABool =  {
@@ -194,34 +195,38 @@ case class ALists(intervals: Intervals){
     }
   }
 
-  def ===[AList](l1 : AList, l2: AList) : ABool = (l1,l2) match {
+  //TODO rename to ===
+  def equals_AList(l1 : AList, l2: AList) : ABool = (l1,l2) match {
     case (ANil, ANil) => ATrue
-    case (ANil, ACons(_,_)) => AFalse
-    case (ANil, AMany(_)) => ATrue
-    case (ACons(a, as), ACons(b,bs)) => &&(===(a,b), ===(as,bs))
+    case (ANil, ACons(_,_)) | (ACons(_,_), ANil) => AFalse
+    case (ANil, AMany(_)) | (AMany(_), ANil) => ATrue
+    case (ACons(a, as), ACons(b,bs)) => &&(===(a,b), equals_AList(as,bs))
     case (AMany(a), AMany(b)) => ===(a,b)
-    case (AMany(a), ACons(b,bs)) => &&(===(a,b), ===(l1,bs))
-    case (ACons(a,as), AMany(b)) => &&(===(a,b), ===(as,l2))
+    case (AMany(a), ACons(b,bs)) => &&(===(a,b), equals_AList(l1,bs))
+    case (ACons(a,as), AMany(b)) => &&(===(a,b), equals_AList(as,l2))
   }
 
-  def ===[AOption[AInt]](ao1 : AOption[AInt], ao2: AOption[AInt]) : ABool = (ao1,ao2) match {
+  //TODO rename to ===
+  def equals_AOption_AInt(ao1 : AOption[AInt], ao2: AOption[AInt]) : ABool = (ao1,ao2) match {
     case (ANone, ANone) => ATrue
-    case (ANone, ASome(_)) => AFalse
-    case (ANone, AMaybe(_)) => ATrue
+    case (ANone, ASome(_)) | (ASome(_), ANone) => AFalse
+    case (ANone, AMaybe(_))| (AMaybe(_), ANone) => ATrue
     case (ASome(a), ASome(b)) => ===(a,b)
     case (AMaybe(a), AMaybe(b)) =>  ===(a,b)
-    case (ASome(a), AMaybe(b))   =>  ===(a,b) //TODO  exclude ANone
-    case (AMaybe(a), ASome(b)) => ===(a,b)
+    case (ASome(a), AMaybe(b))  =>  ===(a,b) //TODO  exclude ANone
+    case (AMaybe(a), ASome(b)) => ===(a,b) //TODO  exclude ANone
 
   }
-  def ===[AOption[AList]](ao1 : AOption[AList], ao2: AOption[AList]) : ABool = (ao1,ao2) match {
+
+  //TODO rename to ===
+  def equals_AOption_AList(ao1 : AOption[AList], ao2: AOption[AList]) : ABool = (ao1,ao2) match {
     case (ANone, ANone) => ATrue
-    case (ANone, ASome(_)) => AFalse
-    case (ANone, AMaybe(_)) => ATrue
-    case (ASome(a), ASome(b)) => ===(a,b)
-    case (AMaybe(a), AMaybe(b)) =>  ===(a,b)
-    case (ASome(a), AMaybe(b))   =>  ===(a,b) //TODO  exclude ANone
-    case (AMaybe(a), ASome(b)) => ===(a,b)
+    case (ANone, ASome(_))| (ASome(_), ANone) => AFalse
+    case (ANone, AMaybe(_))| (AMaybe(_), ANone) => ATrue
+    case (ASome(a), ASome(b)) => equals_AList(a,b)
+    case (AMaybe(a), AMaybe(b)) =>  equals_AList(a,b)
+    case (ASome(a), AMaybe(b))   =>  equals_AList(a,b) //TODO  exclude ANone
+    case (AMaybe(a), ASome(b)) => equals_AList(a,b) //TODO  exclude ANone
   }
 
 

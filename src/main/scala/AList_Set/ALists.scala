@@ -23,7 +23,7 @@ case class ALists(intervals: Intervals) {
   case object ATrue extends ABool
   case object AFalse extends ABool
   case object AUnknown extends ABool
-  //case object AUnknown extends ABool
+
 
 /**
  * Meeting 30.11
@@ -38,8 +38,9 @@ case class ALists(intervals: Intervals) {
   def aHead (l: Set[AList]): Set[AOption[AInt]] = l.map{
     case ANil => ANone
     case ACons(h, _) => ASome(h)
-    case AMany(e) => AMaybe(e) //TODO AMaybe
+    case AMany(e) => AMaybe(e) //TODO AMaybe = = ANil ≀ ACons(e, Many(e))
   }
+
 
   def aTail (l: Set[AList]): Set[AOption[AList]] = l.map{
     case ANil => ANone
