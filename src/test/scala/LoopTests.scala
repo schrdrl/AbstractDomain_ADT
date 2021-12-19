@@ -34,9 +34,11 @@ class LoopTests extends AnyFunSuite {
         if (b.isNil(xs) == b.AUnknown) { //to ensure termination of the loop (case AUnknown)
           b_AUnknown = false
         }
-        xs = b.justAList(ys) //TODO get value AList out of b.AOption[b.AList]
-        println("(" + n + ")after xs: " + xs)
-        println("")
+        if(ys == b.ASome(xs)){
+          xs = b.justAList(ys) //TODO get value AList out of b.AOption[b.AList]
+          println("(" + n + ")after xs: " + xs)
+          println("")
+        }//TODO what to do if ys is ANone or AMaybe
         n += 1
       }
     }

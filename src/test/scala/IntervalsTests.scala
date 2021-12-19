@@ -185,4 +185,17 @@ class IntervalsTests extends AnyFunSuite {
     assert(a.intersect_Interval(f,g) == f) //[8,25]
   }
 
+  test("==="){
+    val a = Intervals.Unbounded
+    val b = a.Interval(IntegerVal(2), IntegerVal(4))
+    val c = a.Interval(IntegerVal(-1), IntegerVal(5))
+    val d = a.Interval(IntegerVal(2), IntegerVal(4))
+    val e = a.Interval(IntegerVal(5), IntegerVal(5))
+
+    assert(!a.===(b,c))
+    assert(a.===(b,b))
+    assert(a.===(b,d))
+    assert(!a.===(e,c))
+  }
+
 }

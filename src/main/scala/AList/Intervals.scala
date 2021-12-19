@@ -262,6 +262,11 @@ case class Intervals(mlb: IntegerW = IntegerNegInf, mub: IntegerW = IntegerInf) 
       }
     }
   }
+//added ===
+  def ===(i1: Interval, i2: Interval): Boolean = {
+   (i1.lb == i2.lb) && (i1.ub == i2.ub)
+  }
+
 }
 
 object Intervals {

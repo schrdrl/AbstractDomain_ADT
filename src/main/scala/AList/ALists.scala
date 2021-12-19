@@ -174,11 +174,68 @@ case class ALists(intervals: Intervals){
     case (ASome(a), AMaybe(b)) => AMaybe(intervals.Lattice.widen(a,b))
   }
 
+  //TODO recheck all
+  def &&(a : ABool, b: ABool) : ABool = (a,b) match {
+    case (AFalse, AFalse)| (ATrue, ATrue)  => ATrue
+    case (AFalse, ATrue) | (ATrue, AFalse)  => AFalse
+    case (AUnknown, AUnknown) => ATrue //TODO recheck AFalse or ATrue
+  }
+
+  def ===(a : ABool, b: ABool) : ABool = (a,b) match {
+    case (AFalse, AFalse)| (ATrue, ATrue) => ATrue
+    case (AFalse, ATrue) | (ATrue, AFalse)  => AFalse
+  }
+
+  def ===[AInt](a : AInt, b: AInt) : ABool =  {
+    if(a.equals(b)){
+      ATrue
+    }else{
+      AFalse
+    }
+  }
+
+  def ===[AList](l1 : AList, l2: AList) : ABool = (l1,l2) match {
+    case (ANil, ANil) => ATrue
+    case (ANil, ACons(_,_)) => AFalse
+    case (ANil, AMany(_)) => ATrue
+    case (ACons(a, as), ACons(b,bs)) => &&(===(a,b), ===(as,bs))
+    case (AMany(a), AMany(b)) => ===(a,b)
+    case (AMany(a), ACons(b,bs)) => &&(===(a,b), ===(l1,bs))
+    case (ACons(a,as), AMany(b)) => &&(===(a,b), ===(as,l2))
+  }
+
+  def ===[AOption[AInt]](ao1 : AOption[AInt], ao2: AOption[AInt]) : ABool = (ao1,ao2) match {
+    case (ANone, ANone) => ATrue
+    case (ANone, ASome(_)) => AFalse
+    case (ANone, AMaybe(_)) => ATrue
+    case (ASome(a), ASome(b)) => ===(a,b)
+    case (AMaybe(a), AMaybe(b)) =>  ===(a,b)
+    case (ASome(a), AMaybe(b))   =>  ===(a,b) //TODO  exclude ANone
+    case (AMaybe(a), ASome(b)) => ===(a,b)
+
+  }
+  def ===[AOption[AList]](ao1 : AOption[AList], ao2: AOption[AList]) : ABool = (ao1,ao2) match {
+    case (ANone, ANone) => ATrue
+    case (ANone, ASome(_)) => AFalse
+    case (ANone, AMaybe(_)) => ATrue
+    case (ASome(a), ASome(b)) => ===(a,b)
+    case (AMaybe(a), AMaybe(b)) =>  ===(a,b)
+    case (ASome(a), AMaybe(b))   =>  ===(a,b) //TODO  exclude ANone
+    case (AMaybe(a), ASome(b)) => ===(a,b)
+  }
+
+
+  def !==(ao1: ABool, ao2: ABool) : ABool = (ao1,ao2) match {
+    case (AFalse, AFalse) | (ATrue, ATrue) => AFalse
+    case (AFalse, ATrue) | (ATrue, AFalse) => ATrue
+  }
+
+
   //TODO Hilfsfunktion für Loops
   //TODO wie mit ANone umgehen?
   def justAList(ao: AOption[AList]) : AList = ao match {
     case ASome(e) => e
-    case AMaybe(e) | ANone => ??? //TODO Fail
+    case AMaybe(_) | ANone => ??? //TODO Fail
   }
 
 

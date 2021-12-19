@@ -17,11 +17,12 @@ case class ALists(intervals: Intervals) {
   sealed trait AOption[+A]
   case object ANone extends AOption[Nothing]
   case class ASome[A](get: A) extends AOption[A]
-  //case class AMaybe[A](get: A) extends AOption[A]
+  case class AMaybe[A](get: A) extends AOption[A]
 
   sealed trait ABool
   case object ATrue extends ABool
   case object AFalse extends ABool
+  case object AUnknown extends ABool
   //case object AUnknown extends ABool
 
 /**
@@ -37,21 +38,21 @@ case class ALists(intervals: Intervals) {
   def aHead (l: Set[AList]): Set[AOption[AInt]] = l.map{
     case ANil => ANone
     case ACons(h, _) => ASome(h)
-    //case AMany(e) => AMaybe(e) //AMany = ANil ≀ ACons(e, Many(e))
+    case AMany(e) => AMaybe(e) //TODO AMaybe
   }
 
   def aTail (l: Set[AList]): Set[AOption[AList]] = l.map{
     case ANil => ANone
     case ACons(_,t) => ASome(t)
-      //case AMany(e) => AMaybe(AMany(e))
+    case AMany(e) => AMaybe(AMany(e))
   }
 
-  def isNil(l: Set[AList]) : Set[Set[ABool]]= l.map{
-    case ANil => Set(ATrue)
-    case ACons(_, _)  => Set(AFalse)
-    //case AMany(_) => Set(AFalse, ATrue)
-
+  def isNil(l: Set[AList]) : Set[ABool]= l.map{
+    case ANil => ATrue
+    case ACons(_,_)  => AFalse
+    case AMany(_) => AUnknown
   }
+
 
 
 }
