@@ -8,113 +8,174 @@ class LoopTests extends AnyFunSuite {
    * ****************************************************** */
   test("Loop Abstract 1 (n = 0, ASome)") {
     /**
-     * int n
-     * list xs
+     * AInt n
+     * AList xs
      * while != isNil(xs){
      * xs = xs.tail
      * n++
      * }
      * assert isNil == xs
+     * assert [0;0] <= n
      */
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
 
     var xs: b.AList = b.ACons(c, b.ACons(c, b.ACons(c, b.ANil)))
-    var ys: b.AOption[b.AList] = b.ASome(xs)
-    var n = 0
+    var n = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
+    var counter = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
+    val x = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
 
-    println("befor loop: " + xs)
-    while (b.isNil(xs) != b.ATrue) {
-      var b_AUnknown = true
-      while (b.isNil(xs) != b.ATrue && b_AUnknown == true) {
-        println("(" + n + ")before xs: " + xs)
-        ys = b.aTail(xs)
-        println("(" + n + ")ys: " + ys)
-        if (b.isNil(xs) == b.AUnknown) { //to ensure termination of the loop (case AUnknown)
-          b_AUnknown = false
-        }
-        if(ys == b.ASome(xs)){
-          xs = b.justAList(ys) //TODO get value AList out of b.AOption[b.AList]
-          println("(" + n + ")after xs: " + xs)
-          println("")
-        }//TODO what to do if ys is ANone or AMaybe
-        n += 1
-      }
-    }
-    println("after loop: " + xs)
+
+    println("(1) before xs: " + xs)
+    var ys: b.AOption[b.AList] = b.aTail(xs)
+    xs = b.justAList(ys)
+    println("(1) ys: " + ys)
+    xs = b.justAList(ys)
+    println("(1) after xs: " + xs)
+    n = b.intervals.Lattice.widen(n, counter)
+    println("(1) n: " + n)
+    println("")
+
+    println("(2) before xs: " + xs)
+    ys = b.aTail(xs)
+    xs = b.justAList(ys)
+    println("(2) ys: " + ys)
+    xs = b.justAList(ys)
+    println("(2) after xs: " + xs)
+    counter = b.intervals.+(counter, b.intervals.Interval(IntegerVal(1), IntegerVal(1)))
+    n = b.intervals.Lattice.widen(n, counter)
+    println("(1) n: " + n)
+    println("")
+
+    println("(3) before xs: " + xs)
+    ys = b.aTail(xs)
+    xs = b.justAList(ys)
+    println("(3) ys: " + ys)
+    xs = b.justAList(ys)
+    println("(3) after xs: " + xs)
+    counter = b.intervals.+(counter, b.intervals.Interval(IntegerVal(1), IntegerVal(1)))
+    n = b.intervals.Lattice.widen(n, counter)
+    println("(1) n: " + n)
+    println("")
+
+    println("after loop xs: " + xs)
+    println("after loop n: " + n)
+    println("after loop i: " + counter)
+
     assert(xs == b.ANil)
-    assert(n >= 0)
+    assert(b.intervals.Lattice.<=(x,n))
   }
 
   test("Loop Abstract 1 (n = 0, AMaybe)") {
     /**
-     * int n
-     * list xs
+     * AInt n
+     * AList xs
      * while != isNil(xs){
      * xs = xs.tail
      * n++
      * }
+     * assert isNil == xs
+     * assert [0;0] <= n
      */
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
-    var b_AUnknown = true
+
     var xs: b.AList = b.AMany(c)
-    var ys: b.AOption[b.AList] = b.AMaybe(xs)
-    var n = 0
+    var n = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
+    var counter = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
+    val x = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
 
-    println("befor loop: " + xs)
+    println("(1) before xs: " + xs)
+    var ys: b.AOption[b.AList] = b.aTail(xs)
+    xs = b.justAList(ys)
+    println("(1) ys: " + ys)
+    xs = b.justAList(ys)  //TODO check AMaybe != ANone
+    println("(1) after xs: " + xs)
+    n = b.intervals.Lattice.widen(n, counter)
+    println("(1) n: " + n)
+    println("")
 
-    while (b.isNil(xs) != b.ATrue && b_AUnknown == true) {
-      println("(" + n + ")before xs: " + xs)
-      ys = b.aTail(xs)
-      println("(" + n + ")ys: " + ys)
-      if (b.isNil(xs) == b.AUnknown) { //to ensure termination of the loop (case AUnknown)
-        b_AUnknown = false
-      }
-      xs = b.justAList(ys) //TODO get value AList out of b.AOption[b.AList]
-      println("(" + n + ")after xs: " + xs)
-      println("")
-      n += 1
+    println("(2) before xs: " + xs)
+    ys = b.aTail(xs)
+    xs = b.justAList(ys)
+    println("(2) ys: " + ys)
+    xs = b.justAList(ys)  //TODO check AMaybe != ANone
+    println("(2) after xs: " + xs)
+    counter = b.intervals.+(counter, b.intervals.Interval(IntegerVal(1), IntegerVal(1)))
+    n = b.intervals.Lattice.widen(n, counter)
+    println("(1) n: " + n)
+    println("")
 
-    }
-    println("after loop: " + xs)
-    assert(n >= 0)
+    println("(3) before xs: " + xs)
+    ys = b.aTail(xs)
+    xs = b.justAList(ys)
+    println("(3) ys: " + ys)
+    xs = b.justAList(ys)  //TODO check AMaybe != ANone
+    println("(3) after xs: " + xs)
+    counter = b.intervals.+(counter, b.intervals.Interval(IntegerVal(1), IntegerVal(1)))
+    n = b.intervals.Lattice.widen(n, counter)
+    println("(1) n: " + n)
+    println("")
+
+    println("after loop xs: " + xs)
+    println("after loop n: " + n)
+    println("after loop i: " + counter)
+
+    assert(xs == b.ANil) //TODO: AMany([-1;5]) did not equal ANil -> Check whether AMany is ANil or ACons(e, AMany(e))
+    assert(b.intervals.Lattice.<=(x,n))
 
   }
 
+
   test("Append value(Abstract)") {
     /**
-     * int n
-     * xs <0>
+     * AInt i
+     * AList xs
      * while(*){
      * i++
      * xs = i::xs
      * }
+     *
+     *assert aHead(xs) == i
      */
-    var n = 0
+
     val a = Intervals.Unbounded
     val b = ALists(a)
-    var axs: b.AList = b.ANil
-    var i = b.intervals.Interval(IntegerVal(n), IntegerVal(n))
+    var xs: b.AList = b.ANil
+    var counter = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
 
-    while (n < 4) {
-      val i_head = b.intervals.Interval(IntegerVal(n), IntegerVal(n))
-      i = i_head
-      println("(" + n + ")axs before: " + axs)
-      n += 1
-      axs = b.ACons(i_head, axs)
-      println("(" + (n - 1) + ")axs: " + axs)
-      println("")
-    }
-    assert(b.aHead(axs) == b.ASome(i))
-    assert(b.aHead(axs) == b.ASome(i)) //TODO override ==
-    println(b.aHead(axs))
-    println(b.ASome(i))
+    println("(1) before xs: " + xs)
+    counter = b.intervals.+(counter, b.intervals.Interval(IntegerVal(1), IntegerVal(1)))
+    var i_head = b.intervals.Lattice.widen(counter, counter)
+    xs = b.ACons(i_head, xs)
+    println("(1) after xs: " + xs)
+    println("")
+
+    println("(2) before xs: " + xs)
+    var n = counter
+    counter = b.intervals.+(counter, b.intervals.Interval(IntegerVal(1), IntegerVal(1)))
+    i_head = b.intervals.Lattice.widen(n, counter)
+    xs = b.ACons(i_head, xs)
+    println("(2) after xs: " + xs)
+    println("")
+
+    println("(3) before xs: " + xs)
+    n = counter
+    counter = b.intervals.+(counter, b.intervals.Interval(IntegerVal(1), IntegerVal(1)))
+    i_head = b.intervals.Lattice.widen(n, counter)
+    xs = b.ACons(i_head, xs)
+    println("(3) after xs: " + xs)
+    println("")
+
+    assert(b.aHead(xs) == b.ASome(i_head))
+    println(b.aHead(xs))
+    println(b.ASome(i_head))
 
   }
 
+  //TODO
   /** *******************************************************************************
    * Tests: Loop Concrete                                                          *
    * Experiments to connect the concrete list and the abstract list in Testcases   *

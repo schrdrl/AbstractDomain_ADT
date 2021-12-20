@@ -237,10 +237,10 @@ case class ALists(intervals: Intervals){
 
 
   //TODO Hilfsfunktion für Loops
-  //TODO wie mit ANone umgehen?
+  //TODO wie mit ANone umgehen? -> Check vor Methoden-Aufruf
   def justAList(ao: AOption[AList]) : AList = ao match {
     case ASome(e) => e
-    case AMaybe(_) | ANone => ??? //TODO Fail
+    case AMaybe(e)  => e
   }
 
 

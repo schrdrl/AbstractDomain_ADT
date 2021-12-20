@@ -198,4 +198,16 @@ class IntervalsTests extends AnyFunSuite {
     assert(!a.===(e,c))
   }
 
+  test("<="){
+    val a = Intervals.Unbounded
+    val b = a.Interval(IntegerVal(2), IntegerVal(4))
+    val c = a.Interval(IntegerVal(-1), IntegerVal(5))
+    val d = a.Interval(IntegerVal(2), IntegerVal(2))
+    val e = a.Interval(IntegerVal(5), IntegerVal(5))
+
+    println(a.Lattice.<=(b,b))
+    println(a.Lattice.<=(b,c))
+    println(a.Lattice.<=(c,b))
+  }
+
 }
