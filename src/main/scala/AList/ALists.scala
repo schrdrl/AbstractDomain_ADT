@@ -40,7 +40,7 @@ case class ALists(intervals: Intervals){
   def aTail(l: AList): AOption[AList] = l match {
     case ANil => ANone
     case ACons(_,t) => ASome(t)
-    case AMany(e) => AMaybe(AMany(e))
+    case AMany(e) => AMaybe(l) //l instead of AMany(e)
   }
 
   //Method returns the length of aList object, which is of type AOption[AInt]
