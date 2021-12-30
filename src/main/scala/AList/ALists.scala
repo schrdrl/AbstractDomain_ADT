@@ -263,6 +263,56 @@ case class ALists(intervals: Intervals){
   }
 
 
+
+  //TODO recheck + Doku
+
+  case class AState(n:AInt, xs:AList)
+  //Abstraction: Statement
+  trait AStmt{
+    def execute(as: AState) : Set[AState] //TODO Parameter: Set[AState] or just AState
+  }
+
+
+  //Object of trait AStmt
+  object AssignN0 extends AStmt{
+    override def execute(as:AState): Set[AState]  = {
+        Set(AState(Interval(IntegerVal(0), IntegerVal(0)), as.xs))
+    }
+  }
+
+  object AssignN1 extends AStmt{
+    override def execute(as:AState): Set[AState]  = {
+      Set(AState(Interval(IntegerVal(1), IntegerVal(1)), as.xs))
+    }
+  }
+
+  case class Sequence(stmt1: AStmt, stmt2: AStmt){
+    def execute(as0: AState): Unit ={
+      for(as1 <- stmt1.execute(as0);
+          as2 <- stmt2.execute(as1))
+          yield as2
+    }
+  }
+
+  //Method splits a given AList into two sets (Empty AList, Non-Empty AList)
+  def ifIsNil(l:AList) : (Set[AList], Set[AList]) = l match {
+    case ANil => (Set(ANil), Set())
+    case ACons(h,t) => (Set(), Set(ACons(h,t)))
+    case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
+  }
+
+  //TODO recheck
+  //Abstracted if-else Implementation
+  case class IfxsIsNil(stmt1: AStmt, stmt2: AStmt){
+    def execute(as0: AState) = {
+      val (aStatesTrue, aStatesFalse) = ifIsNil(as0.xs)
+      val result1 = for(as1 <- aStatesTrue; as2 <- stmt1.execute(as0)) yield as2
+      val result2 = for(as1 <- aStatesFalse; as2 <- stmt2.execute(as0)) yield as2
+      result1.union(result2)
+    }
+  }
+
+
 }
 
 
