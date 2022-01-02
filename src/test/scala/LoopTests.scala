@@ -6,6 +6,54 @@ class LoopTests extends AnyFunSuite {
    * tests: Loop Abstract                                  *
    * Tests are just using the abstract type AList          *
    * ****************************************************** */
+
+  test("Concrete Example") {
+    /**
+     * int n
+     * List xs
+     * while(xs != Nil){
+     * n = n-1
+     * xs = xs.tail
+     * }
+     *
+     * assert n <= 0
+     * assert xs == nil
+     */
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
+
+    var xs: b.AList = b.ACons(c, b.ACons(c, b.ANil))
+    var n = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
+    val i = b.intervals.Interval(IntegerVal(1), IntegerVal(1))
+
+    //initial state
+    var state = b.AState(n, xs)
+   // val state2 = b.AState(i, b.justAList(b.aTail(xs)))
+
+
+    val stmt1 = b.AssignN0
+    val stmt2 = b.AssignN_Test1
+    val stmt3 = b.AssignN_Test2
+    //1. Iteration
+
+    val if1 = b.IfxsIsNil(stmt1,stmt2)  //stmt1, stmt2
+    val h = if1.execute(state)
+
+    println(h)
+
+    state = h.head
+
+    //2.Iteration
+    val if2 = b.IfxsIsNil(stmt3,stmt2)  //stmt1, stmt2
+    val j = if2.execute(state)
+
+    println(j)
+
+
+  }
+
+
   test("Loop Abstract 1 (n = 0, ASome)") {
     /**
      * AInt n
@@ -27,6 +75,7 @@ class LoopTests extends AnyFunSuite {
     val x = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
 
 
+    //1. Iteration
     println("(1) before xs: " + xs)
     var ys: b.AOption[b.AList] = b.aTail(xs)
     xs = b.justAList(ys)
@@ -37,6 +86,7 @@ class LoopTests extends AnyFunSuite {
     println("(1) n: " + n)
     println("")
 
+    //2. Iteration
     println("(2) before xs: " + xs)
     ys = b.aTail(xs)
     xs = b.justAList(ys)
@@ -48,6 +98,7 @@ class LoopTests extends AnyFunSuite {
     println("(1) n: " + n)
     println("")
 
+    //3. Iteration
     println("(3) before xs: " + xs)
     ys = b.aTail(xs)
     xs = b.justAList(ys)
@@ -64,8 +115,10 @@ class LoopTests extends AnyFunSuite {
     println("after loop i: " + counter)
 
     assert(xs == b.ANil)
+    println(b.isNil(xs))
     assert(b.intervals.Lattice.<=(x, n))
   }
+
 
   test("Loop Abstract 1 (n = 0, AMaybe)") {
     /**

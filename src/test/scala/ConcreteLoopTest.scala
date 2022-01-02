@@ -45,6 +45,7 @@ class ConcreteLoopTest extends AnyFunSuite{
     assert(axs == b.ACons(c, b.AMany(c)))
   }
 
+
   test("Loop Concrete 1 (ASome)") {
     /**
      * int n
@@ -89,6 +90,7 @@ class ConcreteLoopTest extends AnyFunSuite{
     assert(axs == b.ANil)
     assert(n >= 0)
   }
+
 
   test("Loop Concrete 1 (AMaybe)") {
     /**
