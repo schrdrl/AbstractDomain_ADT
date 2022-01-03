@@ -7,7 +7,7 @@ class LoopTests extends AnyFunSuite {
    * Tests are just using the abstract type AList          *
    * ****************************************************** */
 
-  test("Concrete Example") {
+  test("Concrete Example - ACons") {
     /**
      * int n
      * List xs
@@ -23,33 +23,133 @@ class LoopTests extends AnyFunSuite {
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
 
-    var xs: b.AList = b.ACons(c, b.ACons(c, b.ANil))
-    var n = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
-    val i = b.intervals.Interval(IntegerVal(1), IntegerVal(1))
+    val xs: b.AList = b.ACons(c, b.ACons(c, b.ACons(c, b.ANil)))
+    val n = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
 
     //initial state
     var state = b.AState(n, xs)
-   // val state2 = b.AState(i, b.justAList(b.aTail(xs)))
 
+    val stmt1 = b.AssignN_Same
+    val stmt2 = b.AssignN_Minus1_ATail
 
-    val stmt1 = b.AssignN0
-    val stmt2 = b.AssignN_Test1
-    val stmt3 = b.AssignN_Test2
     //1. Iteration
-
-    val if1 = b.IfxsIsNil(stmt1,stmt2)  //stmt1, stmt2
+    val if1 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
     val h = if1.execute(state)
-
     println(h)
-
     state = h.head
 
     //2.Iteration
-    val if2 = b.IfxsIsNil(stmt3,stmt2)  //stmt1, stmt2
+    val if2 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
     val j = if2.execute(state)
-
     println(j)
+    state = j.head
 
+    //3.Iteration
+    val if3 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
+    val k= if3.execute(state)
+    println(k)
+    state = k.head
+
+    assert(!b.intervals.Lattice.<=(n, state.n) || b.intervals.===(state.n, n))
+    assert(state.xs == b.ANil)
+
+  }
+
+  test("Concrete Example - ANil") {
+    /**
+     * int n
+     * List xs
+     * while(xs != Nil){
+     * n = n-1
+     * xs = xs.tail
+     * }
+     *
+     * assert n <= 0
+     * assert xs == nil
+     */
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
+
+    val xs: b.AList = b.ANil
+    val n = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
+
+    //initial state
+    var state = b.AState(n, xs)
+
+    val stmt1 = b.AssignN_Same
+    val stmt2 = b.AssignN_Minus1_ATail
+
+    //1. Iteration
+    val if1 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
+    val h = if1.execute(state)
+    println(h)
+    state = h.head
+
+    //2.Iteration
+    val if2 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
+    val j = if2.execute(state)
+    println(j)
+    state = j.head
+
+    //3.Iteration
+    val if3 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
+    val k= if3.execute(state)
+    println(k)
+    state = k.head
+
+    assert(!b.intervals.Lattice.<=(n, state.n) || b.intervals.===(state.n, n))
+    assert(state.xs == b.ANil)
+
+  }
+
+  //TODO
+  test("Concrete Example - AMany") {
+    /**
+     * int n
+     * List xs
+     * while(xs != Nil){
+     * n = n-1
+     * xs = xs.tail
+     * }
+     *
+     * assert n <= 0
+     * assert xs == nil
+     */
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
+
+    val xs: b.AList = b.AMany(c)
+    val n = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
+
+    //initial state
+    var state = b.AState(n, xs)
+
+    val stmt1 = b.AssignN_Same
+    val stmt2 = b.AssignN_Minus1_ATail
+
+    //1. Iteration
+    val if1 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
+    val h = if1.execute(state)
+    println(h)
+    var state1 =h[0]
+    var state2 = h[1]
+
+    //2.Iteration
+    val if2 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
+    val j = if2.execute(state)
+    println(j)
+    state = j.head
+
+    //3.Iteration
+    val if3 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
+    val k= if3.execute(state)
+    println(k)
+    state = k.head
+
+    assert(!b.intervals.Lattice.<=(n, state.n) || b.intervals.===(state.n, n))
+    assert(state.xs == b.ANil)
 
   }
 

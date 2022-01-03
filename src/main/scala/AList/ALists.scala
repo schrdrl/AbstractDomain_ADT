@@ -149,8 +149,6 @@ case class ALists(intervals: Intervals){
       if(intervals.intersect_Interval(a,b) != intervals.Interval(IntegerInf, IntegerNegInf)) ACons(intervals.intersect_Interval(a,b),intersect_AList(as, bs)) else ANil
   }
 
-  //TODO intersect_AOption[AInt]
-  //TODO intersect_AOption[AList]
 
   def intersect_ABool(ab1: ABool, ab2: ABool) : Set[ABool] = (ab1, ab2) match {
     case (AFalse,AFalse) => Set(AFalse)
@@ -172,9 +170,6 @@ case class ALists(intervals: Intervals){
     case (ACons(a,as), ACons(b, bs)) => intervals.contains_Interval(a,b) && subset_AList(as, bs)
   }
 
-  //TODO subset_Aoption[AInt]
-  //TODO subset_Aoption[AList]
-  //TODO subset_ABool
 
 
   //widen -> not symmetric
@@ -202,10 +197,8 @@ case class ALists(intervals: Intervals){
     case (ASome(a), AMaybe(b)) => AMaybe(intervals.Lattice.widen(a,b))
   }
 
-  //TODO widen_AOption[AList]
-  //TODO widen_ABool
 
-  //TODO recheck all
+
   def &&(a : ABool, b: ABool) : ABool = (a,b) match {
     case (AFalse, AFalse)| (ATrue, ATrue)  => ATrue
     case (AFalse, ATrue) | (ATrue, AFalse)  => AFalse
@@ -309,44 +302,84 @@ case class ALists(intervals: Intervals){
 
   //TODO recheck + Doku + own class
 
-  case class AState(n:AInt, xs:AList)   //e.g. while loop with n = 0, xs = AMany(e)
+  case class AState(n:AInt, xs:AList)
 
   //Abstraction: Statement
   trait AStmt{
-    def execute(as: AState) : Set[AState] //TODO Parameter: Set[AState] or just AState
+    def execute(as: Set[AState]) : Set[AState] //TODO Parameter: Set[AState] or just AState
   }
 
 
   //Object of trait AStmt
   object AssignN0 extends AStmt{  //initial, beginning of loop
-    override def execute(as:AState): Set[AState]  = {
-        Set(AState(Interval(IntegerVal(0), IntegerVal(0)), as.xs))
+    override def execute(as:Set[AState]): Set[AState]  = {
+     var result : Set[AState] = Set()
+      for (a <- as){
+        result += AState(Interval(IntegerVal(0), IntegerVal(0)), a.xs)
+      }
+      result
     }
   }
 
   object AssignN1 extends AStmt{
-    override def execute(as:AState): Set[AState]  = {
-      Set(AState(Interval(IntegerVal(1), IntegerVal(1)), as.xs))
+    override def execute(as:Set[AState]): Set[AState]  = {
+      var result : Set[AState] = Set()
+      for (a <- as){
+        result += AState(Interval(IntegerVal(1), IntegerVal(1)), a.xs)
+      }
+      result
     }
   }
 
-  //
-  object AssignN_Test1 extends AStmt{
-    override def execute(as:AState): Set[AState]  = {
-      Set(AState(intervals.-(as.n, Interval(IntegerVal(1), IntegerVal(1))), justAList(aTail(as.xs))))
-    }
-  }
-  object AssignN_Test2 extends AStmt{
-    override def execute(as:AState): Set[AState]  = {
-      Set(AState(as.n, as.xs))
+  //TODO assign any n to a state
+
+  object AssignN_Add1 extends AStmt{
+    override def execute(as:Set[AState]): Set[AState]  = {
+      var result : Set[AState] = Set()
+      for (a <- as){
+        result += AState(intervals.+(a.n, Interval(IntegerVal(1), IntegerVal(1))), a.xs)
+      }
+      result
     }
   }
 
-  case class Sequence(stmt1: AStmt, stmt2: AStmt){
-    def execute(as0: AState): Unit ={
-      for(as1 <- stmt1.execute(as0);
-          as2 <- stmt2.execute(as1))
-          yield as2
+  object AssignN_Minus1 extends AStmt{
+    override def execute(as:Set[AState]): Set[AState]  = {
+      var result : Set[AState] = Set()
+      for (a <- as){
+        result += AState(intervals.-(a.n, Interval(IntegerVal(1), IntegerVal(1))),  a.xs)
+      }
+      result
+    }
+  }
+
+  object AssignN_Minus1_ATail extends AStmt{
+    override def execute(as:Set[AState]): Set[AState]  = {
+      var result : Set[AState] = Set()
+      for (a <- as){
+        result += AState(intervals.-(a.n, Interval(IntegerVal(1), IntegerVal(1))), justAList(aTail(a.xs)))
+      }
+      result
+    }
+  }
+
+  object AssignN_Add1_ATail extends AStmt{
+    override def execute(as:Set[AState]): Set[AState]  = {
+      var result : Set[AState] = Set()
+      for (a <- as){
+        result += AState(intervals.+(a.n, Interval(IntegerVal(1), IntegerVal(1))),justAList(aTail(a.xs)))
+      }
+      result
+    }
+  }
+
+  object AssignN_Same extends AStmt{
+    override def execute(as:Set[AState]): Set[AState]  = {
+      var result : Set[AState] = Set()
+      for (a <- as){
+        result += (AState(a.n, a.xs))
+      }
+      result
     }
   }
 
@@ -357,14 +390,23 @@ case class ALists(intervals: Intervals){
     case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
   }
 
-  //TODO recheck
+
   //Abstracted if-else Implementation
-  case class IfxsIsNil(stmt1: AStmt, stmt2: AStmt){
-    def execute(as0: AState) = {
-      val (aStatesTrue, aStatesFalse) = ifIsNil(as0.xs)
-      val result1 = for(as1 <- aStatesTrue; as2 <- stmt1.execute(as0)) yield as2
-      val result2 = for(as1 <- aStatesFalse; as2 <- stmt2.execute(as0)) yield as2
+  case class IfElse_xsIsNil(stmt1: AStmt, stmt2: AStmt){
+    def execute(as:AState) = {
+      val (aStatesTrue, aStatesFalse) = ifIsNil(as.xs)
+      val result1 = for(as1 <- aStatesTrue; as2 <- stmt1.execute(Set(as))) yield as2
+      val result2 = for(as1 <- aStatesFalse; as2 <- stmt2.execute(Set(as))) yield as2
       result1.union(result2)
+    }
+  }
+
+  //Abstracted if Implementation
+  case class If_xsIsNil(stmt: AStmt){
+    def execute(as:AState) = {
+      val (aStatesTrue, aStatesFalse) = ifIsNil(as.xs)
+      val result = for(as1 <- aStatesTrue; as2 <- stmt.execute(Set(as))) yield as2
+      result
     }
   }
 
