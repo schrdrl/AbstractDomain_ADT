@@ -77,21 +77,21 @@ class AStateSequenceTests extends AnyFunSuite {
     val g = b.AssignN1 //AStmt
 
     val h = b.IfElse_xsIsNil(f,g)
-    val h1 = h.execute(e)
+    val h1 = h.execute(Set(e))
     println(h1)
 
     //with ACons
     val i = b.ACons(c, b.ANil)
     val j = b.AState(c,i) //AState
     val k = b.IfElse_xsIsNil(f,g)
-    val k1 = k.execute(j)
+    val k1 = k.execute(Set(j))
     println(k1)
 
     //with ANil
     val l = b.ANil
     val m = b.AState(c,l) //AState
     val n = b.IfElse_xsIsNil(f,g)
-    val n1 = n.execute(m)
+    val n1 = n.execute(Set(m))
     println(n1)
   }
 
