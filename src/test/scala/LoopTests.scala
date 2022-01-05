@@ -23,11 +23,12 @@ class LoopTests extends AnyFunSuite {
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
 
-    val xs: b.AList = b.ACons(c, b.ACons(c, b.ACons(c, b.ANil)))
+    val xs: b.AList = b.ACons(c, b.ACons(c, b.ACons(c, b.ANil))) //b.ACons(c, b.ACons(c, b.ANil))
     val n = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
 
     //initial state
     var state = Set(b.AState(n, xs))
+    println("Initial State: " +state)
 
     val stmt1 = b.AssignN_SameValues
     val stmt2 = b.AssignN_Minus1_ATail
@@ -35,24 +36,45 @@ class LoopTests extends AnyFunSuite {
     //1. Iteration
     val if1 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
     val h = if1.execute(state)
-    println(h)
-    state = h
+    println("after ifElse: " +h)
+
+    if(h.size > 1){
+      state = Set(b.AState(b.intervals.Lattice.widen(h.head.n, h.tail.head.n), b.widen_AList(h.head.xs, h.tail.head.xs)))
+      println("after widening: " +state)
+    }else{
+      state = h
+    }
+
 
     //2.Iteration
     val if2 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
     val j = if2.execute(state)
-    println(j)
-    state = j
+    println("after ifElse: " +j)
+
+    if(j.size > 1){
+      state = Set(b.AState(b.intervals.Lattice.widen(j.head.n, j.tail.head.n), b.widen_AList(j.head.xs, j.tail.head.xs)))
+      println("after widening: " +state)
+    }else{
+      state = j
+    }
 
     //3.Iteration
     val if3 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
     val k= if3.execute(state)
-    println(k)
-    state = k
+    println("after ifElse: " +k)
 
-    //TODO
-    //assert(!b.intervals.Lattice.<=(n, state.n) || b.intervals.===(state.n, n))
-    //assert(state.xs == b.ANil)
+    if(k.size > 1){
+      state = Set(b.AState(b.intervals.Lattice.widen(k.head.n, k.tail.head.n), b.widen_AList(k.head.xs, k.tail.head.xs)))
+      println("after widening: " +state)
+    }else{
+      state = k
+    }
+
+    //Translation between ABool and Boolean
+    val bool_values = b.isNil_ABool(state.head.xs)
+    assert((b.concretization_ABool(bool_values)).head == true)
+    if(bool_values.size > 1) assert( (b.concretization_ABool(bool_values)).tail.head == false)
+    assert(b.intervals.Lattice.<=(state.head.n, n))
 
   }
 
@@ -77,6 +99,7 @@ class LoopTests extends AnyFunSuite {
 
     //initial state
     var state = Set(b.AState(n, xs))
+    println("Initial State: " +state)
 
     val stmt1 = b.AssignN_SameValues
     val stmt2 = b.AssignN_Minus1_ATail
@@ -84,28 +107,47 @@ class LoopTests extends AnyFunSuite {
     //1. Iteration
     val if1 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
     val h = if1.execute(state)
-    println(h)
-    state = h
+    println("after ifElse: " +h)
+
+    if(h.size > 1){
+      state = Set(b.AState(b.intervals.Lattice.widen(h.head.n, h.tail.head.n), b.widen_AList(h.head.xs, h.tail.head.xs)))
+      println("after widening: " +state)
+    }else{
+      state = h
+    }
 
     //2.Iteration
     val if2 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
     val j = if2.execute(state)
-    println(j)
-    state = j
+    println("after ifElse: " +j)
+
+    if(j.size > 1){
+      state = Set(b.AState(b.intervals.Lattice.widen(j.head.n, j.tail.head.n), b.widen_AList(j.head.xs, j.tail.head.xs)))
+      println("after widening: " +state)
+    }else{
+      state = j
+    }
 
     //3.Iteration
     val if3 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
     val k= if3.execute(state)
-    println(k)
-    state = k
+    println("after ifElse: " +k)
 
-    //TODO
-    //assert(!b.intervals.Lattice.<=(n, state.n) || b.intervals.===(state.n, n))
-    //assert(state.xs == b.ANil)
+    if(k.size > 1){
+      state = Set(b.AState(b.intervals.Lattice.widen(k.head.n, k.tail.head.n), b.widen_AList(k.head.xs, k.tail.head.xs)))
+      println("after widening: " +state)
+    }else{
+      state = k
+    }
+
+    //Translation between ABool and Boolean
+    val bool_values = b.isNil_ABool(state.head.xs)
+    assert((b.concretization_ABool(bool_values)).head == true)
+    if(bool_values.size > 1) assert( (b.concretization_ABool(bool_values)).tail.head == false)
+    assert(b.intervals.Lattice.<=(state.head.n, n))
 
   }
 
-  //TODO
   test("Concrete Example - AMany") {
     /**
      * int n
@@ -127,6 +169,7 @@ class LoopTests extends AnyFunSuite {
 
     //initial state
     var state = Set(b.AState(n, xs))   //AState([0;0], AMany([-1;5]))
+    println("Initial State: " +state)
 
     //Statements of if-Sequence
     val stmt1 = b.AssignN_SameValues
@@ -135,27 +178,121 @@ class LoopTests extends AnyFunSuite {
     //1. Iteration
     val if1 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
     val h = if1.execute(state)  //returns a Set of successors
-    println(h)
-    state = h           //AState([0;0], ANil), AState([-1;-1],ACons([-1;5]), AMany([-1;5]))
+    println("after ifElse: " +h)
+
+    if(h.size > 1){
+      state = Set(b.AState(b.intervals.Lattice.widen(h.head.n, h.tail.head.n), b.widen_AList(h.head.xs, h.tail.head.xs)))
+      println("after widening: " +state)
+    }else{
+      state = h
+    }
 
     //2.Iteration
     val if2 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
     val j = if2.execute(state)
-    println(j)
-    state = j
+    println("after ifElse: " +j)
+
+    if(j.size > 1){
+      state = Set(b.AState(b.intervals.Lattice.widen(j.head.n, j.tail.head.n), b.widen_AList(j.head.xs, j.tail.head.xs)))
+      println("after widening: " +state)
+    }else{
+      state = j
+    }
 
     //3.Iteration
     val if3 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
     val k= if3.execute(state)
-    println(k)
-    state = k
+    println("after ifElse: " +k)
 
-    //TODO assertions
-   // assert(!b.intervals.Lattice.<=(n, state.n) || b.intervals.===(state.n, n))
-    //assert(state.xs == b.ANil)
+    if(k.size > 1){
+      state = Set(b.AState(b.intervals.Lattice.widen(k.head.n, k.tail.head.n), b.widen_AList(k.head.xs, k.tail.head.xs)))
+      println("after widening: " +state)
+    }else{
+      state = k
+    }
+    //Translation between ABool and Boolean
+    val bool_values = b.isNil_ABool(state.head.xs)
+    assert((b.concretization_ABool(bool_values)).head == true)
+    if(bool_values.size > 1) assert( (b.concretization_ABool(bool_values)).tail.head == false)
+    assert(b.intervals.Lattice.<=(state.head.n, n))
+
 
   }
 
+  test("Concrete Example - ACons(_,AMany)") {
+    /**
+     * int n
+     * List xs
+     * while(xs != Nil){
+     * n = n-1
+     * xs = xs.tail
+     * }
+     *
+     * assert n <= 0
+     * assert xs == nil
+     */
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
+
+    val xs: b.AList = b.ACons(c, b.AMany(c))
+    val n = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
+
+    //initial state
+    var state = Set(b.AState(n, xs))
+    println("Initial State: " +state)
+
+    val stmt1 = b.AssignN_SameValues
+    val stmt2 = b.AssignN_Minus1_ATail
+
+    //1. Iteration
+    val if1 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
+    val h = if1.execute(state)
+    println("after ifElse: " +h)
+
+    if(h.size > 1){
+      state = Set(b.AState(b.intervals.Lattice.widen(h.head.n, h.tail.head.n), b.widen_AList(h.head.xs, h.tail.head.xs)))
+      println("after widening: " +state)
+    }else{
+      state = h
+    }
+
+
+    //2.Iteration
+    val if2 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
+    val j = if2.execute(state)
+    println("after ifElse: " +j)
+
+    if(j.size > 1){
+      state = Set(b.AState(b.intervals.Lattice.widen(j.head.n, j.tail.head.n), b.widen_AList(j.head.xs, j.tail.head.xs)))
+      println("after widening: " +state)
+    }else{
+      state = j
+    }
+
+    //3.Iteration
+    val if3 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
+    val k= if3.execute(state)
+    println("after ifElse: " +k)
+
+    if(k.size > 1){
+      state = Set(b.AState(b.intervals.Lattice.widen(k.head.n, k.tail.head.n), b.widen_AList(k.head.xs, k.tail.head.xs)))
+      println("after widening: " +state)
+    }else{
+      state = k
+    }
+
+    //Translation between ABool and Boolean
+    val bool_values = b.isNil_ABool(state.head.xs)
+    assert((b.concretization_ABool(bool_values)).head == true)
+    if(bool_values.size > 1) assert( (b.concretization_ABool(bool_values)).tail.head == false)
+    assert(b.intervals.Lattice.<=(state.head.n, n))
+
+  }
+
+
+
+  //TODO still usefull?
 
   test("Loop Abstract 1 (n = 0, ASome)") {
     /**

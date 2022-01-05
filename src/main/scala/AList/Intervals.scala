@@ -140,8 +140,9 @@ case class Intervals(mlb: IntegerW = IntegerNegInf, mub: IntegerW = IntegerInf) 
   }
 
   implicit def Lattice: Lattice[Interval] = new Lattice[Interval] {
-    override def <=(i1: Interval, i2: Interval): Boolean =
-      IntegerW.<=(i2.lb, i1.lb) && IntegerW.<=(i1.ub, i2.ub)
+    override def <=(i1: Interval, i2: Interval): Boolean = {
+      IntegerW.<=(i1.lb, i2.lb) && IntegerW.<=(i1.ub, i2.ub) //TODO should be
+    }
 
     override def bot: Interval = Interval(mub, mlb)
 

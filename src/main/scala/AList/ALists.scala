@@ -1,5 +1,7 @@
 package AList
 
+import scala.collection.immutable.{AbstractSet, SortedSet}
+
 /**
  * AList is an abstract domain of numerical lists (belonging to algebraic data types)
  * It is described by an interval and has three types:
@@ -101,6 +103,19 @@ case class ALists(intervals: Intervals) {
     case (Some(_), ANone) => false
     case (Some(h1), ASome(h2)) => intervals.contains(h2, h1)
     case (Some(h1), AMaybe(h2)) => intervals.contains(h2, h1)
+  }
+ 
+  //TODO recheck
+   def isConcreteElementOf_ABool(b: Boolean, ab: ABool): Boolean = (b,ab) match {
+     case (true, ATrue) => true
+     case (false, AFalse) => true
+     case (false, ATrue) | (true , AFalse) => false
+   }
+  
+  //TODO recheck
+  def concretization_ABool(ab: Set[ABool]): Set[Boolean] = ab.map {
+    case ATrue => true
+    case AFalse => false
   }
 
   def union_AList(al1: AList, al2: AList): AList = (al1, al2) match {
@@ -207,17 +222,22 @@ case class ALists(intervals: Intervals) {
     case (ASome(a), AMaybe(b)) => AMaybe(intervals.Lattice.widen(a, b))
   }
 
+  //TODO recheck
+ //def widen_AStates(as: Set[AState]) : Set[AState]= {
+  // Set(AState(intervals.Lattice.widen(as1.n, as2.n), widen_AList(as1.xs, as2.xs)))
+ //}
+
 
   def &&(a: ABool, b: ABool): ABool = (a, b) match {
     case (AFalse, AFalse) | (ATrue, ATrue) => ATrue
     case (AFalse, ATrue) | (ATrue, AFalse) => AFalse
-    case (AUnknown, AUnknown) => ATrue //TODO recheck AFalse or ATrue
+    //case (AUnknown, AUnknown) => ATrue //TODO recheck AFalse or ATrue
   }
 
   def ===(a: ABool, b: ABool): ABool = (a, b) match {
     case (AFalse, AFalse) | (ATrue, ATrue) => ATrue
     case (AFalse, ATrue) | (ATrue, AFalse) => AFalse
-    case (AUnknown, ATrue) | (ATrue, AUnknown) | (AUnknown, AFalse) | (AFalse, AUnknown) => ATrue
+    case  (AUnknown, AFalse) | (AFalse, AUnknown) => ATrue
   }
 
   def ===[AInt](a: AInt, b: AInt): ABool = {
@@ -360,6 +380,7 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+  /* TODO Without widen, still useful??
   object AssignN_Minus1_ATail extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
@@ -369,6 +390,21 @@ case class ALists(intervals: Intervals) {
       result
     }
   }
+   */
+
+  object AssignN_Minus1_ATail extends AStmt {
+    override def execute(as: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (a <- as) {
+        val i1 = a.n
+        val i2 = intervals.-(a.n, Interval(IntegerVal(1), IntegerVal(1)))
+        result += AState(intervals.Lattice.widen(i1,i2), justAList(aTail(a.xs)))
+      }
+      result
+    }
+  }
+
+
 
   object AssignN_Add1_ATail extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
@@ -402,7 +438,11 @@ case class ALists(intervals: Intervals) {
     case ACons(h, t) => (Set(), Set(ACons(h, t)))
     case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
   }
-
+  def isNil_ABool(l: AList) : Set[ABool]= l match{
+    case ANil => Set(ATrue)
+    case ACons(_,_)  => Set(AFalse)
+    case AMany(_) => Set(ATrue,AFalse)
+  }
 
   //Abstracted if-else Implementation
   //TODO
