@@ -1,8 +1,10 @@
+package Experimenting
+
 import AList.{ALists, IntegerVal, Intervals}
 import org.scalatest.funsuite.AnyFunSuite
 
 class AStateSequenceTests extends AnyFunSuite {
-  test("AssignN0") {
+  test("AssignN - execute") {
 
     val a = Intervals.Unbounded
     val b = ALists(a)
@@ -10,10 +12,32 @@ class AStateSequenceTests extends AnyFunSuite {
     val d = b.AMany(c)
     val e = b.AState(c, d)
 
-    val f = b.AssignN0
+    val f = b.AssignN
     val g = f.execute(Set(e))
     println(g)
   }
+
+  test("AssignN - assignAnyN") {
+
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
+    val d = b.intervals.Interval(IntegerVal(8), IntegerVal(15))
+    val e = b.AMany(c)
+    val f = b.AState(c, e)
+
+    val g = b.AssignN
+    val h = g.assignAnyN(d, Set(f))
+    println(h)
+
+    val i = g.execute(Set(f))
+    println(i)
+
+    val j = g.assignAnyN(d, Set(f))
+    println(j)
+  }
+
+
 
 
   test("ifIsNil"){

@@ -10,78 +10,66 @@ import scala.collection.immutable.{AbstractSet, SortedSet}
  * -AMany(e): contains both types ANil and ACons
  */
 case class ALists(intervals: Intervals) {
-
   import intervals.Interval //import inner Class
-
   type AInt = Interval //alias
 
   sealed trait AList //"behaviour"
-
   case object ANil extends AList
-
   case class ACons(head: AInt, tail: AList) extends AList
-
   case class AMany(elem: AInt) extends AList
 
   sealed trait AOption[+A]
-
   case object ANone extends AOption[Nothing]
-
   case class ASome[A](get: A) extends AOption[A]
-
   case class AMaybe[A](get: A) extends AOption[A]
 
   sealed trait ABool
-
   case object ATrue extends ABool
-
   case object AFalse extends ABool
+  //case object AUnknown extends ABool
 
-  case object AUnknown extends ABool
+  /************************************************************
+   *                 Basic Functions over ALists              *
+   ************************************************************/
 
-
-  /*Method returns the head of aList object, which is of type AOption[AInt]
-  */
+  //returns the head of aList object, which is of type AOption[AInt]
   def aHead(l: AList): AOption[AInt] = l match {
     case ANil => ANone
     case ACons(h, _) => ASome(h)
     case AMany(e) => AMaybe(e) //AMany = ANil ≀ ACons(e, Many(e))
   }
 
-  /*Method returns the tail of aList object, which is of type AOption[AInt]
-*/
+  //returns the tail of aList object, which is of type AOption[AInt]
   def aTail(l: AList): AOption[AList] = l match {
     case ANil => ANone
     case ACons(_, t) => ASome(t)
-    case AMany(e) => AMaybe(l) //l instead of AMany(e)
+    case AMany(_) => AMaybe(l) //l instead of AMany(e)
   }
 
-  //Method returns the length of aList object, which is of type AOption[AInt]
-
+  //returns the length of aList object, which is of type AOption[AInt]
   def aLength(l: AList): AOption[AInt] = l match {
     case ANil => ANone
     case ACons(_, _) => ASome(Interval(IntegerVal(1), IntegerInf))
     case AMany(_) => ASome(Interval(IntegerVal(0), IntegerInf))
   }
 
-  // Method checks whether a given AList is Nil
-  def isNil(l: AList): ABool = l match {
-    case ANil => ATrue
-    case ACons(_, _) => AFalse
-    case AMany(_) => AUnknown
+  // checks whether a given AList is Nil
+  def isNil(l: AList): Set[ABool] = l match {
+    case ANil => Set(ATrue)
+    case ACons(_, _) => Set(AFalse)
+    case AMany(_) => Set(ATrue, AFalse)
   }
 
+  /************************************************************
+   *                   isConcreteElementOf                    *
+   ************************************************************/
 
-  /*Method checks whether an integer value is a concrete Element of an Interval.
-   *It takes two parameters, an integer and an interval of type AInt and returns a boolean
-   */
+  //checks whether an integer value is a concrete Element of an Interval.
   def isConcreteElementOf_Int(i: Int, ai: AInt): Boolean = {
     intervals.contains(ai, i)
   }
 
-  /*Method checks whether a list is a concrete Element of AList.
-   *It takes two parameters, a list with integer values and a abstract AList and returns a boolean
-   */
+  //checks whether a list is a concrete Element of AList.
   def isConcreteElementOf_List(l: List[Int], al: AList): Boolean = (l, al) match {
     case (Nil, ANil) => true
     case (Nil, ACons(_, _)) => false
@@ -92,11 +80,8 @@ case class ALists(intervals: Intervals) {
       isConcreteElementOf_Int(x, ax) && isConcreteElementOf_List(xs, al)
   }
 
-
-  /*Method checks whether an Option[Int] is a concrete Element of an interval AOption[AInt].
-   *It takes two parameters, an integer and an interval of type AInt and returns a boolean
-   */
-  def isConcreteElementOf_Option(o: Option[Int], ao: AOption[AInt]): Boolean = (o, ao) match {
+  //checks whether an Option[Int] is a concrete Element of an interval AOption[AInt].
+  def isConcreteElementOf_OptionInt(o: Option[Int], ao: AOption[AInt]): Boolean = (o, ao) match {
     case (None, ANone) => true
     case (None, ASome(_)) => false
     case (None, AMaybe(_)) => true
@@ -104,20 +89,30 @@ case class ALists(intervals: Intervals) {
     case (Some(h1), ASome(h2)) => intervals.contains(h2, h1)
     case (Some(h1), AMaybe(h2)) => intervals.contains(h2, h1)
   }
- 
-  //TODO recheck
-   def isConcreteElementOf_ABool(b: Boolean, ab: ABool): Boolean = (b,ab) match {
-     case (true, ATrue) => true
-     case (false, AFalse) => true
-     case (false, ATrue) | (true , AFalse) => false
-   }
-  
-  //TODO recheck
-  def concretization_ABool(ab: Set[ABool]): Set[Boolean] = ab.map {
-    case ATrue => true
-    case AFalse => false
+
+  //checks whether an Option[List[Int]] is a concrete Element of an interval AOption[AList].
+  def isConcreteElementOf_OptionList(o: Option[List[Int]], ao: AOption[AList]): Boolean = (o, ao) match {
+    case (None, ANone) => true
+    case (None, ASome(_)) => false
+    case (None, AMaybe(_)) => true
+    case (Some(_), ANone) => false
+    case (Some(h1), ASome(h2)) => isConcreteElementOf_List(h1, h2)
+    case (Some(h1), AMaybe(h2)) => isConcreteElementOf_List(h1, h2)
   }
 
+  //checks whether a Boolean value is a concrete Element of an ABool.
+  def isConcreteElementOf_ABool(b: Boolean, ab: ABool): Boolean = (b, ab) match {
+    case (true, ATrue) => true
+    case (false, AFalse) => true
+    case (false, ATrue) | (true, AFalse) => false
+  }
+
+
+  /************************************************************
+   *                Advanced Functions over ALists            *
+   ************************************************************/
+
+  //union of two ALists
   def union_AList(al1: AList, al2: AList): AList = (al1, al2) match {
     case (ANil, ANil) => ANil
     case (ANil, AMany(e)) => AMany(e)
@@ -130,6 +125,7 @@ case class ALists(intervals: Intervals) {
     case (ACons(a, as), ACons(b, bs)) => ACons(intervals.union_Interval(a, b), union_AList(as, bs))
   }
 
+  //union of two values of type AOption[AInt]
   def union_AOption_AInt(ao1: AOption[AInt], ao2: AOption[AInt]): AOption[AInt] = (ao1, ao2) match {
     case (ANone, ANone) => ANone
     case (ANone, AMaybe(e)) => AMaybe(e)
@@ -142,6 +138,7 @@ case class ALists(intervals: Intervals) {
     case (AMaybe(a), AMaybe(b)) => AMaybe(intervals.union_Interval(a, b))
   }
 
+  //union of two values of type AOption[AList]
   def union_AOption_AList(ao1: AOption[AList], ao2: AOption[AList]): AOption[AList] = (ao1, ao2) match {
     case (ANone, ANone) => ANone
     case (ANone, AMaybe(e)) => AMaybe(e)
@@ -154,13 +151,14 @@ case class ALists(intervals: Intervals) {
     case (AMaybe(a), AMaybe(b)) => AMaybe(union_AList(a, b))
   }
 
+  //union of two values of type ABool
   def union_ABool(ab1: ABool, ab2: ABool): Set[ABool] = (ab1, ab2) match {
     case (AFalse, AFalse) => Set(AFalse)
     case (ATrue, ATrue) => Set(ATrue)
     case (ATrue, AFalse) | (AFalse, ATrue) => Set(AFalse, ATrue)
   }
 
-
+  //intersection of two ALists
   def intersect_AList(al1: AList, al2: AList): AList = (al1, al2) match {
     case (ANil, ANil) => ANil
     case (ANil, AMany(_)) | (AMany(_), ANil) => ANil
@@ -175,15 +173,40 @@ case class ALists(intervals: Intervals) {
       if (intervals.intersect_Interval(a, b) != intervals.Interval(IntegerInf, IntegerNegInf)) ACons(intervals.intersect_Interval(a, b), intersect_AList(as, bs)) else ANil
   }
 
+  //intersection of two values of type AOption[AInt]  //TODO recheck
+  def intersect_AOption_AInt(ao1: AOption[AInt], ao2: AOption[AInt]): AOption[AInt] = (ao1, ao2) match {
+    case (ANone, ANone) => ANone
+    case (ANone, AMaybe(e)) => ANone
+    case (AMaybe(_), ANone) => ANone
+    case (ANone, ASome(_)) => ANone
+    case (ASome(_), ANone) => ANone
+    case (ASome(a), ASome(b)) => ASome(intervals.intersect_Interval(a, b))
+    case (ASome(a), AMaybe(b)) => ASome(intervals.intersect_Interval(a, b))
+    case (AMaybe(a), ASome(b)) => ASome(intervals.intersect_Interval(a, b))
+    case (AMaybe(a), AMaybe(b)) => AMaybe(intervals.intersect_Interval(a, b))
+  }
 
+  //intersection of two values of type AOption[AList]  //TODO recheck
+  def intersect_AOption_AList(ao1: AOption[AList], ao2: AOption[AList]): AOption[AList] = (ao1, ao2) match {
+    case (ANone, ANone) => ANone
+    case (ANone, AMaybe(e)) => ANone
+    case (AMaybe(_), ANone) => ANone
+    case (ANone, ASome(_)) => ANone
+    case (ASome(_), ANone) => ANone
+    case (ASome(a), ASome(b)) => ASome(intersect_AList(a, b))
+    case (ASome(a), AMaybe(b)) => ASome(intersect_AList(a, b))
+    case (AMaybe(a), ASome(b)) => ASome(intersect_AList(a, b))
+    case (AMaybe(a), AMaybe(b)) => AMaybe(intersect_AList(a, b))
+  }
+
+  //intersection of two values of type ABool
   def intersect_ABool(ab1: ABool, ab2: ABool): Set[ABool] = (ab1, ab2) match {
     case (AFalse, AFalse) => Set(AFalse)
     case (ATrue, ATrue) => Set(ATrue)
     case (ATrue, AFalse) | (AFalse, ATrue) => Set()
   }
 
-
-  //left AList is subset of right AList
+  //checks whether the left AList(first parameter) is a subset of the right AList(second parameter)
   def subset_AList(al1: AList, al2: AList): Boolean = (al1, al2) match {
     case (ANil, ANil) => true
     case (ANil, AMany(_)) => true
@@ -197,7 +220,7 @@ case class ALists(intervals: Intervals) {
   }
 
 
-  //widen -> not symmetric
+  //widening of two ALists (operation is not symmetric)
   def widen_AList(al1: AList, al2: AList): AList = (al1, al2) match {
     case (ANil, ANil) => ANil
     case (ANil, AMany(e)) => AMany(e)
@@ -210,7 +233,8 @@ case class ALists(intervals: Intervals) {
     case (ACons(a, as), ACons(b, bs)) => ACons(intervals.Lattice.widen(a, b), widen_AList(as, bs))
   }
 
-  def widen_AOption(ao1: AOption[AInt], ao2: AOption[AInt]): AOption[AInt] = (ao1, ao2) match {
+  //widening of two values of type AOption[AInt] (operation is not symmetric)
+  def widen_AOptionAInt(ao1: AOption[AInt], ao2: AOption[AInt]): AOption[AInt] = (ao1, ao2) match {
     case (ANone, ANone) => ANone
     case (ANone, ASome(e)) => AMaybe(e)
     case (ASome(e), ANone) => AMaybe(e)
@@ -222,25 +246,39 @@ case class ALists(intervals: Intervals) {
     case (ASome(a), AMaybe(b)) => AMaybe(intervals.Lattice.widen(a, b))
   }
 
-  //TODO recheck
- //def widen_AStates(as: Set[AState]) : Set[AState]= {
-  // Set(AState(intervals.Lattice.widen(as1.n, as2.n), widen_AList(as1.xs, as2.xs)))
- //}
+  //widening of two values of type AOption[AList] (operation is not symmetric) //TODO recheck
+  def widen_AOptionAList(ao1: AOption[AList], ao2: AOption[AList]): AOption[AList] = (ao1, ao2) match {
+    case (ANone, ANone) => ANone
+    case (ANone, ASome(e)) => AMaybe(e)
+    case (ASome(e), ANone) => AMaybe(e)
+    case (ANone, AMaybe(e)) => AMaybe(e)
+    case (AMaybe(e), ANone) => AMaybe(e)
+    case (AMaybe(a), AMaybe(b)) => AMaybe(widen_AList(a,b))
+    case (ASome(a), ASome(b)) => ASome(widen_AList(a,b))
+    case (AMaybe(a), ASome(b)) => AMaybe(widen_AList(a,b))
+    case (ASome(a), AMaybe(b)) => AMaybe(widen_AList(a,b))
+  }
 
+  /************************************************************
+   *                Operators (&&, ===, !==)                  *
+   ************************************************************/
 
   def &&(a: ABool, b: ABool): ABool = (a, b) match {
-    case (AFalse, AFalse) | (ATrue, ATrue) => ATrue
-    case (AFalse, ATrue) | (ATrue, AFalse) => AFalse
-    //case (AUnknown, AUnknown) => ATrue //TODO recheck AFalse or ATrue
+    case (ATrue, ATrue) => ATrue
+    case (AFalse, AFalse) | (AFalse, ATrue) | (ATrue, AFalse) => AFalse
+  }
+
+  def !==(ao1: ABool, ao2: ABool): ABool = (ao1, ao2) match {
+    case (AFalse, AFalse) | (ATrue, ATrue) => AFalse
+    case (AFalse, ATrue) | (ATrue, AFalse) => ATrue
   }
 
   def ===(a: ABool, b: ABool): ABool = (a, b) match {
     case (AFalse, AFalse) | (ATrue, ATrue) => ATrue
     case (AFalse, ATrue) | (ATrue, AFalse) => AFalse
-    case  (AUnknown, AFalse) | (AFalse, AUnknown) => ATrue
   }
 
-  def ===[AInt](a: AInt, b: AInt): ABool = {
+  def ===(a: AInt, b: AInt): ABool = {
     if (a.equals(b)) {
       ATrue
     } else {
@@ -248,56 +286,56 @@ case class ALists(intervals: Intervals) {
     }
   }
 
-  //TODO rename to ===
-  def equals_AList(l1: AList, l2: AList): ABool = (l1, l2) match {
+  def ===(l1: AList, l2: AList): ABool = (l1, l2) match {
     case (ANil, ANil) => ATrue
     case (ANil, ACons(_, _)) | (ACons(_, _), ANil) => AFalse
     case (ANil, AMany(_)) | (AMany(_), ANil) => ATrue
-    case (ACons(a, as), ACons(b, bs)) => &&(===(a, b), equals_AList(as, bs))
+    case (ACons(a, as), ACons(b, bs)) => &&(===(a, b), ===(as, bs))
     case (AMany(a), AMany(b)) => ===(a, b)
-    case (AMany(a), ACons(b, bs)) => &&(===(a, b), equals_AList(l1, bs))
-    case (ACons(a, as), AMany(b)) => &&(===(a, b), equals_AList(as, l2))
+    case (AMany(a), ACons(b, bs)) => &&(===(a, b), ===(l1, bs))
+    case (ACons(a, as), AMany(b)) => &&(===(a, b), ===(as, l2))
   }
 
-  //TODO rename to ===
-  def equals_AOption_AInt(ao1: AOption[AInt], ao2: AOption[AInt]): ABool = (ao1, ao2) match {
+  def ===(ao1: AOption[AInt], ao2: AOption[AInt]): ABool = (ao1, ao2) match {
     case (ANone, ANone) => ATrue
     case (ANone, ASome(_)) | (ASome(_), ANone) => AFalse
     case (ANone, AMaybe(_)) | (AMaybe(_), ANone) => ATrue
     case (ASome(a), ASome(b)) => ===(a, b)
     case (AMaybe(a), AMaybe(b)) => ===(a, b)
-    case (ASome(a), AMaybe(b)) => ===(a, b) //TODO  exclude ANone
-    case (AMaybe(a), ASome(b)) => ===(a, b) //TODO  exclude ANone
-
+    case (ASome(a), AMaybe(b)) => ===(a, b)
+    case (AMaybe(a), ASome(b)) => ===(a, b)
   }
 
-  //TODO rename to ===
-  def equals_AOption_AList(ao1: AOption[AList], ao2: AOption[AList]): ABool = (ao1, ao2) match {
+  def ===(a1: AOption[AList], a2: AOption[AList]) (implicit d: DummyImplicit): ABool = (a1, a2) match {
     case (ANone, ANone) => ATrue
     case (ANone, ASome(_)) | (ASome(_), ANone) => AFalse
     case (ANone, AMaybe(_)) | (AMaybe(_), ANone) => ATrue
-    case (ASome(a), ASome(b)) => equals_AList(a, b)
-    case (AMaybe(a), AMaybe(b)) => equals_AList(a, b)
-    case (ASome(a), AMaybe(b)) => equals_AList(a, b) //TODO  exclude ANone
-    case (AMaybe(a), ASome(b)) => equals_AList(a, b) //TODO  exclude ANone
+    case (ASome(a), ASome(b)) => ===(a, b)
+    case (AMaybe(a), AMaybe(b)) => ===(a, b)
+    case (ASome(a), AMaybe(b)) => ===(a, b)
+    case (AMaybe(a), ASome(b)) => ===(a, b)
   }
 
 
-  def !==(ao1: ABool, ao2: ABool): ABool = (ao1, ao2) match {
-    case (AFalse, AFalse) | (ATrue, ATrue) => AFalse
-    case (AFalse, ATrue) | (ATrue, AFalse) => ATrue
-  }
+  /************************************************************
+   *             Methods:   AOption[T] -> T                  *
+   ************************************************************/
 
-  //TODO ABool -> Bool Translator
-
-
-  //TODO Hilfsfunktion für Loops
-  //TODO wie mit ANone umgehen? -> Check vor Methoden-Aufruf
+  //TODO Exception-Handling: If Input is accidentely ANone or AMaybe
+  //Pattern Matching is done with case class Sequence (e.g. IfElse_xsIsNil)
   def justAList(ao: AOption[AList]): AList = ao match {
     case ASome(e) => e
-    case AMaybe(e) => e
+    case _ => ???
   }
 
+  def justAInt(ao: AOption[AInt]): AInt = ao match{
+    case ASome(e) => e
+    case _ => ???
+  }
+
+  /************************************************************
+   *                       Lattice                            *
+   ************************************************************/
 
   implicit def Lattice: Lattice[AList] = new Lattice[AList] {
 
@@ -312,32 +350,20 @@ case class ALists(intervals: Intervals) {
     override def <=(a1: AList, a2: AList): Boolean = subset_AList(a1: AList, a2: AList)
 
     override def widen(a1: AList, a2: AList, bound: Int): AList = widen_AList(a1: AList, a2: AList)
-
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-  //TODO recheck + Doku + own class
-
+  /************************************************************
+   *                      AState, AStmt                       *
+   ************************************************************/
+  //Represents a state(AInt, AList). Is used by objects of AStmt and in Sets for Sequences
   case class AState(n: AInt, xs: AList)
 
-  //Abstraction: Statement
+  //Representation of a Statement. Is used by Sequences, e.g. IfElse_xsIsNil(stmt1,stmt2)
   trait AStmt {
     def execute(as: Set[AState]): Set[AState] //TODO Parameter: Set[AState] or just AState
   }
 
-
-  //Object of trait AStmt
+  //Statements assigns interval [0;0] to a Set of AStates -> initialState
   object AssignN0 extends AStmt { //initial, beginning of loop
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
@@ -348,6 +374,7 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+  //Statements assigns interval [1;1] to a Set of AStates -> initialState
   object AssignN1 extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
@@ -358,8 +385,30 @@ case class ALists(intervals: Intervals) {
     }
   }
 
-  //TODO assign any n to a state
+  /** object of AStmt.
+   * Method execute assigns interval [0;0] to a Set of AStates -> initialState
+   * Method assignAnyN assigns any interval n to a Set of AStates
+   */
+  object AssignN extends AStmt {
+    override def execute(as: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (a <- as) {
+        result += AState(Interval(IntegerVal(0), IntegerVal(0)), a.xs)
+      }
+      result
+    }
 
+    def assignAnyN(i: AInt, as: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (a <- as) {
+        result += AState(i, a.xs)
+      }
+      result
+    }
+  }
+
+
+//TODO recheck from here
   object AssignN_Add1 extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
@@ -380,6 +429,9 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+
+
+
   /* TODO Without widen, still useful??
   object AssignN_Minus1_ATail extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
@@ -392,18 +444,23 @@ case class ALists(intervals: Intervals) {
   }
    */
 
+  //TODO other object Assign.... add widen -Operation
+  //TODO recheck
   object AssignN_Minus1_ATail extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
       for (a <- as) {
         val i1 = a.n
         val i2 = intervals.-(a.n, Interval(IntegerVal(1), IntegerVal(1)))
-        result += AState(intervals.Lattice.widen(i1,i2), justAList(aTail(a.xs)))
+
+        val l1 = a.xs
+        val l2 = justAList(aTail(a.xs))
+        //result += AState(intervals.Lattice.widen(i1, i2), justAList(aTail(a.xs)))
+        result += AState(intervals.Lattice.widen(i1, i2), widen_AList(l1,l2))
       }
       result
     }
   }
-
 
 
   object AssignN_Add1_ATail extends AStmt {
@@ -426,11 +483,18 @@ case class ALists(intervals: Intervals) {
     }
   }
 
-//TODO recheck
+  //TODO recheck
   def AssignN_SameIntervalToAList(as: AState, al: AList) = {
     AState(as.n, al)
   }
 
+
+
+
+
+  /************************************************************
+   *                     Sequences                            *
+   ************************************************************/
 
   //Method splits a given AList into two sets (Empty AList, Non-Empty AList)
   def ifIsNil(l: AList): (Set[AList], Set[AList]) = l match {
@@ -438,17 +502,11 @@ case class ALists(intervals: Intervals) {
     case ACons(h, t) => (Set(), Set(ACons(h, t)))
     case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
   }
-  def isNil_ABool(l: AList) : Set[ABool]= l match{
-    case ANil => Set(ATrue)
-    case ACons(_,_)  => Set(AFalse)
-    case AMany(_) => Set(ATrue,AFalse)
-  }
 
-  //Abstracted if-else Implementation
-  //TODO
+  //stmt1 will be exectued if xs of the given AState is nil, otherwise stmt2 will be executed
   case class IfElse_xsIsNil(stmt1: AStmt, stmt2: AStmt) {
     def execute(as: Set[AState]): Set[AState] = {
-      var (aStatesTrue, aStatesFalse): (Set[AList], Set[AList]) = (Set(), Set()) //ifIsNil(as.xs)  //TODO for all inputs AState execute this line
+      var (aStatesTrue, aStatesFalse): (Set[AList], Set[AList]) = (Set(), Set())
       var result: Set[AState] = Set()
       for (a <- as) {
         val (b, c) = ifIsNil(a.xs)
@@ -456,9 +514,6 @@ case class ALists(intervals: Intervals) {
         if (b != Nil) aStatesTrue = aStatesTrue.union(b)
         if (c != Nil) aStatesFalse = aStatesFalse.union(c)
 
-        //}
-        //TODO aus AList in den Sets aStatesTrue/False -> AStates machen
-        //
         var d: Set[AState] = Set() //isNil -> aStatesTrue
         for (e <- b) d = d ++ Set(AssignN_SameIntervalToAList(a, e))
 
@@ -474,14 +529,25 @@ case class ALists(intervals: Intervals) {
     }
   }
 
-  //TODO example + recheck
-  //Abstracted if Implementation
+//The AStmt will be exectued if xs of the given AState is nil
   case class If_xsIsNil(stmt: AStmt) {
     def execute(as: AState) = {
       val (aStatesTrue, aStatesFalse) = ifIsNil(as.xs)
       val result = for (as1 <- aStatesTrue; as2 <- stmt.execute(Set(as))) yield as2
       result
     }
+  }
+
+
+
+  /************************************************************
+   *                     Concretization                        *
+   ************************************************************/
+
+  //Method concretizes the abstract type ABool into concrete values of Boolean
+  def concretization_ABool(ab: Set[ABool]): Set[Boolean] = ab.map {
+    case ATrue => true
+    case AFalse => false
   }
 
 

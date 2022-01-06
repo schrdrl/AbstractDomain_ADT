@@ -1,3 +1,5 @@
+package Experimenting
+
 import AList.{IntegerVal, Intervals}
 import AList_Set._
 import org.scalatest.funsuite.AnyFunSuite

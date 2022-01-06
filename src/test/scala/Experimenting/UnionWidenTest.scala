@@ -1,3 +1,5 @@
+package Experimenting
+
 import AList._
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -244,10 +246,10 @@ class UnionWidenTest extends AnyFunSuite {
     val f = b.ASome(c)
     val g = b.AMaybe(d)
 
-    assert(b.widen_AOption(e,e) == e) //returns: ANone
-    assert(b.widen_AOption(e,f) == b.AMaybe(c)) //returns: AMaybe([-1;3])
-    assert(b.widen_AOption(e,g) == g) //returns: AMaybe([5;8])
-    assert(b.widen_AOption(g,e) == g) //returns: AMaybe([5;8])
+    assert(b.widen_AOptionAInt(e,e) == e) //returns: ANone
+    assert(b.widen_AOptionAInt(e,f) == b.AMaybe(c)) //returns: AMaybe([-1;3])
+    assert(b.widen_AOptionAInt(e,g) == g) //returns: AMaybe([5;8])
+    assert(b.widen_AOptionAInt(g,e) == g) //returns: AMaybe([5;8])
   }
 
   test("widen with ASome"){
@@ -261,11 +263,11 @@ class UnionWidenTest extends AnyFunSuite {
     val g = b.AMaybe(d)
     val h = b.ASome(e)
 
-    assert(b.widen_AOption(f,f) == f) //returns: ASome([-1;3])
-    assert(b.widen_AOption(g,f) == b.AMaybe(b.intervals.Interval(IntegerNegInf, IntegerVal(8)))) //returns: AMaybe([-∞;8])
-    assert(b.widen_AOption(f,g) == b.AMaybe(b.intervals.Interval(IntegerVal(-1), IntegerInf))) //returns: AMaybe([-1;∞])
-    assert(b.widen_AOption(f,g) != b.widen_AOption(g,f))
-    assert(b.widen_AOption(f,h) == b.ASome(b.intervals.Interval(IntegerVal(-1), IntegerInf))) //returns: ASome([-1;∞])
+    assert(b.widen_AOptionAInt(f,f) == f) //returns: ASome([-1;3])
+    assert(b.widen_AOptionAInt(g,f) == b.AMaybe(b.intervals.Interval(IntegerNegInf, IntegerVal(8)))) //returns: AMaybe([-∞;8])
+    assert(b.widen_AOptionAInt(f,g) == b.AMaybe(b.intervals.Interval(IntegerVal(-1), IntegerInf))) //returns: AMaybe([-1;∞])
+    assert(b.widen_AOptionAInt(f,g) != b.widen_AOptionAInt(g,f))
+    assert(b.widen_AOptionAInt(f,h) == b.ASome(b.intervals.Interval(IntegerVal(-1), IntegerInf))) //returns: ASome([-1;∞])
   }
 
   test("widen with AMaybe"){
@@ -283,11 +285,11 @@ class UnionWidenTest extends AnyFunSuite {
     val j = b.intervals.Interval(IntegerNegInf, IntegerVal(8))
     val k = b.intervals.Interval(IntegerNegInf, IntegerVal(12))
 
-    assert(b.widen_AOption(f,f) == f) //AMaybe([-1;3])
-    assert(b.widen_AOption(g,f) == b.AMaybe(j)) //AMaybe([-∞;8])
-    assert(b.widen_AOption(f,g) == b.AMaybe(i)) //AMaybe([-1;∞])
-    assert(b.widen_AOption(f,h) == b.AMaybe(i)) //AMaybe([-1;∞])
-    assert(b.widen_AOption(h,f) == b.AMaybe(k)) //AMaybe([-∞;12])
+    assert(b.widen_AOptionAInt(f,f) == f) //AMaybe([-1;3])
+    assert(b.widen_AOptionAInt(g,f) == b.AMaybe(j)) //AMaybe([-∞;8])
+    assert(b.widen_AOptionAInt(f,g) == b.AMaybe(i)) //AMaybe([-1;∞])
+    assert(b.widen_AOptionAInt(f,h) == b.AMaybe(i)) //AMaybe([-1;∞])
+    assert(b.widen_AOptionAInt(h,f) == b.AMaybe(k)) //AMaybe([-∞;12])
   }
 
 }

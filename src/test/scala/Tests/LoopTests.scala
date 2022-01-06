@@ -1,3 +1,5 @@
+package Tests
+
 import AList.{ALists, IntegerVal, Intervals}
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -71,7 +73,7 @@ class LoopTests extends AnyFunSuite {
     }
 
     //Translation between ABool and Boolean
-    val bool_values = b.isNil_ABool(state.head.xs)
+    val bool_values = b.isNil(state.head.xs)
     assert((b.concretization_ABool(bool_values)).head == true)
     if(bool_values.size > 1) assert( (b.concretization_ABool(bool_values)).tail.head == false)
     assert(b.intervals.Lattice.<=(state.head.n, n))
@@ -141,7 +143,7 @@ class LoopTests extends AnyFunSuite {
     }
 
     //Translation between ABool and Boolean
-    val bool_values = b.isNil_ABool(state.head.xs)
+    val bool_values = b.isNil(state.head.xs)
     assert((b.concretization_ABool(bool_values)).head == true)
     if(bool_values.size > 1) assert( (b.concretization_ABool(bool_values)).tail.head == false)
     assert(b.intervals.Lattice.<=(state.head.n, n))
@@ -211,7 +213,7 @@ class LoopTests extends AnyFunSuite {
       state = k
     }
     //Translation between ABool and Boolean
-    val bool_values = b.isNil_ABool(state.head.xs)
+    val bool_values = b.isNil(state.head.xs)
     assert((b.concretization_ABool(bool_values)).head == true)
     if(bool_values.size > 1) assert( (b.concretization_ABool(bool_values)).tail.head == false)
     assert(b.intervals.Lattice.<=(state.head.n, n))
@@ -283,7 +285,7 @@ class LoopTests extends AnyFunSuite {
     }
 
     //Translation between ABool and Boolean
-    val bool_values = b.isNil_ABool(state.head.xs)
+    val bool_values = b.isNil(state.head.xs)
     assert((b.concretization_ABool(bool_values)).head == true)
     if(bool_values.size > 1) assert( (b.concretization_ABool(bool_values)).tail.head == false)
     assert(b.intervals.Lattice.<=(state.head.n, n))

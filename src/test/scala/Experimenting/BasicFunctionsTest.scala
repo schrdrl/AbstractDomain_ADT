@@ -1,3 +1,5 @@
+package Experimenting
+
 
 import AList._
 import org.scalatest.funsuite.AnyFunSuite
@@ -250,27 +252,27 @@ class BasicFunctionsTest extends AnyFunSuite {
   test("None is concrete element of ANone"){
     val a = Intervals.Unbounded
     val b = ALists(a)
-    assert(b.isConcreteElementOf_Option(None, b.ANone))
+    assert(b.isConcreteElementOf_OptionList(None, b.ANone))
   }
 
   test("None is not concrete element of ASome"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
-    assert(!b.isConcreteElementOf_Option(None, b.ASome(c)))
+    assert(!b.isConcreteElementOf_OptionInt(None, b.ASome(c)))
   }
 
   test("None is concrete element of AMaybe"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
-    println(b.isConcreteElementOf_Option(None, b.AMaybe(c)))
+    println(b.isConcreteElementOf_OptionInt(None, b.AMaybe(c)))
   }
 
   test("Some is not concrete element of ANone"){
     val a = Intervals.Unbounded
     val b = ALists(a)
-    assert(!b.isConcreteElementOf_Option(Some(1), b.ANone))
+    assert(!b.isConcreteElementOf_OptionInt(Some(1), b.ANone))
   }
 
   test("Some is concrete element of ASome"){
@@ -283,8 +285,8 @@ class BasicFunctionsTest extends AnyFunSuite {
     val e = b.ASome(c)
     val f = b.ASome(d)
 
-    assert(b.isConcreteElementOf_Option(Some(1), e))
-    assert(!b.isConcreteElementOf_Option(Some(1), f))
+    assert(b.isConcreteElementOf_OptionInt(Some(1), e))
+    assert(!b.isConcreteElementOf_OptionInt(Some(1), f))
   }
 
   test("Some is concrete Element of AMaybe"){
@@ -297,8 +299,8 @@ class BasicFunctionsTest extends AnyFunSuite {
     val e = b.AMaybe(c)
     val f = b.AMaybe(d)
 
-    assert(b.isConcreteElementOf_Option(Some(1), e))
-    assert(!b.isConcreteElementOf_Option(Some(1), f))
+    assert(b.isConcreteElementOf_OptionInt(Some(1), e))
+    assert(!b.isConcreteElementOf_OptionInt(Some(1), f))
   }
 
 

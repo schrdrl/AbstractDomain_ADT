@@ -1,3 +1,5 @@
+package Experimenting
+
 import AList.{ALists, IntegerVal, Intervals}
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -8,14 +10,11 @@ class EqualityTests extends AnyFunSuite {
     val b = ALists(a)
     val c: b.ABool = b.ATrue
     val d = b.AFalse
-    val e = b.AUnknown
 
     println(b.!==(c, c))
+    println(b.!==(d, d))
     println(b.===(c, c))
     println(b.===(c, d))
-    println(b.===(c, e))
-    println(b.!==(c, e))
-    println(b.===(d, e))
   }
 
   test("=== on AInt") {
@@ -43,14 +42,14 @@ class EqualityTests extends AnyFunSuite {
     val i = b.ACons(c, b.AMany(c))
     val j = b.ACons(d, b.AMany(c))
 
-    println(b.equals_AList(e, b.ANil))
-    println(b.equals_AList(e, f))
-    println(b.equals_AList(f, g))
-    println(b.equals_AList(f, h))
-    println(b.equals_AList(e, h))
-    println(b.equals_AList(f, i))
-    println(b.equals_AList(f, j))
-    println(b.equals_AList(j, g))
+    println(b.===(e, b.ANil))
+    println(b.===(e, f))
+    println(b.===(f, g))
+    println(b.===(f, h))
+    println(b.===(e, h))
+    println(b.===(f, i))
+    println(b.===(f, j))
+    println(b.===(j, g))
   }
 
   test("=== on AOption[AInt]") {
@@ -64,11 +63,11 @@ class EqualityTests extends AnyFunSuite {
     val g = b.AMaybe(c)
     val h = b.AMaybe(d)
 
-    println(b.equals_AOption_AInt(e,b.ANone))
-    println(b.equals_AOption_AInt(e,f))
-    println(b.equals_AOption_AInt(g,f))
-    println(b.equals_AOption_AInt(e,g))
-    println(b.equals_AOption_AInt(g,h))
+    println(b.===(e,b.ANone : b.AOption[b.AInt])) //Otherwise: double definition (ANone, ANone) for AOption[AInt] and AOption[AList]
+    println(b.===(e,f))
+    println(b.===(g,f))
+    println(b.===(e,g))
+    println(b.===(g,h))
   }
 
   test("=== on AOption[AList]") {
@@ -88,18 +87,17 @@ class EqualityTests extends AnyFunSuite {
     val l = b.ASome(e)
     val m = b.AMaybe(e)
 
-    println(b.equals_AOption_AList(k,l))
-    println(b.equals_AOption_AList(k,m))
-    println(b.equals_AOption_AList(m,l))
+    println(b.===(k,l))
+    println(b.===(k,m))
+    println(b.===(m,l))
 
     val n = b.AMaybe(f)
     val o = b.AMaybe(h)
     val p = b.ASome(f)
     val q = b.ASome(h)
-    println(b.equals_AOption_AList(n,o))
-    println(b.equals_AOption_AList(q,p))
+    println(b.===(n,o))
+    println(b.===(q,p))
 
-    //todo more tests
 
   }
 
