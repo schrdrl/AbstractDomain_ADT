@@ -253,4 +253,70 @@ class SubsetIntersectTests extends AnyFunSuite {
     assert(b.intersect_AList(g,m) == b.ANil)
   }
 
+  test("Intersection AOption[AInt]"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
+    val d = b.intervals.Interval(IntegerVal(5), IntegerVal(8))
+
+    val e = b.ANone
+    val f = b.ASome(c)
+    val g = b.AMaybe(c)
+    val h = b.ASome(d)
+    val i = b.AMaybe(d)
+
+    println(b.intersect_AOption_AInt(f,f))
+    println(b.intersect_AOption_AInt(e,f)) //None, ASome
+    println(b.intersect_AOption_AInt(e,g))  //None, AMaybe
+    println(b.intersect_AOption_AInt(f,g)) //ASome, AMaybe
+    println(b.intersect_AOption_AInt(h,f))  //ASome, ASome
+    println(b.intersect_AOption_AInt(g,i)) //AMaybe, AMaybe
+    println("")
+
+    val j = b.intervals.Interval(IntegerVal(0), IntegerVal(6))
+    val k = b.ASome(j)
+    val l = b.AMaybe(j)
+
+    println(b.intersect_AOption_AInt(k,l))
+    println(b.intersect_AOption_AInt(f,l))
+    println(b.intersect_AOption_AInt(f,k))
+    println(b.intersect_AOption_AInt(i,l))
+    println(b.intersect_AOption_AInt(i,k))
+  }
+
+  test("Intersection AOption[AList]"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
+    val d = b.intervals.Interval(IntegerVal(5), IntegerVal(8))
+
+    val e = b.ANone
+    val f = b.ASome(b.ANil)
+    val g = b.AMaybe(b.ANil)
+    val h = b.ASome(b.AMany(c))
+    val i = b.AMaybe(b.AMany(c))
+    val j = b.ASome(b.AMany(d))
+    val k = b.AMaybe(b.AMany(d))
+
+    val l = b.ASome(b.ACons(c, b.ANil))
+    val m = b.AMaybe(b.ACons(c, b.AMany(c)))
+    val n = b.AMaybe(b.ACons(c, b.AMany(d)))
+    val o = b.ASome(b.ACons(c, b.ACons(c, b.ANil)))
+    val p = b.AMaybe(b.ACons(c, b.ACons(d, b.ANil)))
+
+    println(b.intersect_AOption_AList(e,f)) //ANone, ASome(ANil)
+    println(b.intersect_AOption_AList(e,g)) //ANone, AMaybe(ANil)
+    println(b.intersect_AOption_AList(f,h)) //ASome(ANil), ASome(AMany)
+    println(b.intersect_AOption_AList(h,i)) //ASome(AMany), AMaybe(AMany)
+    println("")
+
+    println(b.intersect_AOption_AList(l,m)) //ASome(ACons), AMaybe(ACons)
+    println(b.intersect_AOption_AList(m,n)) //AMaybe(ACons), AMaybe(ACons)
+    println(b.intersect_AOption_AList(m,o)) //AMaybe(ACons), ASome(ACons)
+    println(b.intersect_AOption_AList(o,p)) //ASome(ACons), AMaybe(ACons)
+    println(b.intersect_AOption_AList(i,p)) //AMaybe(AMany), AMaybe(ACons)
+
+  }
+
+
 }

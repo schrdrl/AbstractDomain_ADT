@@ -72,14 +72,14 @@ class AStateSequenceTests extends AnyFunSuite {
     val f = b.AState(c, d)
     val g = b.AState(c, e)
 
-    val h = b.AssignN_Add1
+    val h = b.Add1
     val h1 = h.execute(Set(f))
     val h2 = h.execute(Set(f,g))
 
     println(h1)
     println(h2)
 
-    val i = b.AssignN_Minus1
+    val i = b.Subtract1
     val i1 = i.execute(Set(f))
     val i2 = i.execute(Set(f,g))
 

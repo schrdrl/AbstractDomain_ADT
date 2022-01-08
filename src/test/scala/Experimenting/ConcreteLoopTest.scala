@@ -10,7 +10,7 @@ class ConcreteLoopTest extends AnyFunSuite {
    * when a translator between concrete and abstract lists is implemented
    */
 
-  //TODO: Method that translates concrete List into an abstracted AList-value
+  //TODO refactor Tests
   /** *******************************************************************************
    * Tests: Loop Concrete                                                          *
    * Experiments to connect the concrete list and the abstract list in Testcases   *
@@ -75,10 +75,10 @@ class ConcreteLoopTest extends AnyFunSuite {
         xs = xs.tail
 
         ys = b.aTail(axs)
-        //if (b.isNil(axs) == b.AUnknown) { //TODO no AUnknown , now ATrue, AFalse
+        //if (b.isNil(axs) == b.AUnknown) {
         b_AUnknown = false
      // }
-      axs = b.justAList(ys) //TODO get value AList out of b.AOption[b.AList]
+      axs = b.justAList(ys)
 
       println("(" + n + ")after xs: " + xs)
       println("(" + n + ")after axs: " + axs)
@@ -146,8 +146,6 @@ class ConcreteLoopTest extends AnyFunSuite {
      * xs = i::xs
      * }
      */
-
-    //TODO
   }
 
 }

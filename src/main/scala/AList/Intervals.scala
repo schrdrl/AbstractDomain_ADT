@@ -28,6 +28,13 @@ case object IntegerNegInf extends IntegerW {    //Negative Infinite
 object IntegerW {
   implicit def intToIntegerW(i: Int): IntegerW = IntegerVal(i)
 
+//added integerWToInt
+  def integerWToInt(i: IntegerW): Int = i match {
+    case IntegerVal(e) => e
+    case IntegerInf =>  Double.PositiveInfinity.toInt
+    case IntegerNegInf => Double.NegativeInfinity.toInt
+  }
+
   def <=(iw1: IntegerW, iw2: IntegerW): Boolean = (iw1, iw2) match {
     case (IntegerNegInf, _) => true
     case (_, IntegerInf) => true
@@ -140,8 +147,8 @@ case class Intervals(mlb: IntegerW = IntegerNegInf, mub: IntegerW = IntegerInf) 
   }
 
   implicit def Lattice: Lattice[Interval] = new Lattice[Interval] {
-    override def <=(i1: Interval, i2: Interval): Boolean = {
-      IntegerW.<=(i1.lb, i2.lb) && IntegerW.<=(i1.ub, i2.ub) //TODO should be
+    override def <=(i1: Interval, i2: Interval): Boolean = {  //Subset
+      IntegerW.<=(i2.lb, i1.lb) && IntegerW.<=(i1.ub, i2.ub)
     }
 
     override def bot: Interval = Interval(mub, mlb)
@@ -231,6 +238,11 @@ case class Intervals(mlb: IntegerW = IntegerNegInf, mub: IntegerW = IntegerInf) 
   def %(i1: Interval, i2: Interval): Interval = {
     require(IntegerW.<(IntegerVal(0), i2.lb))
     makeInterval(IntegerVal(0), i2.ub)
+  }
+
+  //added <=
+  def <=(i1: Interval, i2: Interval): Boolean = {
+    IntegerW.<=(i1.lb, i2.lb) && IntegerW.<=(i1.ub, i2.ub)
   }
 
 

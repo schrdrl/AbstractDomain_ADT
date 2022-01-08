@@ -173,20 +173,20 @@ case class ALists(intervals: Intervals) {
       if (intervals.intersect_Interval(a, b) != intervals.Interval(IntegerInf, IntegerNegInf)) ACons(intervals.intersect_Interval(a, b), intersect_AList(as, bs)) else ANil
   }
 
-  //intersection of two values of type AOption[AInt]  //TODO recheck
+  //intersection of two values of type AOption[AInt]
   def intersect_AOption_AInt(ao1: AOption[AInt], ao2: AOption[AInt]): AOption[AInt] = (ao1, ao2) match {
     case (ANone, ANone) => ANone
     case (ANone, AMaybe(e)) => ANone
     case (AMaybe(_), ANone) => ANone
     case (ANone, ASome(_)) => ANone
     case (ASome(_), ANone) => ANone
-    case (ASome(a), ASome(b)) => ASome(intervals.intersect_Interval(a, b))
-    case (ASome(a), AMaybe(b)) => ASome(intervals.intersect_Interval(a, b))
-    case (AMaybe(a), ASome(b)) => ASome(intervals.intersect_Interval(a, b))
-    case (AMaybe(a), AMaybe(b)) => AMaybe(intervals.intersect_Interval(a, b))
+    case (ASome(a), ASome(b)) => if (intervals.intersect_Interval(a, b) != intervals.Interval(IntegerInf, IntegerNegInf)) ASome(intervals.intersect_Interval(a, b)) else ANone
+    case (ASome(a), AMaybe(b)) => if (intervals.intersect_Interval(a, b) != intervals.Interval(IntegerInf, IntegerNegInf)) ASome(intervals.intersect_Interval(a, b)) else ANone
+    case (AMaybe(a), ASome(b)) => if (intervals.intersect_Interval(a, b) != intervals.Interval(IntegerInf, IntegerNegInf)) ASome(intervals.intersect_Interval(a, b)) else ANone
+    case (AMaybe(a), AMaybe(b)) => if (intervals.intersect_Interval(a, b) != intervals.Interval(IntegerInf, IntegerNegInf)) AMaybe(intervals.intersect_Interval(a, b)) else ANone
   }
 
-  //intersection of two values of type AOption[AList]  //TODO recheck
+  //intersection of two values of type AOption[AList]
   def intersect_AOption_AList(ao1: AOption[AList], ao2: AOption[AList]): AOption[AList] = (ao1, ao2) match {
     case (ANone, ANone) => ANone
     case (ANone, AMaybe(e)) => ANone
@@ -246,7 +246,7 @@ case class ALists(intervals: Intervals) {
     case (ASome(a), AMaybe(b)) => AMaybe(intervals.Lattice.widen(a, b))
   }
 
-  //widening of two values of type AOption[AList] (operation is not symmetric) //TODO recheck
+  //widening of two values of type AOption[AList] (operation is not symmetric)
   def widen_AOptionAList(ao1: AOption[AList], ao2: AOption[AList]): AOption[AList] = (ao1, ao2) match {
     case (ANone, ANone) => ANone
     case (ANone, ASome(e)) => AMaybe(e)
@@ -360,7 +360,7 @@ case class ALists(intervals: Intervals) {
 
   //Representation of a Statement. Is used by Sequences, e.g. IfElse_xsIsNil(stmt1,stmt2)
   trait AStmt {
-    def execute(as: Set[AState]): Set[AState] //TODO Parameter: Set[AState] or just AState
+    def execute(as: Set[AState]): Set[AState]
   }
 
   //Statements assigns interval [0;0] to a Set of AStates -> initialState
@@ -374,7 +374,7 @@ case class ALists(intervals: Intervals) {
     }
   }
 
-  //Statements assigns interval [1;1] to a Set of AStates -> initialState
+  //Statements assigns a interval [1;1] to a Set of AStates -> initialState
   object AssignN1 extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
@@ -385,31 +385,8 @@ case class ALists(intervals: Intervals) {
     }
   }
 
-  /** object of AStmt.
-   * Method execute assigns interval [0;0] to a Set of AStates -> initialState
-   * Method assignAnyN assigns any interval n to a Set of AStates
-   */
-  object AssignN extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        result += AState(Interval(IntegerVal(0), IntegerVal(0)), a.xs)
-      }
-      result
-    }
-
-    def assignAnyN(i: AInt, as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        result += AState(i, a.xs)
-      }
-      result
-    }
-  }
-
-
-//TODO recheck from here
-  object AssignN_Add1 extends AStmt {
+  //Statements adds interval [1;1] to a Set of AStates
+  object Add1 extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
       for (a <- as) {
@@ -419,7 +396,8 @@ case class ALists(intervals: Intervals) {
     }
   }
 
-  object AssignN_Minus1 extends AStmt {
+  //Statements subtracts a interval [1;1] off a Set of AStates
+  object Subtract1 extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
       for (a <- as) {
@@ -429,10 +407,6 @@ case class ALists(intervals: Intervals) {
     }
   }
 
-
-
-
-  /* TODO Without widen, still useful??
   object AssignN_Minus1_ATail extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
@@ -442,26 +416,6 @@ case class ALists(intervals: Intervals) {
       result
     }
   }
-   */
-
-  //TODO other object Assign.... add widen -Operation
-  //TODO recheck
-  object AssignN_Minus1_ATail extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        val i1 = a.n
-        val i2 = intervals.-(a.n, Interval(IntegerVal(1), IntegerVal(1)))
-
-        val l1 = a.xs
-        val l2 = justAList(aTail(a.xs))
-        //result += AState(intervals.Lattice.widen(i1, i2), justAList(aTail(a.xs)))
-        result += AState(intervals.Lattice.widen(i1, i2), widen_AList(l1,l2))
-      }
-      result
-    }
-  }
-
 
   object AssignN_Add1_ATail extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
@@ -483,18 +437,98 @@ case class ALists(intervals: Intervals) {
     }
   }
 
-  //TODO recheck
-  def AssignN_SameIntervalToAList(as: AState, al: AList) = {
-    AState(as.n, al)
+  /** object of AStmt.
+   * Method execute assigns interval [0;0] to a Set of AStates -> initialState
+   * Method assignAnyN assigns any interval n to a Set of AStates
+   */
+  object AssignN extends AStmt {
+    override def execute(as: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (a <- as) {
+        result += AState(Interval(IntegerVal(0), IntegerVal(0)), a.xs)
+      }
+      result
+    }
+
+    def assignAnyN(n: AInt, as: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (a <- as) {
+        result += AState(n, a.xs)
+      }
+      result
+    }
+  }
+
+  /** object of AStmt.
+   * Method execute subtracts the interval [1;1] to a Set of AStates
+   * Method addAnyN subtracts any interval n off a Set of AStates
+   */
+  object SubtractAnyN extends AStmt {
+    override def execute(as: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (a <- as) {
+        result += AState(intervals.-(a.n, Interval(IntegerVal(1), IntegerVal(1))), a.xs)
+      }
+      result
+    }
+
+    def subtractAnyN(n: AInt, as: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (a <- as) {
+        result += AState(intervals.-(a.n, n), a.xs)
+      }
+      result
+    }
+
+    def subtractAnyN_aTail(n: AInt, as: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (a <- as) {
+        result += AState(intervals.-(a.n, n), justAList(aTail(a.xs)))
+      }
+      result
+    }
   }
 
 
+  /** object of AStmt.
+   * Method execute adds the interval [1;1] to a Set of AStates
+   * Method addAnyN adds any interval n to a Set of AStates
+   */
+  object AddAnyN extends AStmt {
+    override def execute(as: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (a <- as) {
+        result += AState(intervals.+(a.n, Interval(IntegerVal(1), IntegerVal(1))), a.xs)
+      }
+      result
+    }
 
+    def addAnyN(n: AInt, as: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (a <- as) {
+        result += AState(intervals.+(a.n, n), a.xs)
+      }
+      result
+    }
+
+    def addAnyN_aTail(n: AInt, as: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (a <- as) {
+        result += AState(intervals.+(a.n, n), justAList(aTail(a.xs)))
+      }
+      result
+    }
+  }
 
 
   /************************************************************
    *                     Sequences                            *
    ************************************************************/
+
+  //Method is used to create an AState of a given list and an already existing AState -> IfElse_xsIsNil
+  def AssignN_SameIntervalToAList(as: AState, al: AList) = {
+    AState(as.n, al)
+  }
 
   //Method splits a given AList into two sets (Empty AList, Non-Empty AList)
   def ifIsNil(l: AList): (Set[AList], Set[AList]) = l match {
@@ -529,9 +563,10 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+
 //The AStmt will be exectued if xs of the given AState is nil
   case class If_xsIsNil(stmt: AStmt) {
-    def execute(as: AState) = {
+    def execute(as: AState): Set[AState] = {
       val (aStatesTrue, aStatesFalse) = ifIsNil(as.xs)
       val result = for (as1 <- aStatesTrue; as2 <- stmt.execute(Set(as))) yield as2
       result
@@ -549,6 +584,7 @@ case class ALists(intervals: Intervals) {
     case ATrue => true
     case AFalse => false
   }
+
 
 
 }

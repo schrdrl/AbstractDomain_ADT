@@ -114,7 +114,6 @@ class UnionWidenTest extends AnyFunSuite {
      *    i++
      * }
      */
-
     val a = Intervals.Unbounded
     val b = ALists(a)
     var i = 0 //initial
@@ -290,6 +289,40 @@ class UnionWidenTest extends AnyFunSuite {
     assert(b.widen_AOptionAInt(f,g) == b.AMaybe(i)) //AMaybe([-1;∞])
     assert(b.widen_AOptionAInt(f,h) == b.AMaybe(i)) //AMaybe([-1;∞])
     assert(b.widen_AOptionAInt(h,f) == b.AMaybe(k)) //AMaybe([-∞;12])
+  }
+
+  test("widen AOption[AList]"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
+    val d = b.intervals.Interval(IntegerVal(5), IntegerVal(8))
+
+    val e = b.ANone
+    val f = b.ASome(b.ANil)
+    val g = b.AMaybe(b.ANil)
+    val h = b.ASome(b.AMany(c))
+    val i = b.AMaybe(b.AMany(c))
+    val j = b.ASome(b.AMany(d))
+    val k = b.AMaybe(b.AMany(d))
+
+    val l = b.ASome(b.ACons(c, b.ANil))
+    val m = b.AMaybe(b.ACons(c, b.AMany(c)))
+    val n = b.AMaybe(b.ACons(c, b.AMany(d)))
+    val o = b.ASome(b.ACons(c, b.ACons(c, b.ANil)))
+    val p = b.AMaybe(b.ACons(c, b.ACons(d, b.ANil)))
+
+    println(b.widen_AOptionAList(e,f)) //ANone, ASome(ANil)
+    println(b.widen_AOptionAList(e,g)) //ANone, AMaybe(ANil)
+    println(b.widen_AOptionAList(f,h)) //ASome(ANil), ASome(AMany)
+    println(b.widen_AOptionAList(h,i)) //ASome(AMany), AMaybe(AMany)
+    println(b.widen_AOptionAList(h,k)) //ASome(AMany), AMaybe(AMany)
+    println("")
+
+    println(b.widen_AOptionAList(l,m)) //ASome(ACons), AMaybe(ACons)
+    println(b.widen_AOptionAList(m,n)) //AMaybe(ACons), AMaybe(ACons)
+    println(b.widen_AOptionAList(m,o)) //AMaybe(ACons), ASome(ACons)
+    println(b.widen_AOptionAList(o,p)) //ASome(ACons), AMaybe(ACons)
+    println(b.widen_AOptionAList(i,p)) //AMaybe(AMany), AMaybe(ACons)
   }
 
 }
