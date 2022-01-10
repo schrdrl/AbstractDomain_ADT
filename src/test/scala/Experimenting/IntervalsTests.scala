@@ -1,5 +1,6 @@
 package Experimenting
 
+import AList.IntegerW.integerWToInt
 import AList.{IntegerInf, IntegerNegInf, IntegerVal, Intervals}
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -210,6 +211,20 @@ class IntervalsTests extends AnyFunSuite {
     println(a.Lattice.<=(b,b))
     println(a.Lattice.<=(b,c))
     println(a.Lattice.<=(c,b))
+  }
+
+  test("IntegerWToInt"){
+    val a = Intervals.Unbounded
+    val b = a.Interval(IntegerVal(2), IntegerVal(4))
+    val c = a.Interval(IntegerNegInf, IntegerVal(5))
+    val d = a.Interval(IntegerVal(-1), IntegerInf)
+
+    println(integerWToInt(d.lb))
+    println(integerWToInt(d.ub))
+    println(integerWToInt(c.lb))
+
+
+
   }
 
 }

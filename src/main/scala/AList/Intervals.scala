@@ -28,7 +28,7 @@ case object IntegerNegInf extends IntegerW {    //Negative Infinite
 object IntegerW {
   implicit def intToIntegerW(i: Int): IntegerW = IntegerVal(i)
 
-//added integerWToInt
+//added integerWToInt(!overflow)
   def integerWToInt(i: IntegerW): Int = i match {
     case IntegerVal(e) => e
     case IntegerInf =>  Double.PositiveInfinity.toInt

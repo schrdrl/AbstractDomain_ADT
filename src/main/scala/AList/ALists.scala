@@ -407,7 +407,7 @@ case class ALists(intervals: Intervals) {
     }
   }
 
-  object AssignN_Minus1_ATail extends AStmt {
+  object Subtract1_ATail extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
       for (a <- as) {
@@ -417,7 +417,7 @@ case class ALists(intervals: Intervals) {
     }
   }
 
-  object AssignN_Add1_ATail extends AStmt {
+  object Add1_ATail extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
       for (a <- as) {
@@ -427,7 +427,7 @@ case class ALists(intervals: Intervals) {
     }
   }
 
-  object AssignN_SameValues extends AStmt {
+  object Assign_SameValues extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
       for (a <- as) {

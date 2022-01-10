@@ -32,8 +32,8 @@ class LoopTests extends AnyFunSuite {
     var state = Set(b.AState(n, xs))
     println("Initial State: " +state)
 
-    val stmt1 = b.AssignN_SameValues
-    val stmt2 = b.AssignN_Minus1_ATail
+    val stmt1 = b.Assign_SameValues
+    val stmt2 = b.Subtract1_ATail
 
     //1. Iteration
     val if1 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
@@ -103,8 +103,8 @@ class LoopTests extends AnyFunSuite {
     var state = Set(b.AState(n, xs))
     println("Initial State: " +state)
 
-    val stmt1 = b.AssignN_SameValues
-    val stmt2 = b.AssignN_Minus1_ATail
+    val stmt1 = b.Assign_SameValues
+    val stmt2 = b.Subtract1_ATail
 
     //1. Iteration
     val if1 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
@@ -174,8 +174,8 @@ class LoopTests extends AnyFunSuite {
     println("Initial State: " +state)
 
     //Statements of if-Sequence
-    val stmt1 = b.AssignN_SameValues
-    val stmt2 = b.AssignN_Minus1_ATail
+    val stmt1 = b.Assign_SameValues
+    val stmt2 = b.Subtract1_ATail
 
     //1. Iteration
     val if1 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
@@ -244,8 +244,8 @@ class LoopTests extends AnyFunSuite {
     var state = Set(b.AState(n, xs))
     println("Initial State: " +state)
 
-    val stmt1 = b.AssignN_SameValues
-    val stmt2 = b.AssignN_Minus1_ATail
+    val stmt1 = b.Assign_SameValues
+    val stmt2 = b.Subtract1_ATail
 
     //1. Iteration
     val if1 = b.IfElse_xsIsNil(stmt1,stmt2)  //stmt1, stmt2
