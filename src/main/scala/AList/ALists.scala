@@ -1,6 +1,6 @@
 package AList
 
-import scala.collection.immutable.{AbstractSet, SortedSet}
+import Console.{GREEN, RED, RESET}
 
 /**
  * AList is an abstract domain of numerical lists (belonging to algebraic data types)
@@ -321,16 +321,18 @@ case class ALists(intervals: Intervals) {
    *             Methods:   AOption[T] -> T                  *
    ************************************************************/
 
-  //TODO Exception-Handling: If Input is accidentely ANone or AMaybe
+
   //Pattern Matching is done with case class Sequence (e.g. IfElse_xsIsNil)
   def justAList(ao: AOption[AList]): AList = ao match {
     case ASome(e) => e
-    case _ => ???
+    case ANone => throw new Exception("Exception thrown from justAList. Reason: Input was ANone")
+    case AMaybe(_) => throw new Exception("Exception thrown from justAList. Reason: Input was AMaybe")
   }
 
   def justAInt(ao: AOption[AInt]): AInt = ao match{
     case ASome(e) => e
-    case _ => ???
+    case ANone => throw new Exception("Exception thrown from justAInt. Reason: Input was ANone")
+    case AMaybe(_) => throw new Exception("Exception thrown from justAInt. Reason: Input was AMaybe")
   }
 
   /************************************************************
@@ -537,31 +539,24 @@ case class ALists(intervals: Intervals) {
     case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
   }
 
+
+
   //stmt1 will be exectued if xs of the given AState is nil, otherwise stmt2 will be executed
-  case class IfElse_xsIsNil(stmt1: AStmt, stmt2: AStmt) {
-    def execute(as: Set[AState]): Set[AState] = {
-      var (aStatesTrue, aStatesFalse): (Set[AList], Set[AList]) = (Set(), Set())
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        val (b, c) = ifIsNil(a.xs)
+  case class IfElse_xsIsNil(stmt1: AStmt, stmt2: AStmt) extends AStmt {
+      def execute(as: Set[AState]): Set[AState] = {
+        var result: Set[AState] = Set()
+        for (a <- as) {
+          val (isNil, isNotNil) = ifIsNil(a.xs)
 
-        if (b != Nil) aStatesTrue = aStatesTrue.union(b)
-        if (c != Nil) aStatesFalse = aStatesFalse.union(c)
+          val aStatesTrue: Set[AState] = isNil.map(AssignN_SameIntervalToAList(a,_))
+          val aStatesFalse: Set[AState] = isNotNil.map(AssignN_SameIntervalToAList(a,_)) //isNotNil -> aStatesFalse
 
-        var d: Set[AState] = Set() //isNil -> aStatesTrue
-        for (e <- b) d = d ++ Set(AssignN_SameIntervalToAList(a, e))
-
-        var f: Set[AState] = Set() //isNotNil -> aStatesFalse
-        for (g <- c) f = f ++ Set(AssignN_SameIntervalToAList(a, g))
-
-        val result1 = for (as1 <- d; as2 <- stmt1.execute(Set(as1))) yield as2
-        val result2 = for (as1 <- f; as2 <- stmt2.execute(Set(as1))) yield as2
-
-        result = result ++ result1.concat(result2)
+          result =  stmt1.execute(aStatesTrue) ++ stmt2.execute(aStatesFalse)
+        }
+        result
       }
-      result
     }
-  }
+
 
 
 //The AStmt will be exectued if xs of the given AState is nil
@@ -573,10 +568,156 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+  /************************************************************
+   *                          ATest                           *
+   ************************************************************/
 
+  //Trait ATest represents the two states a Test (e.g. xsIsNil) can have
+  trait ATest{
+    def positive(states: Set[AState]): Set[AState]
+    def negative(states: Set[AState]): Set[AState]
+  }
+
+
+  object xsIsNilTest extends ATest {
+    override def positive(states: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (state <- states) {
+        val (isNil, _) = ifIsNil(state.xs)
+         result = isNil.map(AssignN_SameIntervalToAList(state,_))
+      }
+     result
+    }
+
+    override def negative(states: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (state <- states) {
+        val (_, isNotNil) = ifIsNil(state.xs)
+        result = isNotNil.map(AssignN_SameIntervalToAList(state,_))
+      }
+      result
+    }
+  }
+
+  object xsIsNotNilTest extends ATest {
+    override def positive(states: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (state <- states) {
+        val (_, isNotNil) = ifIsNil(state.xs)
+        result = isNotNil.map(AssignN_SameIntervalToAList(state,_))
+      }
+      result
+    }
+
+    override def negative(states: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (state <- states) {
+        val (isNil, _) = ifIsNil(state.xs)
+        result = isNil.map(AssignN_SameIntervalToAList(state,_))
+      }
+      result
+      }
+  }
+
+
+  object nIsPositive extends ATest {
+    override def positive(states: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (state <- states) {
+        if(intervals.isPositive(state.n)){
+          result += state
+        }
+      }
+      result
+    }
+
+    override def negative(states: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (state <- states) {
+        if(!intervals.isPositive(state.n)){
+          result += state
+        }
+      }
+      result
+    }
+  }
+
+
+  object nIsNegative extends ATest {
+    override def positive(states: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (state <- states) {
+        if(intervals.isNegative(state.n)){
+          result += state
+        }
+      }
+      result
+    }
+
+    override def negative(states: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (state <- states) {
+        if(!intervals.isNegative(state.n)){
+          result += state
+        }
+      }
+      result
+    }
+  }
+
+
+  object nEqualsZero extends ATest {
+    override def positive(states: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (state <- states) {
+        if(intervals.isZero(state.n)){
+          result += state
+        }
+      }
+      result
+    }
+
+    override def negative(states: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (state <- states) {
+        if(!intervals.isZero(state.n)){
+          result += state
+        }
+      }
+      result
+    }
+  }
+
+  case class AIf(test: ATest, left: AStmt, right:AStmt) extends AStmt{
+    override def execute(as: Set[AState]): Set[AState] = {
+      left.execute(test.positive(as)) ++ right.execute(test.negative(as))
+    }
+  }
+
+  case class AWhile(test:ATest, body: AStmt) extends AStmt {
+    override def execute(as: Set[AState]): Set[AState] = {
+      body.execute(test.positive(as))
+    }
+  }
+
+  //TODO
+
+  /**
+   * Assert (xs == nil) => Ausgaben: true für ..., false für...
+   * test: xs == nil
+   *
+   */
+  case class AAssert(test: ATest) {
+     def execute(as: Set[AState]): Unit = {
+      //if (???) //test.positive(as)
+        Console.println(s"${RESET}${GREEN}Assertion fullfills for...  ${RESET}")
+      //else //test.negative(as)
+        Console.err.println(s"${RESET}${RED}Assertion will fail for ...${RESET}")
+    }
+  }
 
   /************************************************************
-   *                     Concretization                        *
+   *                     Concretization                       *
    ************************************************************/
 
   //Method concretizes the abstract type ABool into concrete values of Boolean

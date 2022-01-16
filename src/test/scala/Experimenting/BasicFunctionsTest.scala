@@ -303,6 +303,19 @@ class BasicFunctionsTest extends AnyFunSuite {
     assert(!b.isConcreteElementOf_OptionInt(Some(1), f))
   }
 
+  test("JustAList"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
+    val d = b.ANone
+    val e = b.ASome(b.AMany(c))
+    val f = b.AMaybe(b.ACons(c, b.ANil))
+
+    //println(b.justAList(d))
+    println(b.justAList(e))
+    //println(b.justAList(f))
+  }
+
 
 
 }
