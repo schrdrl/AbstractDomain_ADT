@@ -147,9 +147,14 @@ class ATestTests extends AnyFunSuite {
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(0),IntegerVal(0))
-    val d = b.nEqualsZero
-    val e = b.AAssert(d)
-    val f = b.AState(c, b.ANil)
-    println(e.execute(Set(f)))
+    val d = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
+
+    val e = b.nEqualsZero
+    val f = b.AAssert(e)
+    val g = b.AState(c, b.ANil)
+    val h = b.AState(d, b.ANil)
+    val i = b.AState(c, b.AMany(d))
+    val j = b.AState(d,  b.AMany(c))
+    f.execute(Set(g,h,i,j))
   }
 }

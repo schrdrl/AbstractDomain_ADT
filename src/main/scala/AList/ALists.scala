@@ -708,11 +708,24 @@ case class ALists(intervals: Intervals) {
    *
    */
   case class AAssert(test: ATest) {
-     def execute(as: Set[AState]): Unit = {
-      //if (???) //test.positive(as)
-        Console.println(s"${RESET}${GREEN}Assertion fullfills for...  ${RESET}")
-      //else //test.negative(as)
-        Console.err.println(s"${RESET}${RED}Assertion will fail for ...${RESET}")
+     def execute(as: Set[AState]) : Unit = {
+
+       println("")
+
+       if (!test.positive(as).isEmpty) {
+         Console.println(s"$RESET${GREEN}Assertion fulfills for state(s): $RESET")  //success
+         test.positive(as).foreach(posElement => Console.println(s"$RESET$GREEN $posElement $RESET"))
+
+       }
+       println("")
+
+       if (!test.negative(as).isEmpty) {
+         Console.println(s"$RESET${RED}Assertion fails for state(s):$RESET") //fails
+         test.negative(as).foreach(negElement => Console.println(s"$RESET$RED $negElement $RESET"))
+       }
+
+       //yellow for might fail/unknown
+
     }
   }
 
