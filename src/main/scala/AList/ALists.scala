@@ -176,7 +176,7 @@ case class ALists(intervals: Intervals) {
   //intersection of two values of type AOption[AInt]
   def intersect_AOption_AInt(ao1: AOption[AInt], ao2: AOption[AInt]): AOption[AInt] = (ao1, ao2) match {
     case (ANone, ANone) => ANone
-    case (ANone, AMaybe(e)) => ANone
+    case (ANone, AMaybe(_)) => ANone
     case (AMaybe(_), ANone) => ANone
     case (ANone, ASome(_)) => ANone
     case (ASome(_), ANone) => ANone
@@ -268,6 +268,11 @@ case class ALists(intervals: Intervals) {
     case (AFalse, AFalse) | (AFalse, ATrue) | (ATrue, AFalse) => AFalse
   }
 
+  def ||(a: ABool, b: ABool): ABool = (a, b) match {
+    case (ATrue, ATrue) | (AFalse, ATrue) | (ATrue, AFalse) => ATrue
+    case (AFalse, AFalse)  => AFalse
+  }
+
   def !==(ao1: ABool, ao2: ABool): ABool = (ao1, ao2) match {
     case (AFalse, AFalse) | (ATrue, ATrue) => AFalse
     case (AFalse, ATrue) | (ATrue, AFalse) => ATrue
@@ -286,14 +291,17 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+
   def ===(l1: AList, l2: AList): ABool = (l1, l2) match {
     case (ANil, ANil) => ATrue
     case (ANil, ACons(_, _)) | (ACons(_, _), ANil) => AFalse
     case (ANil, AMany(_)) | (AMany(_), ANil) => ATrue
     case (ACons(a, as), ACons(b, bs)) => &&(===(a, b), ===(as, bs))
     case (AMany(a), AMany(b)) => ===(a, b)
-    case (AMany(a), ACons(b, bs)) => &&(===(a, b), ===(l1, bs))
-    case (ACons(a, as), AMany(b)) => &&(===(a, b), ===(as, l2))
+    case (AMany(_), ACons(_, ANil)) => AFalse
+    case (ACons(_, ANil) , AMany(_)) => AFalse
+    case (AMany(a), ACons(b, bs)) => AFalse
+    case (ACons(a, as), AMany(b)) => AFalse
   }
 
   def ===(ao1: AOption[AInt], ao2: AOption[AInt]): ABool = (ao1, ao2) match {
@@ -314,6 +322,10 @@ case class ALists(intervals: Intervals) {
     case (AMaybe(a), AMaybe(b)) => ===(a, b)
     case (ASome(a), AMaybe(b)) => ===(a, b)
     case (AMaybe(a), ASome(b)) => ===(a, b)
+  }
+
+  def ===(as1: AState, as2: AState): ABool = {
+    &&(===(as1.n, as2.n),===(as1.xs, as2.xs))
   }
 
 
@@ -433,7 +445,7 @@ case class ALists(intervals: Intervals) {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
       for (a <- as) {
-        result += (AState(a.n, a.xs))
+        result += AState(a.n, a.xs)
       }
       result
     }
@@ -528,7 +540,7 @@ case class ALists(intervals: Intervals) {
    ************************************************************/
 
   //Method is used to create an AState of a given list and an already existing AState -> IfElse_xsIsNil
-  def AssignN_SameIntervalToAList(as: AState, al: AList) = {
+  def AssignN_SameIntervalToAList(as: AState, al: AList) : AState = {
     AState(as.n, al)
   }
 
@@ -541,7 +553,7 @@ case class ALists(intervals: Intervals) {
 
 
 
-  //stmt1 will be exectued if xs of the given AState is nil, otherwise stmt2 will be executed
+  //stmt1 will be executed if xs of the given AState is nil, otherwise stmt2 will be executed
   case class IfElse_xsIsNil(stmt1: AStmt, stmt2: AStmt) extends AStmt {
       def execute(as: Set[AState]): Set[AState] = {
         var result: Set[AState] = Set()
@@ -559,7 +571,7 @@ case class ALists(intervals: Intervals) {
 
 
 
-//The AStmt will be exectued if xs of the given AState is nil
+//The AStmt will be executed if xs of the given AState is nil
   case class If_xsIsNil(stmt: AStmt) {
     def execute(as: AState): Set[AState] = {
       val (aStatesTrue, aStatesFalse) = ifIsNil(as.xs)
@@ -694,37 +706,55 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+
   case class AWhile(test:ATest, body: AStmt) extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
-      body.execute(test.positive(as))
+      var states_at_loop_head: Set[AState] = as
+      var states_after_body: Set[AState] = Set()
+      var result: Set[AState] = Set()
+      var abort_loop = false
+
+      while (test.positive(states_at_loop_head).nonEmpty && (!abort_loop)) {
+        states_after_body = body.execute(test.positive(states_at_loop_head))
+        println("After loop-execution:" + states_after_body.head)
+        result = Set(AState(intervals.Lattice.widen(states_at_loop_head.head.n, states_after_body.head.n), widen_AList(states_at_loop_head.head.xs, states_after_body.head.xs)))
+        println("After widen:" + result.head)
+        println("")
+
+        if (===(states_at_loop_head.head, result.head) == AFalse)  {
+          states_at_loop_head = result
+        } else if (===(states_at_loop_head.head, result.head) == ATrue) {
+          abort_loop = true
+        }
+      }
+
+      if (result.nonEmpty) {
+        println("After loop:" + result)
+      } else {
+        println("Not in loop")
+      }
+      result
     }
   }
 
-  //TODO
 
-  /**
-   * Assert (xs == nil) => Ausgaben: true für ..., false für...
-   * test: xs == nil
-   *
-   */
+
+  //Assert all possible states
   case class AAssert(test: ATest) {
      def execute(as: Set[AState]) : Unit = {
-
-       println("")
-
-       if (!test.positive(as).isEmpty) {
+       if (test.positive(as).nonEmpty) {
          Console.println(s"$RESET${GREEN}Assertion fulfills for state(s): $RESET")  //success
          test.positive(as).foreach(posElement => Console.println(s"$RESET$GREEN $posElement $RESET"))
-
        }
        println("")
 
-       if (!test.negative(as).isEmpty) {
+       if (test.negative(as).nonEmpty) {
          Console.println(s"$RESET${RED}Assertion fails for state(s):$RESET") //fails
          test.negative(as).foreach(negElement => Console.println(s"$RESET$RED $negElement $RESET"))
+         //-> return input
        }
 
-       //yellow for might fail/unknown
+       //yellow for might fail/unknown -> return input
 
     }
   }

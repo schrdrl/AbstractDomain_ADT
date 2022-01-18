@@ -29,6 +29,7 @@ class EqualityTests extends AnyFunSuite {
     println(b.===(d, e))
   }
 
+
   test("=== on AList") {
     val a = Intervals.Unbounded
     val b = ALists(a)
@@ -42,14 +43,22 @@ class EqualityTests extends AnyFunSuite {
     val i = b.ACons(c, b.AMany(c))
     val j = b.ACons(d, b.AMany(c))
 
-    println(b.===(e, b.ANil))
-    println(b.===(e, f))
-    println(b.===(f, g))
-    println(b.===(f, h))
-    println(b.===(e, h))
-    println(b.===(f, i))
-    println(b.===(f, j))
-    println(b.===(j, g))
+    println(b.===(e, b.ANil)) //ATrue
+    println(b.===(e, f)) //ATrue
+    println(b.===(f, g)) //AFalse
+    println("")
+    println(b.===(f, h)) //AFalse
+    println(b.===(e, h)) //AFalse
+    println(b.===(f, i)) //ATrue
+    println("")
+    println(b.===(f, j)) //AFalse
+    println(b.===(j, g)) //AFalse
+    println("")
+
+    val m = b.ACons(c,b. ACons(c, b.ACons(c,b.ANil)))
+    val n = b.ACons(c,b. ACons(c, b.AMany(c)))
+    println(b.===(m, n)) //AFalse
+
   }
 
   test("=== on AOption[AInt]") {

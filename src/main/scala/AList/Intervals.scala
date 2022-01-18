@@ -7,9 +7,7 @@ package AList
  * source: https://github.com/ahmadsalim/Rascal-Light
  */
 
-import AList.Intervals.Unbounded
 
-import java.util.NoSuchElementException
 import language.implicitConversions
 
 sealed trait IntegerW

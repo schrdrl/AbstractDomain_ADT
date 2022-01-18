@@ -10,7 +10,7 @@ class ConcreteLoopTest extends AnyFunSuite {
    * when a translator between concrete and abstract lists is implemented
    */
 
-  //TODO refactor Tests
+  //TODO refactor Tests if necessary
   /** *******************************************************************************
    * Tests: Loop Concrete                                                          *
    * Experiments to connect the concrete list and the abstract list in Testcases   *
