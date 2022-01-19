@@ -300,8 +300,8 @@ case class ALists(intervals: Intervals) {
     case (AMany(a), AMany(b)) => ===(a, b)
     case (AMany(_), ACons(_, ANil)) => AFalse
     case (ACons(_, ANil) , AMany(_)) => AFalse
-    case (AMany(a), ACons(b, bs)) => AFalse
-    case (ACons(a, as), AMany(b)) => AFalse
+    case (AMany(_), ACons(_, _)) => AFalse
+    case (ACons(_, _), AMany(_)) => AFalse
   }
 
   def ===(ao1: AOption[AInt], ao2: AOption[AInt]): ABool = (ao1, ao2) match {
@@ -551,6 +551,12 @@ case class ALists(intervals: Intervals) {
     case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
   }
 
+  def ifIsEqual(l1: AList, l2: AList): (Set[(AList,AList)], Set[(AList,AList)]) = (l1,l2) match {
+    case (ANil, ANil) => (Set((ANil, ANil)), Set())
+    case ACons(h, t) => (Set(), Set(ACons(h, t)))
+    case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
+  }
+
 
 
   //stmt1 will be executed if xs of the given AState is nil, otherwise stmt2 will be executed
@@ -596,7 +602,7 @@ case class ALists(intervals: Intervals) {
       var result: Set[AState] = Set()
       for (state <- states) {
         val (isNil, _) = ifIsNil(state.xs)
-         result = isNil.map(AssignN_SameIntervalToAList(state,_))
+         result ++= isNil.map(AssignN_SameIntervalToAList(state,_))
       }
      result
     }
@@ -605,7 +611,7 @@ case class ALists(intervals: Intervals) {
       var result: Set[AState] = Set()
       for (state <- states) {
         val (_, isNotNil) = ifIsNil(state.xs)
-        result = isNotNil.map(AssignN_SameIntervalToAList(state,_))
+        result ++= isNotNil.map(AssignN_SameIntervalToAList(state,_))
       }
       result
     }

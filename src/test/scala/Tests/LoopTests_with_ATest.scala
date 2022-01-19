@@ -186,7 +186,7 @@ class LoopTests_with_ATest extends AnyFunSuite {
     }
   }
 
-//TODO output: code execution failed for: &
+//TODO output: code execution failed for:_ & successful for input:_
   test("Concrete Example - Set[AList]") {
     /**
      * int n
@@ -207,7 +207,7 @@ class LoopTests_with_ATest extends AnyFunSuite {
     var counter = 0
     val axs: Set[b.AList] = Set(b.ANil, b.ACons(c, b.ANil), b.ACons(c, b.ACons(c, b.ANil)), b.ACons(c, b.AMany(c)), b.AMany(c))
     for (xs <- axs) {
-      println("Round: " + counter)
+      println("------ Round: " + counter +" ,initial state: " +xs +" -----")
 
       //initial state
       val init_state = Set(b.AState(n, xs))
