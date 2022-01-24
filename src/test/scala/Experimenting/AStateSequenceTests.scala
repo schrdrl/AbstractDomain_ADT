@@ -150,4 +150,22 @@ class AStateSequenceTests extends AnyFunSuite {
   }
 
 
+  test("Generic AState"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
+
+    val d = b.AStateGeneric("TestName", 3)
+    println(d)
+    val e = b.AStateGeneric(c, b.ANil)
+    println(e)
+    val f = b.AStateGeneric(c, c)
+    println(f)
+    val g = b.AStateGeneric(b.AMany(c), b.AMaybe(c))
+    println(g)
+
+
+  }
+
+
 }

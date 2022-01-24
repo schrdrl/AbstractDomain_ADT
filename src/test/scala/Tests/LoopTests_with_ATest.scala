@@ -47,7 +47,6 @@ class LoopTests_with_ATest extends AnyFunSuite {
     val assertAfterExecution1 = b.AAssert(conditionAssert1)
     println("")
     println("assert xs == nil")
-    //TODO AIf(test, leftStmt, rightStmt)
     if (loopTest.nonEmpty) {
       assertAfterExecution1.execute(loopTest)
     } else {
@@ -57,7 +56,6 @@ class LoopTests_with_ATest extends AnyFunSuite {
     println("assert n <= 0")
     val assertAfterExecution2 = b.AAssert(conditionAssert2)
 
-    //TODO AIf(test, leftStmt, rightStmt)
     if (loopTest.nonEmpty) {
       assertAfterExecution2.execute(loopTest)
     } else {
@@ -107,7 +105,6 @@ class LoopTests_with_ATest extends AnyFunSuite {
     println("")
     println("assert xs == nil")
 
-    //TODO AIf(test, leftStmt, rightStmt)
     if (loopTest.nonEmpty) {
       assertAfterExecution1.execute(loopTest)
     } else {
@@ -117,7 +114,6 @@ class LoopTests_with_ATest extends AnyFunSuite {
     println("assert n <= 0")
     val assertAfterExecution2 = b.AAssert(conditionAssert2)
 
-    //TODO AIf(test, leftStmt, rightStmt)
     if (loopTest.nonEmpty) {
       assertAfterExecution2.execute(loopTest)
     } else {
@@ -168,7 +164,6 @@ class LoopTests_with_ATest extends AnyFunSuite {
     val assertAfterExecution1 = b.AAssert(conditionAssert1)
     println("")
     println("assert xs == nil")
-    //TODO AIf(test, leftStmt, rightStmt)
     if (loopTest.nonEmpty) {
       assertAfterExecution1.execute(loopTest)
     } else {
@@ -178,7 +173,6 @@ class LoopTests_with_ATest extends AnyFunSuite {
     println("assert n <= 0")
     val assertAfterExecution2 = b.AAssert(conditionAssert2)
 
-    //TODO AIf(test, leftStmt, rightStmt)
     if (loopTest.nonEmpty) {
       assertAfterExecution2.execute(loopTest)
     } else {
@@ -231,7 +225,6 @@ class LoopTests_with_ATest extends AnyFunSuite {
       val assertAfterExecution1 = b.AAssert(conditionAssert1)
       println("")
       println("assert xs == nil")
-      //TODO AIf(test, leftStmt, rightStmt)
       if (loopTest.nonEmpty) {
         assertAfterExecution1.execute(loopTest)
       } else {
@@ -241,7 +234,6 @@ class LoopTests_with_ATest extends AnyFunSuite {
       println("assert n <= 0")
       val assertAfterExecution2 = b.AAssert(conditionAssert2)
 
-      //TODO AIf(test, leftStmt, rightStmt)
       if (loopTest.nonEmpty) {
         assertAfterExecution2.execute(loopTest)
       } else {

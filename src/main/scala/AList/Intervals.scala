@@ -274,6 +274,24 @@ case class Intervals(mlb: IntegerW = IntegerNegInf, mub: IntegerW = IntegerInf) 
       }
     }
   }
+
+
+  //added complementOfASet (i1/i2)
+  //cases: i1.lb < i2.lb
+  //cases: i1.lb == i2.lb
+  //cases: i1.lb > i2.lb
+  //TODO test
+  //TODO mehrere Intervalls
+  /*
+  def complementOfASet(i1: Interval, i2: Interval) :Set[Interval] = {
+    var newlb : IntegerW = if(IntegerW.<(i1.lb, i2.lb)) i1.lb else if (IntegerW.==(i1.lb, i2.lb)) IntegerW.+(i2.ub, IntegerVal(1)) else if (IntegerW.<(i2.lb, i1.lb)) IntegerW.+(i2.ub, IntegerVal(1))
+      if(IntegerW.<(i1.ub, newlb)) newlb = IntegerInf
+
+    val newub = if(IntegerW.<(i1.lb, i2.lb)) ??? else if (IntegerW.==(i1.lb, i2.lb)) ??? else if (IntegerW.<(i2.lb, i1.lb)) ???//TODO
+    val newInterval = Interval(newlb, newub)
+  }
+*/
+
 //added ===
   def ===(i1: Interval, i2: Interval): Boolean = {
    (i1.lb == i2.lb) && (i1.ub == i2.ub)

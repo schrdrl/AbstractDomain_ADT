@@ -15,7 +15,7 @@ case class ALists(intervals: Intervals) {
 
   sealed trait AList //"behaviour"
   case object ANil extends AList
-  case class ACons(head: AInt, tail: AList) extends AList
+  case class ACons(aHead: AInt, aTail: AList) extends AList
   case class AMany(elem: AInt) extends AList
 
   sealed trait AOption[+A]
@@ -259,8 +259,18 @@ case class ALists(intervals: Intervals) {
     case (ASome(a), AMaybe(b)) => AMaybe(widen_AList(a,b))
   }
 
+
+
+
+
+
+
+
+
+
+
   /************************************************************
-   *                Operators (&&, ===, !==)                  *
+   *          Operators (&&, ===, !==) returning ABool        *
    ************************************************************/
 
   def &&(a: ABool, b: ABool): ABool = (a, b) match {
@@ -284,7 +294,7 @@ case class ALists(intervals: Intervals) {
   }
 
   def ===(a: AInt, b: AInt): ABool = {
-    if (a.equals(b)) {
+    if (intervals.Lattice.<=(a,b) && intervals.Lattice.<=(b,a)){
       ATrue
     } else {
       AFalse
@@ -330,17 +340,103 @@ case class ALists(intervals: Intervals) {
 
 
   /************************************************************
+   *                Operators returning Set[A]                *
+   ************************************************************/
+  //trait "seperates" the input of a unary operations in two sets
+  trait AUnOp[A]{
+    def positive(a:A): Set[A]
+    def negative(a:A): Set[A]
+  }
+
+  //checks whether an AList is empty and returns the empty and non-empty parts of it
+  object AIsNil extends AUnOp[AList]{
+    override def positive(a: AList): Set[AList] = a match{
+      case ANil => Set(a)
+      case ACons(_,_) => Set()
+      case AMany(e) => Set(ANil)
+    }
+
+    override def negative(a: AList): Set[AList] = a match {
+      case ANil => Set()
+      case ACons(_,_) => Set(a)
+      case AMany(e) => Set(ACons(e, AMany(e)))
+    }
+  }
+
+
+  //trait "seperates" inputs of unary operations in two sets
+  trait ABinOp[A]{
+    def positive(a1:A,a2: A ) : Set[A]
+    def negative(a1:A,a2: A) : (Set[(A,A)] , Set[(A,A)])
+  }
+
+  /*
+  //TODO
+  object AIntEqual extends ABinOp[AInt] {
+
+    override def positive(a1: AInt, a2: AInt): Set[AInt] = {
+      if (intervals.intersect_Interval(a1,a2) != intervals.Interval(IntegerInf, IntegerNegInf)) Set((a1, a2)) else Set()
+    }
+                                            // a1(before, after)      a2(before, after)
+    override def negative(a1: AInt, a2: AInt): (Set[(AInt, AInt)], Set[(AInt, AInt)]) = {
+      if(AIntEqual.positive(a1,a2).isEmpty) (Set(a1), Set(a2))
+      else{
+        val equalPart = AIntEqual.positive(a1,a2).head
+
+          ???
+
+      }
+
+
+    }
+
+  }
+
+
+  //TODO Test
+  object AListEqual extends ABinOp[AList] {
+    override def positive(a1: AList, a2: AList): Set[AList] = (a1,a2) match { //return the equal part -> one AList
+      case (ANil, ANil) => Set(ANil)
+      case (ANil, AMany(_)) | (AMany(_), ANil)=> Set(ANil)
+      case (ANil, ACons(_,_)) | (ACons(_,_), ANil) => Set()
+      case (ACons(h1,t1), ACons(h2,t2)) => if(AIntEqual.positive(h1,h2).nonEmpty) Set(ACons(AIntEqual.positive(h1,h2).head, AListEqual.positive(t1,t2).head)) else Set()
+      case (ACons(h,t), AMany(e)) =>  if(AIntEqual.positive(h,e).nonEmpty) Set(ACons(AIntEqual.positive(h,e).head, AListEqual.positive(t,a2).head)) else Set()
+      case (AMany(e), ACons(h,t)) => if(AIntEqual.positive(e,h).nonEmpty) Set(ACons(AIntEqual.positive(e,h).head, AListEqual.positive(a1,t).head)) else Set()
+      case (AMany(e1), AMany(e2)) => if(AIntEqual.positive(e1,e2).nonEmpty) Set(AMany(AIntEqual.positive(e1,e2).head)) else Set()
+    }
+
+    //TODO Darstellung                            a1(before, after)      a2(before, after)
+    override def negative(a1: AList, a2: AList): (Set[(AList,AList)], Set[(AList,AList)]) =(a1,a2) match {
+      case (ANil, ANil) => (Set(), Set())
+      case (ANil, AMany(_)) => ???
+      case(AMany(_), ANil) => ???
+      case (ANil, ACons(_,_)) => ???
+      case (ACons(_,_), ANil) => ???
+      case (ACons(h1,t1), ACons(h2,t2)) => ???
+      case (ACons(h,t), AMany(e)) =>  ???
+      case (AMany(e), ACons(h,t)) => ???
+      case (AMany(e1), AMany(e2)) => ???
+    }
+
+*/
+
+
+
+
+  /************************************************************
    *             Methods:   AOption[T] -> T                  *
    ************************************************************/
 
 
   //Pattern Matching is done with case class Sequence (e.g. IfElse_xsIsNil)
+  //TODO Rückgabe mit Set falls -> isNil
   def justAList(ao: AOption[AList]): AList = ao match {
     case ASome(e) => e
     case ANone => throw new Exception("Exception thrown from justAList. Reason: Input was ANone")
     case AMaybe(_) => throw new Exception("Exception thrown from justAList. Reason: Input was AMaybe")
   }
 
+  //TODO Rückgabe mit Set falls -> isNil
   def justAInt(ao: AOption[AInt]): AInt = ao match{
     case ASome(e) => e
     case ANone => throw new Exception("Exception thrown from justAInt. Reason: Input was ANone")
@@ -371,6 +467,14 @@ case class ALists(intervals: Intervals) {
    ************************************************************/
   //Represents a state(AInt, AList). Is used by objects of AStmt and in Sets for Sequences
   case class AState(n: AInt, xs: AList)
+
+  //First sketch of a generic version of AState
+  sealed abstract class AStates
+  case class AStateGeneric[T, S](first: T, second:S ) extends AStates
+  //Pattern Matching -> wenn xs gefragt ist
+
+
+
 
   //Representation of a Statement. Is used by Sequences, e.g. IfElse_xsIsNil(stmt1,stmt2)
   trait AStmt {
@@ -551,11 +655,7 @@ case class ALists(intervals: Intervals) {
     case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
   }
 
-  def ifIsEqual(l1: AList, l2: AList): (Set[(AList,AList)], Set[(AList,AList)]) = (l1,l2) match {
-    case (ANil, ANil) => (Set((ANil, ANil)), Set())
-    case ACons(h, t) => (Set(), Set(ACons(h, t)))
-    case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
-  }
+
 
 
 
@@ -706,13 +806,18 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+  /************************************************************
+   *                 Abstract Transformers                    *
+   ************************************************************/
+
+  //Abstract transformer: AIf is an abstract representation of an If test
   case class AIf(test: ATest, left: AStmt, right:AStmt) extends AStmt{
     override def execute(as: Set[AState]): Set[AState] = {
       left.execute(test.positive(as)) ++ right.execute(test.negative(as))
     }
   }
 
-
+  //Abstract transformer: AWhile is an abstract representation of a while loop
   case class AWhile(test:ATest, body: AStmt) extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       var states_at_loop_head: Set[AState] = as
@@ -744,8 +849,7 @@ case class ALists(intervals: Intervals) {
   }
 
 
-
-  //Assert all possible states
+  //Abstract Transformer: AAssert is an abstract representation of an assertion
   case class AAssert(test: ATest) {
      def execute(as: Set[AState]) : Unit = {
        if (test.positive(as).nonEmpty) {
@@ -760,10 +864,16 @@ case class ALists(intervals: Intervals) {
          //-> return input
        }
 
-       //yellow for might fail/unknown -> return input
-
+       //yellow for might fail/unknown/warning -> return input
     }
   }
+
+  //TODO outer verification of the program code
+  //case class AVerify()
+
+  //TODO insert to abstract transformers, evtl als Set sammeln falls im Programm Verlauf mehr hinzukommen
+  //case class AAssume(assumption: AStmt)
+  //trait AAssume
 
   /************************************************************
    *                     Concretization                       *
