@@ -1,6 +1,6 @@
 package AList
 
-import Console.{GREEN, RED, RESET}
+import Console.{GREEN, RED, YELLOW ,RESET}
 
 /**
  * AList is an abstract domain of numerical lists (belonging to algebraic data types)
@@ -111,6 +111,35 @@ case class ALists(intervals: Intervals) {
   /************************************************************
    *                Advanced Functions over ALists            *
    ************************************************************/
+
+   //Method prepends an element on the front a an AList value
+   def +:(elem: AInt, al2: AList) : AList = ACons(elem, al2 )
+
+
+  //Method appends an element the the end a an AList value
+   def :+(al1: AList, elem: AInt) : Set[AList] = al1 match { //evtl. doch mit Set
+     case ANil => Set(ACons(elem, ANil))
+     case ACons(h,t) => if(:+(t, elem).tail.nonEmpty) Set(ACons(h, :+(t, elem).head), ACons(h, :+(t, elem).tail.head)) else Set(ACons(h, :+(t, elem).head))//TODO recheck
+     case AMany(e) => Set(ACons(elem, ANil), ACons(e, AMany(intervals.union_Interval(e, elem))))  //TODO recheck
+     //1. case: ANil -> ACons(elem, ANil)
+     //2. case: ACons(e, AMany(e)) -> ACons(e, ACons(elem, ANil)) oder ACons(e, ACons(elem, AMany(e))) oder ACons(e, AMany(e union elem)) ???
+   }
+
+  //Method concats two values of type AList
+   def ++(al1: AList, al2: AList): Set[AList] = (al1, al2) match {
+     case (ANil, ANil) => Set(ANil)
+     case (ANil, ACons(h,t)) => Set(al2)
+     case (ACons(h,t), ANil) => Set(al1)
+     case (ANil, AMany(e)) => Set(al2)
+     case (AMany(e), ANil) => Set(al1)
+     case (AMany(e1), AMany(e2)) => Set(AMany(intervals.union_Interval(e1,e2)))
+     case (AMany(e1), ACons(h,t)) => Set(al2, ACons(e1, union_AList(al1, al2))) //TODO recheck
+     case (ACons(h,t), AMany(e2)) =>if(++(t,ACons(e2,AMany(e2))).tail.nonEmpty) Set(ACons(h, ++(t,ACons(e2,AMany(e2))).head), ACons(h, ++(t,ACons(e2,AMany(e2))).tail.head)) else Set(al1, ACons(h,++(t,ACons(e2,AMany(e2))).head)) //TODO recheck
+     case (ACons(h1, t1), ACons(h2, t2)) =>  if(++(t1, al2).tail.nonEmpty) Set(ACons(h1, ++(t1, al2).head),ACons(h1, ++(t1, al2).tail.head)) else Set(ACons(h1, ++(t1, al2).head))
+
+
+   }
+
 
   //union of two ALists
   def union_AList(al1: AList, al2: AList): AList = (al1, al2) match {
@@ -262,16 +291,15 @@ case class ALists(intervals: Intervals) {
 
 
 
-
-
-
-
-
-
-
   /************************************************************
    *          Operators (&&, ===, !==) returning ABool        *
    ************************************************************/
+
+
+   def !(a: ABool): ABool = a match {
+     case ATrue => AFalse
+     case AFalse => ATrue
+   }
 
   def &&(a: ABool, b: ABool): ABool = (a, b) match {
     case (ATrue, ATrue) => ATrue
@@ -336,6 +364,14 @@ case class ALists(intervals: Intervals) {
 
   def ===(as1: AState, as2: AState): ABool = {
     &&(===(as1.n, as2.n),===(as1.xs, as2.xs))
+  }
+
+
+  //TODO checks whether an AList contains an element of AInt
+  def aContains(al1: AList, elem: AInt) : Set[ABool] = al1 match {
+    case ANil => Set(AFalse)
+    case ACons(h,t) => ???
+    case AMany(e) => ???
   }
 
 
@@ -431,14 +467,14 @@ case class ALists(intervals: Intervals) {
   //Pattern Matching is done with case class Sequence (e.g. IfElse_xsIsNil)
   //TODO Rückgabe mit Set falls -> isNil
   def justAList(ao: AOption[AList]): AList = ao match {
-    case ASome(e) => e
+    case ASome(e) =>  ASome(e).get
     case ANone => throw new Exception("Exception thrown from justAList. Reason: Input was ANone")
     case AMaybe(_) => throw new Exception("Exception thrown from justAList. Reason: Input was AMaybe")
   }
 
   //TODO Rückgabe mit Set falls -> isNil
   def justAInt(ao: AOption[AInt]): AInt = ao match{
-    case ASome(e) => e
+    case ASome(e) => ASome(e).get
     case ANone => throw new Exception("Exception thrown from justAInt. Reason: Input was ANone")
     case AMaybe(_) => throw new Exception("Exception thrown from justAInt. Reason: Input was AMaybe")
   }
@@ -559,6 +595,7 @@ case class ALists(intervals: Intervals) {
    * Method execute assigns interval [0;0] to a Set of AStates -> initialState
    * Method assignAnyN assigns any interval n to a Set of AStates
    */
+  //TODO useful?
   object AssignN extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
@@ -654,9 +691,6 @@ case class ALists(intervals: Intervals) {
     case ACons(h, t) => (Set(), Set(ACons(h, t)))
     case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
   }
-
-
-
 
 
   //stmt1 will be executed if xs of the given AState is nil, otherwise stmt2 will be executed
@@ -850,6 +884,7 @@ case class ALists(intervals: Intervals) {
 
 
   //Abstract Transformer: AAssert is an abstract representation of an assertion
+  //TODO evtl doch mit extends AStmt -> mit generischem AState Typ output für AVerify() generieren
   case class AAssert(test: ATest) {
      def execute(as: Set[AState]) : Unit = {
        if (test.positive(as).nonEmpty) {
@@ -871,9 +906,20 @@ case class ALists(intervals: Intervals) {
   //TODO outer verification of the program code
   //case class AVerify()
 
-  //TODO insert to abstract transformers, evtl als Set sammeln falls im Programm Verlauf mehr hinzukommen
-  //case class AAssume(assumption: AStmt)
-  //trait AAssume
+  //Abstract Transformer: AAssume is an abstract representation of an assumption
+  //TODO Test
+  case class AAssume(assumption: AStmt) extends AStmt{
+    override def execute(as: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set()
+      for (a <- as) {
+        assumption.execute(as)
+      }
+      result
+    }
+  }
+
+
+
 
   /************************************************************
    *                     Concretization                       *

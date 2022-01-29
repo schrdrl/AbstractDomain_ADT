@@ -301,6 +301,8 @@ class BasicFunctionsTest extends AnyFunSuite {
 
     assert(b.isConcreteElementOf_OptionInt(Some(1), e))
     assert(!b.isConcreteElementOf_OptionInt(Some(1), f))
+
+    println(e.get)
   }
 
   test("JustAList"){
