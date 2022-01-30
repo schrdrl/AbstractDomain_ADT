@@ -544,6 +544,8 @@ case class ALists(intervals: Intervals) {
       for (a <- as) {
         if(a.first.isInstanceOf[AInt]) {
           result += AState1(Interval(IntegerVal(0), IntegerVal(0)), a.second )
+        }else{
+          result += a
         }
       }
       result

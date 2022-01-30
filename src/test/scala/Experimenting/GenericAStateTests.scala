@@ -26,7 +26,7 @@ class GenericAStateTests extends AnyFunSuite {
     println(k.execute(Set(i)))
     println(k.execute(Set(g)))
     println(k.execute(Set(j)))
-    println(k.execute(Set(g,h,i)))
+    println(k.execute(Set(g,h,i,j)))
 
 
 
