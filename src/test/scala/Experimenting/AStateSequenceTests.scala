@@ -155,7 +155,9 @@ class AStateSequenceTests extends AnyFunSuite {
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
 
+   /*
     val d = b.AStateGeneric("TestName", 3)
+
     println(d)
     val e = b.AStateGeneric(c, b.ANil)
     println(e)
@@ -163,7 +165,7 @@ class AStateSequenceTests extends AnyFunSuite {
     println(f)
     val g = b.AStateGeneric(b.AMany(c), b.AMaybe(c))
     println(g)
-
+*/
 
   }
 

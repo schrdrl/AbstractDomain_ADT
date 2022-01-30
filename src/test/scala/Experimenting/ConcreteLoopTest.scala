@@ -78,7 +78,7 @@ class ConcreteLoopTest extends AnyFunSuite {
         //if (b.isNil(axs) == b.AUnknown) {
         b_AUnknown = false
      // }
-      axs = b.justAList(ys)
+      axs = b.justValue(ys).head
 
       println("(" + n + ")after xs: " + xs)
       println("(" + n + ")after axs: " + axs)
@@ -122,7 +122,7 @@ class ConcreteLoopTest extends AnyFunSuite {
        // if (b.isNil(axs) == b.AUnknown) {
           b_AUnknown = false
        // }
-        axs = b.justAList(ys)
+        axs = b.justValue(ys).head
 
         println("(" + n + ")after xs: " + xs)
         println("(" + n + ")after axs: " + axs)

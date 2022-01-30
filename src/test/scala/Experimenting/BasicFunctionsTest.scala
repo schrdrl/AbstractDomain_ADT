@@ -305,7 +305,7 @@ class BasicFunctionsTest extends AnyFunSuite {
     println(e.get)
   }
 
-  test("JustAList"){
+  test("JustValue"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
@@ -313,9 +313,16 @@ class BasicFunctionsTest extends AnyFunSuite {
     val e = b.ASome(b.AMany(c))
     val f = b.AMaybe(b.ACons(c, b.ANil))
 
-    //println(b.justAList(d))
-    println(b.justAList(e))
-    //println(b.justAList(f))
+    println(b.justValue(d))
+    println(b.justValue(e))
+    println(b.justValue(f))
+
+
+    val g = b.AMaybe(c)
+    val h = b.ASome(c)
+    println(b.justValue(g))
+    println(b.justValue(h))
+
   }
 
 

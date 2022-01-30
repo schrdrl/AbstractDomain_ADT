@@ -13,7 +13,7 @@ case class ALists(intervals: Intervals) {
   import intervals.Interval //import inner Class
   type AInt = Interval //alias
 
-  sealed trait AList //"behaviour"
+  sealed trait AList  //"behaviour"
   case object ANil extends AList
   case class ACons(aHead: AInt, aTail: AList) extends AList
   case class AMany(elem: AInt) extends AList
@@ -367,11 +367,12 @@ case class ALists(intervals: Intervals) {
   }
 
 
-  //TODO checks whether an AList contains an element of AInt
-  def aContains(al1: AList, elem: AInt) : Set[ABool] = al1 match {
-    case ANil => Set(AFalse)
-    case ACons(h,t) => ???
-    case AMany(e) => ???
+  //TODO test
+  //Method checks whether an AList value contains an element of AInt
+  def aContains(al1: AList, elem: AInt) : ABool = al1 match {
+    case ANil => AFalse
+    case ACons(h,t) => if(intervals.contains_Interval(elem,h) == true) ATrue else aContains(t, elem)
+    case AMany(e) => if(intervals.contains_Interval(elem,e) == true) ATrue else AFalse
   }
 
 
@@ -462,22 +463,23 @@ case class ALists(intervals: Intervals) {
   /************************************************************
    *             Methods:   AOption[T] -> T                  *
    ************************************************************/
+    //TODO Rückgabe: AState(AOption[AInt], ABool)
+  def AOptionContain(ao: AOption[AInt], elem: AInt): ABool = ao match {
+    case ANone => AFalse
+    case ASome(e) => ???
+    case AMaybe(e) => ???
 
-
-  //Pattern Matching is done with case class Sequence (e.g. IfElse_xsIsNil)
-  //TODO Rückgabe mit Set falls -> isNil
-  def justAList(ao: AOption[AList]): AList = ao match {
-    case ASome(e) =>  ASome(e).get
-    case ANone => throw new Exception("Exception thrown from justAList. Reason: Input was ANone")
-    case AMaybe(_) => throw new Exception("Exception thrown from justAList. Reason: Input was AMaybe")
   }
 
-  //TODO Rückgabe mit Set falls -> isNil
-  def justAInt(ao: AOption[AInt]): AInt = ao match{
-    case ASome(e) => ASome(e).get
-    case ANone => throw new Exception("Exception thrown from justAInt. Reason: Input was ANone")
-    case AMaybe(_) => throw new Exception("Exception thrown from justAInt. Reason: Input was AMaybe")
+  //Method returns the argument of an AOption value
+  //TODO Rückgabe: Set[AState] mit AState(AOption[AList],ABool)
+  def justValue[T](ao: AOption[T]): Set[T] = ao match {
+    case ASome(e) =>  Set(ASome(e).get)
+    case ANone => Set()// throw new Exception("Exception thrown from justAList. Reason: Input was ANone")
+    case AMaybe(e) => Set()// throw new Exception("Exception thrown from justAList. Reason: Input was AMaybe")
+    //TODO Set(AState(ANone, AFalse), AState(ASome(e), ATrue))
   }
+
 
   /************************************************************
    *                       Lattice                            *
@@ -505,11 +507,48 @@ case class ALists(intervals: Intervals) {
   case class AState(n: AInt, xs: AList)
 
   //First sketch of a generic version of AState
-  sealed abstract class AStates
-  case class AStateGeneric[T, S](first: T, second:S ) extends AStates
+  //TODO überall einfügen
+  sealed abstract class AStates[T,S](val first: T,val second:S)
+  case class AStateGeneric1(override  val first: AInt, override  val second:AList) extends AStates[AInt, AList](first, second)
+  case class AStateGeneric2(override  val first: AOption[AInt], override  val second:ABool) extends AStates[ AOption[AInt], ABool](first, second)
+
   //Pattern Matching -> wenn xs gefragt ist
 
+  trait AState_Base[T,S]
+  trait AState_BaseAInt[AInt,S]
 
+  //case class AState1(first:AInt, second: Any) extends AState_Base[AInt, Any] with AState_BaseAInt[AInt,Any]
+  case class AState1(first:Any, second: Any) extends AState_Base[Any, Any] with AState_BaseAInt[Any,Any]
+  case class AState2(first : AOption[AInt], second: ABool) extends  AState_Base[AOption[AInt], ABool]
+
+
+
+
+
+
+  //TODO AStmt_Test
+  trait AStmt_Test[AState_Base] {
+    def execute(as: Set[AState_Base]): Set[AState_Base]
+  }
+  //TODO AssignN0_Test
+  object AssignN0_test1 extends AStmt_Test[AState1] { //initial, beginning of loop
+    override def execute(as: Set[AState1]): Set[AState1]= {
+      Set(AState1(Interval(IntegerVal(0), IntegerInf), ANil))
+    }
+  }
+
+  //TODO Test
+  object AssignN0_test2 extends AStmt_Test[AState1] { //initial, beginning of loop
+    override def execute(as: Set[AState1]): Set[AState1] = {
+      var result: Set[AState1] = Set()
+      for (a <- as) {
+        if(a.first.isInstanceOf[AInt]) {
+          result += AState1(Interval(IntegerVal(0), IntegerVal(0)), a.second )
+        }
+      }
+      result
+    }
+  }
 
 
   //Representation of a Statement. Is used by Sequences, e.g. IfElse_xsIsNil(stmt1,stmt2)
@@ -565,7 +604,7 @@ case class ALists(intervals: Intervals) {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
       for (a <- as) {
-        result += AState(intervals.-(a.n, Interval(IntegerVal(1), IntegerVal(1))), justAList(aTail(a.xs)))
+        result += AState(intervals.-(a.n, Interval(IntegerVal(1), IntegerVal(1))), justValue(aTail(a.xs)).head)
       }
       result
     }
@@ -575,7 +614,7 @@ case class ALists(intervals: Intervals) {
     override def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
       for (a <- as) {
-        result += AState(intervals.+(a.n, Interval(IntegerVal(1), IntegerVal(1))), justAList(aTail(a.xs)))
+        result += AState(intervals.+(a.n, Interval(IntegerVal(1), IntegerVal(1))), justValue(aTail(a.xs)).head)
       }
       result
     }
@@ -638,7 +677,7 @@ case class ALists(intervals: Intervals) {
     def subtractAnyN_aTail(n: AInt, as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
       for (a <- as) {
-        result += AState(intervals.-(a.n, n), justAList(aTail(a.xs)))
+        result += AState(intervals.-(a.n, n), justValue(aTail(a.xs)).head)
       }
       result
     }
@@ -669,7 +708,7 @@ case class ALists(intervals: Intervals) {
     def addAnyN_aTail(n: AInt, as: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
       for (a <- as) {
-        result += AState(intervals.+(a.n, n), justAList(aTail(a.xs)))
+        result += AState(intervals.+(a.n, n), justValue(aTail(a.xs)).head)
       }
       result
     }
