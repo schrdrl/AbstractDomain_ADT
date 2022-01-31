@@ -1,6 +1,6 @@
 package AList
 
-import Console.{GREEN, RED, YELLOW ,RESET}
+import Console.{GREEN, RED, RESET, YELLOW}
 
 /**
  * AList is an abstract domain of numerical lists (belonging to algebraic data types)
@@ -111,11 +111,11 @@ case class ALists(intervals: Intervals) {
   /************************************************************
    *                Advanced Functions over ALists            *
    ************************************************************/
-
+   //TODO recheck
    //Method prepends an element on the front a an AList value
    def +:(elem: AInt, al2: AList) : AList = ACons(elem, al2 )
 
-
+  //TODO recheck
   //Method appends an element the the end a an AList value
    def :+(al1: AList, elem: AInt) : Set[AList] = al1 match { //evtl. doch mit Set
      case ANil => Set(ACons(elem, ANil))
@@ -125,6 +125,7 @@ case class ALists(intervals: Intervals) {
      //2. case: ACons(e, AMany(e)) -> ACons(e, ACons(elem, ANil)) oder ACons(e, ACons(elem, AMany(e))) oder ACons(e, AMany(e union elem)) ???
    }
 
+  //TODO recheck
   //Method concats two values of type AList
    def ++(al1: AList, al2: AList): Set[AList] = (al1, al2) match {
      case (ANil, ANil) => Set(ANil)
@@ -136,8 +137,6 @@ case class ALists(intervals: Intervals) {
      case (AMany(e1), ACons(h,t)) => Set(al2, ACons(e1, union_AList(al1, al2))) //TODO recheck
      case (ACons(h,t), AMany(e2)) =>if(++(t,ACons(e2,AMany(e2))).tail.nonEmpty) Set(ACons(h, ++(t,ACons(e2,AMany(e2))).head), ACons(h, ++(t,ACons(e2,AMany(e2))).tail.head)) else Set(al1, ACons(h,++(t,ACons(e2,AMany(e2))).head)) //TODO recheck
      case (ACons(h1, t1), ACons(h2, t2)) =>  if(++(t1, al2).tail.nonEmpty) Set(ACons(h1, ++(t1, al2).head),ACons(h1, ++(t1, al2).tail.head)) else Set(ACons(h1, ++(t1, al2).head))
-
-
    }
 
 
@@ -289,8 +288,6 @@ case class ALists(intervals: Intervals) {
   }
 
 
-
-
   /************************************************************
    *          Operators (&&, ===, !==) returning ABool        *
    ************************************************************/
@@ -362,17 +359,100 @@ case class ALists(intervals: Intervals) {
     case (AMaybe(a), ASome(b)) => ===(a, b)
   }
 
-  def ===(as1: AState, as2: AState): ABool = {
-    &&(===(as1.n, as2.n),===(as1.xs, as2.xs))
+
+  def AStateEqual(as1: AState_Base, as2: AState_Base): ABool = {
+    as1.first match {
+      case int: AInt =>
+        as1.second match {
+          case int1: AInt =>
+            &&(===(int, as2.first.asInstanceOf[AInt]), ===(int1, as2.second.asInstanceOf[AInt]))
+          case list: AList =>
+            &&(===(int, as2.first.asInstanceOf[AInt]), ===(list, as2.second.asInstanceOf[AList]))
+          case bool: ABool =>
+            &&(===(int, as2.first.asInstanceOf[AInt]), ===(bool, as2.second.asInstanceOf[ABool]))
+          case ao1: AOption[AInt] =>
+            &&(===(int, as2.first.asInstanceOf[AInt]), ===(ao1, as2.second.asInstanceOf[AOption[AInt]]))
+          case a1: AOption[AList] =>
+            &&(===(int, as2.first.asInstanceOf[AInt]), ===(a1, as2.second.asInstanceOf[AOption[AList]]))
+          case _ =>
+            AFalse //if it is a different combination
+        }
+      case list: AList =>
+        as1.second match {
+          case int: AInt =>
+            &&(===(list, as2.first.asInstanceOf[AList]), ===(int, as2.second.asInstanceOf[AInt]))
+          case list1: AList =>
+            &&(===(list, as2.first.asInstanceOf[AList]), ===(list1, as2.second.asInstanceOf[AList]))
+          case bool: ABool =>
+            &&(===(list, as2.first.asInstanceOf[AList]), ===(bool, as2.second.asInstanceOf[ABool]))
+          case ao1: AOption[AInt] =>
+            &&(===(list, as2.first.asInstanceOf[AList]), ===(ao1, as2.second.asInstanceOf[AOption[AInt]]))
+          case a1: AOption[AList] =>
+            &&(===(list, as2.first.asInstanceOf[AList]), ===(a1, as2.second.asInstanceOf[AOption[AList]]))
+          case _ =>
+            AFalse //if it is a different combination
+        }
+      case bool: ABool =>
+        as1.second match {
+          case int: AInt =>
+            &&(===(bool, as2.first.asInstanceOf[ABool]), ===(int, as2.second.asInstanceOf[AInt]))
+          case list: AList =>
+            &&(===(bool, as2.first.asInstanceOf[ABool]), ===(list, as2.second.asInstanceOf[AList]))
+          case bool1: ABool =>
+            &&(===(bool, as2.first.asInstanceOf[ABool]), ===(bool1, as2.second.asInstanceOf[ABool]))
+          case ao1: AOption[AInt] =>
+            &&(===(bool, as2.first.asInstanceOf[ABool]), ===(ao1, as2.second.asInstanceOf[AOption[AInt]]))
+          case a1: AOption[AList] =>
+            &&(===(bool, as2.first.asInstanceOf[ABool]), ===(a1, as2.second.asInstanceOf[AOption[AList]]))
+          case _ =>
+            AFalse //if it is a different combination
+        }
+      case ao1: AOption[AInt] =>
+        as1.second match {
+          case int: AInt =>
+            &&(===(ao1, as2.first.asInstanceOf[AOption[AInt]]), ===(int, as2.second.asInstanceOf[AInt]))
+          case list: AList =>
+            &&(===(ao1, as2.first.asInstanceOf[AOption[AInt]]), ===(list, as2.second.asInstanceOf[AList]))
+          case bool: ABool =>
+            &&(===(ao1, as2.first.asInstanceOf[AOption[AInt]]), ===(bool, as2.second.asInstanceOf[ABool]))
+          case ao11: AOption[AInt] =>
+            &&(===(ao1, as2.first.asInstanceOf[AOption[AInt]]), ===(ao11, as2.second.asInstanceOf[AOption[AInt]]))
+          case a1: AOption[AList] =>
+            &&(===(ao1, as2.first.asInstanceOf[AOption[AInt]]), ===(a1, as2.second.asInstanceOf[AOption[AList]]))
+          case _ =>
+            AFalse //if it is a different combination
+        }
+      case a1: AOption[AList] =>
+        as1.second match {
+          case int: AInt =>
+            &&(===(a1, as2.first.asInstanceOf[AOption[AList]]), ===(int, as2.second.asInstanceOf[AInt]))
+          case list: AList =>
+            &&(===(a1, as2.first.asInstanceOf[AOption[AList]]), ===(list, as2.second.asInstanceOf[AList]))
+          case bool: ABool =>
+            &&(===(a1, as2.first.asInstanceOf[AOption[AList]]), ===(bool, as2.second.asInstanceOf[ABool]))
+          case ao1: AOption[AInt] =>
+            &&(===(a1, as2.first.asInstanceOf[AOption[AList]]), ===(ao1, as2.second.asInstanceOf[AOption[AInt]]))
+          case a11: AOption[AList] =>
+            &&(===(a1, as2.first.asInstanceOf[AOption[AList]]), ===(a11, as2.second.asInstanceOf[AOption[AList]]))
+          case _ =>
+            AFalse //if it is a different combination
+        }
+      case _ =>
+        AFalse //if it is a different combination
+    }
+
+
   }
+
+
 
 
   //TODO test
   //Method checks whether an AList value contains an element of AInt
   def aContains(al1: AList, elem: AInt) : ABool = al1 match {
     case ANil => AFalse
-    case ACons(h,t) => if(intervals.contains_Interval(elem,h) == true) ATrue else aContains(t, elem)
-    case AMany(e) => if(intervals.contains_Interval(elem,e) == true) ATrue else AFalse
+    case ACons(h,t) => if(intervals.contains_Interval(elem, h)) ATrue else aContains(t, elem)
+    case AMany(e) => if(intervals.contains_Interval(elem, e)) ATrue else AFalse
   }
 
 
@@ -403,33 +483,54 @@ case class ALists(intervals: Intervals) {
 
   //trait "seperates" inputs of unary operations in two sets
   trait ABinOp[A]{
-    def positive(a1:A,a2: A ) : Set[A]
+    def positive(a1:A,a2: A ) :  Set[AInt]
     def negative(a1:A,a2: A) : (Set[(A,A)] , Set[(A,A)])
   }
 
-  /*
-  //TODO
-  object AIntEqual extends ABinOp[AInt] {
 
-    override def positive(a1: AInt, a2: AInt): Set[AInt] = {
-      if (intervals.intersect_Interval(a1,a2) != intervals.Interval(IntegerInf, IntegerNegInf)) Set((a1, a2)) else Set()
-    }
-                                            // a1(before, after)      a2(before, after)
-    override def negative(a1: AInt, a2: AInt): (Set[(AInt, AInt)], Set[(AInt, AInt)]) = {
-      if(AIntEqual.positive(a1,a2).isEmpty) (Set(a1), Set(a2))
-      else{
-        val equalPart = AIntEqual.positive(a1,a2).head
 
-          ???
-
+    object AIntEqual extends ABinOp[AInt] {
+      //returns the interval both inputs have in common
+      override def positive(a1: AInt, a2: AInt): Set[AInt] = {
+        if (intervals.intersect_Interval(a1,a2) != intervals.Interval(IntegerInf, IntegerNegInf)) Set(intervals.intersect_Interval(a1,a2)) else Set()
       }
 
-
+      //returns the interval parts that are not equal: (a1(before, after), a2(before, after))
+      override def negative(a1: AInt, a2: AInt): (Set[(AInt, AInt)], Set[(AInt, AInt)]) = {
+       if  (AIntEqual.positive(a1,a2).isEmpty){ //not equal at all
+         (Set((a1, null)), Set((a2, null)))
+       }
+        else{ //there are some parts of the intervals that are equivalent
+           if(a1.lb == a2.lb){  //exactly the same boundaries
+             if(a1.ub == a2.ub){
+              (Set((null, null)), Set((null,null)))
+             }else if(IntegerW.<(a1.ub, a2.ub)){
+                 (Set((null, null)), Set((null,Interval(IntegerW.+(a1.ub, IntegerVal(1)), a2.ub))))
+             }else{ //if(IntegerW.<(a2.ub, a1.ub))
+                (Set((null, Interval(IntegerW.+(a2.ub, IntegerVal(1)), a1.ub))), Set((null, null)))
+             }
+           }else if(IntegerW.<(a1.lb, a2.lb)){
+             if(a1.ub == a2.ub){
+               (Set((Interval(a1.lb,IntegerW.-(a2.lb, IntegerVal(1))), null)), Set((null, null)))
+             }else if(IntegerW.<(a1.ub, a2.ub)){
+               (Set((Interval(a1.lb,IntegerW.-(a2.lb, IntegerVal(1))), null)), Set((null, Interval(IntegerW.+(a1.ub, IntegerVal(1)), a2.ub))))
+             }else { //if(IntegerW.<(a2.ub, a1.ub))
+               (Set((Interval(a1.lb, IntegerW.-(a2.lb, IntegerVal(1))),Interval(IntegerW.+(a2.ub, IntegerVal(1)),a1.ub))), Set((null, null)))
+             }
+           }else { //if(IntegerW.<(a2.lb, a1.lb))
+             if(a1.ub == a2.ub){
+               (Set((null,null)), Set((Interval(a2.lb, IntegerW.-(a1.lb, IntegerVal(1))),null)))
+             }else if(IntegerW.<(a1.ub, a2.ub)){
+               (Set((null, null)), Set((Interval(a2.lb, IntegerW.-(a1.lb, IntegerVal(1))),Interval(IntegerW.+(a1.ub, IntegerVal(1)), a2.ub))))
+             }else { //if(IntegerW.<(a2.ub, a1.ub))
+               (Set((null, Interval(IntegerW.+(a2.ub, IntegerVal(1)),a1.ub))), Set((Interval(a2.lb, IntegerW.-(a1.lb, IntegerVal(1))),null)))
+             }
+           }
+       }
+      }
     }
 
-  }
-
-
+/*
   //TODO Test
   object AListEqual extends ABinOp[AList] {
     override def positive(a1: AList, a2: AList): Set[AList] = (a1,a2) match { //return the equal part -> one AList
@@ -464,20 +565,23 @@ case class ALists(intervals: Intervals) {
    *             Methods:   AOption[T] -> T                  *
    ************************************************************/
     //TODO Rückgabe: AState(AOption[AInt], ABool)
+    /*
   def AOptionContain(ao: AOption[AInt], elem: AInt): ABool = ao match {
     case ANone => AFalse
     case ASome(e) => ???
     case AMaybe(e) => ???
 
   }
+  */
+
 
   //Method returns the argument of an AOption value
-  //TODO Rückgabe: Set[AState] mit AState(AOption[AList],ABool)
+  //TODO Test
   def justValue[T](ao: AOption[T]): Set[T] = ao match {
     case ASome(e) =>  Set(ASome(e).get)
     case ANone => Set()// throw new Exception("Exception thrown from justAList. Reason: Input was ANone")
-    case AMaybe(e) => Set()// throw new Exception("Exception thrown from justAList. Reason: Input was AMaybe")
-    //TODO Set(AState(ANone, AFalse), AState(ASome(e), ATrue))
+    case AMaybe(e) => ???//Set(AState(ANone, AFalse), AState(ASome(e).get, ATrue))// throw new Exception("Exception thrown from justAList. Reason: Input was AMaybe")
+//TODO AMaybe
   }
 
 
@@ -504,47 +608,37 @@ case class ALists(intervals: Intervals) {
    *                      AState, AStmt                       *
    ************************************************************/
   //Represents a state(AInt, AList). Is used by objects of AStmt and in Sets for Sequences
-  case class AState(n: AInt, xs: AList)
+  //case class AState(n: AInt, xs: AList) //TODO löschen wenn ausgetauscht
 
-  //First sketch of a generic version of AState
-  //TODO überall einfügen
-  sealed abstract class AStates[T,S](val first: T,val second:S)
-  case class AStateGeneric1(override  val first: AInt, override  val second:AList) extends AStates[AInt, AList](first, second)
-  case class AStateGeneric2(override  val first: AOption[AInt], override  val second:ABool) extends AStates[ AOption[AInt], ABool](first, second)
 
-  //Pattern Matching -> wenn xs gefragt ist
-
-  trait AState_Base[T,S]
-  trait AState_BaseAInt[AInt,S]
+  trait AState_Base{
+    def  first: Any
+    def  second: Any
+  }
 
   //case class AState1(first:AInt, second: Any) extends AState_Base[AInt, Any] with AState_BaseAInt[AInt,Any]
-  case class AState1(first:Any, second: Any) extends AState_Base[Any, Any] with AState_BaseAInt[Any,Any]
-  case class AState2(first : AOption[AInt], second: ABool) extends  AState_Base[AOption[AInt], ABool]
+  case class AState(first:Any, second: Any) extends AState_Base
+  /*
+  case class AState_AIntAList(first:AInt, second: AList) extends AState_Base
+  case class AState_AIntABool(first:AInt, second: ABool) extends AState_Base
+  case class AState_AIntAOp[T](first:AInt, second: AOption[T]) extends AState_Base
+  case class AState_AIntAny(first:AInt, second: Any) extends AState_Base
+  case class AState_AOpABool[T](first : AOption[T], second: ABool) extends  AState_Base
+*/
 
-
-
-
-
-
-  //TODO AStmt_Test
-  trait AStmt_Test[AState_Base] {
+  //Representation of a Statement. Is used by Sequences, e.g. IfElse_xsIsNil(stmt1,stmt2)
+  trait AStmt {
     def execute(as: Set[AState_Base]): Set[AState_Base]
   }
-  //TODO AssignN0_Test
-  object AssignN0_test1 extends AStmt_Test[AState1] { //initial, beginning of loop
-    override def execute(as: Set[AState1]): Set[AState1]= {
-      Set(AState1(Interval(IntegerVal(0), IntegerInf), ANil))
-    }
-  }
 
-  //TODO Test
-  object AssignN0_test2 extends AStmt_Test[AState1] { //initial, beginning of loop
-    override def execute(as: Set[AState1]): Set[AState1] = {
-      var result: Set[AState1] = Set()
+  //Statements assigns interval [0;0] to a Set of AStates -> initialState
+  object AssignN0 extends AStmt { //initial, beginning of loop
+    override def execute(as: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
       for (a <- as) {
         if(a.first.isInstanceOf[AInt]) {
-          result += AState1(Interval(IntegerVal(0), IntegerVal(0)), a.second )
-        }else{
+          result += AState(Interval(IntegerVal(0), IntegerVal(0)), a.second)
+        } else{
           result += a
         }
       }
@@ -552,29 +646,16 @@ case class ALists(intervals: Intervals) {
     }
   }
 
-
-  //Representation of a Statement. Is used by Sequences, e.g. IfElse_xsIsNil(stmt1,stmt2)
-  trait AStmt {
-    def execute(as: Set[AState]): Set[AState]
-  }
-
-  //Statements assigns interval [0;0] to a Set of AStates -> initialState
-  object AssignN0 extends AStmt { //initial, beginning of loop
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        result += AState(Interval(IntegerVal(0), IntegerVal(0)), a.xs)
-      }
-      result
-    }
-  }
-
   //Statements assigns a interval [1;1] to a Set of AStates -> initialState
   object AssignN1 extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
+    override def execute(as: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
       for (a <- as) {
-        result += AState(Interval(IntegerVal(1), IntegerVal(1)), a.xs)
+        if(a.first.isInstanceOf[AInt] ) {
+          result += AState(Interval(IntegerVal(1), IntegerVal(1)), a.second)
+        } else{
+          result += a
+        }
       }
       result
     }
@@ -582,10 +663,17 @@ case class ALists(intervals: Intervals) {
 
   //Statements adds interval [1;1] to a Set of AStates
   object Add1 extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
+    override def execute(as: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
       for (a <- as) {
-        result += AState(intervals.+(a.n, Interval(IntegerVal(1), IntegerVal(1))), a.xs)
+
+        a.first match {
+          case int: AInt =>
+            result += AState(intervals.+(int, Interval(IntegerVal(1), IntegerVal(1))), a.second)
+          case _ =>
+            result += a
+        }
+
       }
       result
     }
@@ -593,45 +681,61 @@ case class ALists(intervals: Intervals) {
 
   //Statements subtracts a interval [1;1] off a Set of AStates
   object Subtract1 extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
+    override def execute(as: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
       for (a <- as) {
-        result += AState(intervals.-(a.n, Interval(IntegerVal(1), IntegerVal(1))), a.xs)
+        a.first match {
+          case int: AInt =>
+            result += AState(intervals.-(int, Interval(IntegerVal(1), IntegerVal(1))), a.second)
+          case _ =>
+            result += a
+        }
       }
       result
     }
   }
 
   object Subtract1_ATail extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
+    override def execute(as: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
       for (a <- as) {
-        result += AState(intervals.-(a.n, Interval(IntegerVal(1), IntegerVal(1))), justValue(aTail(a.xs)).head)
+        a.first match {
+          case int: AInt if a.second.isInstanceOf[AList] =>
+            result += AState(intervals.-(int, Interval(IntegerVal(1), IntegerVal(1))), justValue(aTail(a.second.asInstanceOf[AList])).head)
+          case _ =>
+            result += a
+        }
       }
       result
     }
   }
 
   object Add1_ATail extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
+    override def execute(as: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
       for (a <- as) {
-        result += AState(intervals.+(a.n, Interval(IntegerVal(1), IntegerVal(1))), justValue(aTail(a.xs)).head)
+        a.first match {
+          case int: AInt if a.second.isInstanceOf[AList] =>
+            result += AState(intervals.+(int, Interval(IntegerVal(1), IntegerVal(1))), justValue(aTail(a.second.asInstanceOf[AList])).head)
+          case _ =>
+            result += a
+        }
       }
       result
     }
   }
 
   object Assign_SameValues extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
+    override def execute(as: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
       for (a <- as) {
-        result += AState(a.n, a.xs)
+        result += a
       }
       result
     }
   }
 
+  /*
   /** object of AStmt.
    * Method execute assigns interval [0;0] to a Set of AStates -> initialState
    * Method assignAnyN assigns any interval n to a Set of AStates
@@ -715,16 +819,18 @@ case class ALists(intervals: Intervals) {
       result
     }
   }
-
+*/
 
   /************************************************************
    *                     Sequences                            *
    ************************************************************/
 
   //Method is used to create an AState of a given list and an already existing AState -> IfElse_xsIsNil
-  def AssignN_SameIntervalToAList(as: AState, al: AList) : AState = {
-    AState(as.n, al)
+  /* TODO needs improvement
+  def AssignN_SameIntervalToAList(as: AState_Base, al: AList) : AState = {
+    AState_AnyAny(as.first, al)
   }
+   */
 
   //Method splits a given AList into two sets (Empty AList, Non-Empty AList)
   def ifIsNil(l: AList): (Set[AList], Set[AList]) = l match {
@@ -733,13 +839,13 @@ case class ALists(intervals: Intervals) {
     case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
   }
 
-
+/* TODO deprecated
   //stmt1 will be executed if xs of the given AState is nil, otherwise stmt2 will be executed
   case class IfElse_xsIsNil(stmt1: AStmt, stmt2: AStmt) extends AStmt {
-      def execute(as: Set[AState]): Set[AState] = {
-        var result: Set[AState] = Set()
+      def execute(as: Set[AState_Base]): Set[AState_Base] = {
+        var result: Set[AState_Base] = Set()
         for (a <- as) {
-          val (isNil, isNotNil) = ifIsNil(a.xs)
+          val (isNil, isNotNil) = ifIsNil(a.second.asInstanceOf[AList])
 
           val aStatesTrue: Set[AState] = isNil.map(AssignN_SameIntervalToAList(a,_))
           val aStatesFalse: Set[AState] = isNotNil.map(AssignN_SameIntervalToAList(a,_)) //isNotNil -> aStatesFalse
@@ -750,12 +856,12 @@ case class ALists(intervals: Intervals) {
       }
     }
 
-
+*/
 
 //The AStmt will be executed if xs of the given AState is nil
   case class If_xsIsNil(stmt: AStmt) {
-    def execute(as: AState): Set[AState] = {
-      val (aStatesTrue, aStatesFalse) = ifIsNil(as.xs)
+    def execute(as: AState_Base): Set[AState_Base] = {
+      val (aStatesTrue, aStatesFalse) = ifIsNil(as.second.asInstanceOf[AList]) //TODO check whether it is AList
       val result = for (as1 <- aStatesTrue; as2 <- stmt.execute(Set(as))) yield as2
       result
     }
@@ -767,11 +873,11 @@ case class ALists(intervals: Intervals) {
 
   //Trait ATest represents the two states a Test (e.g. xsIsNil) can have
   trait ATest{
-    def positive(states: Set[AState]): Set[AState]
-    def negative(states: Set[AState]): Set[AState]
+    def positive(states: Set[AState_Base]): Set[AState_Base]
+    def negative(states: Set[AState_Base]): Set[AState_Base]
   }
 
-
+/* TODO needs improvement
   object xsIsNilTest extends ATest {
     override def positive(states: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
@@ -792,6 +898,7 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+
   object xsIsNotNilTest extends ATest {
     override def positive(states: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set()
@@ -811,23 +918,23 @@ case class ALists(intervals: Intervals) {
       result
       }
   }
-
+*/
 
   object nIsPositive extends ATest {
-    override def positive(states: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
+    override def positive(states: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
       for (state <- states) {
-        if(intervals.isPositive(state.n)){
+        if(intervals.isPositive(state.first.asInstanceOf[AInt])){ //TODO check if is AInt
           result += state
         }
       }
       result
     }
 
-    override def negative(states: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
+    override def negative(states: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
       for (state <- states) {
-        if(!intervals.isPositive(state.n)){
+        if(!intervals.isPositive(state.first.asInstanceOf[AInt])){ //TODO check if it is AInt
           result += state
         }
       }
@@ -837,20 +944,20 @@ case class ALists(intervals: Intervals) {
 
 
   object nIsNegative extends ATest {
-    override def positive(states: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
+    override def positive(states: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
       for (state <- states) {
-        if(intervals.isNegative(state.n)){
+        if(intervals.isNegative(state.first.asInstanceOf[AInt])){ //TODO Check if it is AInt
           result += state
         }
       }
       result
     }
 
-    override def negative(states: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
+    override def negative(states: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
       for (state <- states) {
-        if(!intervals.isNegative(state.n)){
+        if(!intervals.isNegative(state.first.asInstanceOf[AInt])){ //TODO Check if it is AInt
           result += state
         }
       }
@@ -860,20 +967,20 @@ case class ALists(intervals: Intervals) {
 
 
   object nEqualsZero extends ATest {
-    override def positive(states: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
+    override def positive(states: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
       for (state <- states) {
-        if(intervals.isZero(state.n)){
+        if(intervals.isZero(state.first.asInstanceOf[AInt])){ //TODO Check if it is AInt
           result += state
         }
       }
       result
     }
 
-    override def negative(states: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
+    override def negative(states: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
       for (state <- states) {
-        if(!intervals.isZero(state.n)){
+        if(!intervals.isZero(state.first.asInstanceOf[AInt])){ //TODO Check if it is AInt
           result += state
         }
       }
@@ -887,31 +994,34 @@ case class ALists(intervals: Intervals) {
 
   //Abstract transformer: AIf is an abstract representation of an If test
   case class AIf(test: ATest, left: AStmt, right:AStmt) extends AStmt{
-    override def execute(as: Set[AState]): Set[AState] = {
+    override def execute(as: Set[AState_Base]): Set[AState_Base] = {
       left.execute(test.positive(as)) ++ right.execute(test.negative(as))
     }
   }
 
   //Abstract transformer: AWhile is an abstract representation of a while loop
   case class AWhile(test:ATest, body: AStmt) extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var states_at_loop_head: Set[AState] = as
-      var states_after_body: Set[AState] = Set()
-      var result: Set[AState] = Set()
+    override def execute(as: Set[AState_Base]): Set[AState_Base] = {
+      var states_at_loop_head: Set[AState_Base] = as
+      var states_after_body: Set[AState_Base] = Set()
+      var result: Set[AState_Base] = Set()
       var abort_loop = false
 
       while (test.positive(states_at_loop_head).nonEmpty && (!abort_loop)) {
         states_after_body = body.execute(test.positive(states_at_loop_head))
         println("After loop-execution:" + states_after_body.head)
-        result = Set(AState(intervals.Lattice.widen(states_at_loop_head.head.n, states_after_body.head.n), widen_AList(states_at_loop_head.head.xs, states_after_body.head.xs)))
+       // result = Set(AState(intervals.Lattice.widen(states_at_loop_head.head.first, states_after_body.head.n), widen_AList(states_at_loop_head.head.xs, states_after_body.head.xs)))
         println("After widen:" + result.head)
         println("")
 
-        if (===(states_at_loop_head.head, result.head) == AFalse)  {
+        //TODO TEST
+        if (AStateEqual(states_at_loop_head.head, result.head) == AFalse)  {
           states_at_loop_head = result
-        } else if (===(states_at_loop_head.head, result.head) == ATrue) {
+        } else if (AStateEqual(states_at_loop_head.head, result.head) == ATrue) {
           abort_loop = true
         }
+
+
       }
 
       if (result.nonEmpty) {
@@ -927,7 +1037,7 @@ case class ALists(intervals: Intervals) {
   //Abstract Transformer: AAssert is an abstract representation of an assertion
   //TODO evtl doch mit extends AStmt -> mit generischem AState Typ output für AVerify() generieren
   case class AAssert(test: ATest) {
-     def execute(as: Set[AState]) : Unit = {
+     def execute(as: Set[AState_Base]) : Unit = {
        if (test.positive(as).nonEmpty) {
          Console.println(s"$RESET${GREEN}Assertion fulfills for state(s): $RESET")  //success
          test.positive(as).foreach(posElement => Console.println(s"$RESET$GREEN $posElement $RESET"))
@@ -950,11 +1060,8 @@ case class ALists(intervals: Intervals) {
   //Abstract Transformer: AAssume is an abstract representation of an assumption
   //TODO Test
   case class AAssume(assumption: AStmt) extends AStmt{
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        assumption.execute(as)
-      }
+    override def execute(as: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = assumption.execute(as)
       result
     }
   }

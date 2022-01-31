@@ -4,6 +4,7 @@ import AList.{ALists, IntegerVal, Intervals}
 import org.scalatest.funsuite.AnyFunSuite
 
 class AStateSequenceTests extends AnyFunSuite {
+  /*
   test("AssignN - execute") {
 
     val a = Intervals.Unbounded
@@ -169,5 +170,5 @@ class AStateSequenceTests extends AnyFunSuite {
 
   }
 
-
+*/
 }

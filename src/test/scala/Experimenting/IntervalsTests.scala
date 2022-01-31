@@ -1,7 +1,7 @@
 package Experimenting
 
 import AList.IntegerW.integerWToInt
-import AList.{IntegerInf, IntegerNegInf, IntegerVal, Intervals}
+import AList.{ALists, IntegerInf, IntegerNegInf, IntegerVal, Intervals}
 import org.scalatest.funsuite.AnyFunSuite
 
 class IntervalsTests extends AnyFunSuite {
@@ -224,6 +224,46 @@ class IntervalsTests extends AnyFunSuite {
     println(integerWToInt(c.lb))
 
 
+
+  }
+
+  test("IntegerW =="){
+    val a = Intervals.Unbounded
+    val b = IntegerVal(0)
+    val c = IntegerVal(1)
+    val d = IntegerVal(0)
+
+    println(b == c)
+    println(b == d)
+
+  }
+
+
+
+  test("AIntEqual"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(3),IntegerVal(8))
+    val d = b.intervals.Interval(IntegerVal(3),IntegerVal(8))
+    val e = b.intervals.Interval(IntegerVal(1),IntegerVal(2))
+    val f = b.intervals.Interval(IntegerVal(3),IntegerVal(5))
+    val g = b.intervals.Interval(IntegerVal(1),IntegerVal(8))
+
+    val h = b.AIntEqual
+    println(h.positive(c,d))
+    println(h.negative(c,d))
+    println("")
+
+    println(h.positive(c,e))
+    println(h.negative(c,e))
+    println("")
+
+    println(h.positive(c,f))
+    println(h.negative(c,f))
+    println("")
+
+    println(h.positive(c,g))
+    println(h.negative(c,g))
 
   }
 

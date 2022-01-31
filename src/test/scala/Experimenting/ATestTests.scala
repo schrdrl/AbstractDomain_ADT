@@ -4,7 +4,7 @@ import AList.{ALists, IntegerVal, Intervals}
 import org.scalatest.funsuite.AnyFunSuite
 
 class ATestTests extends AnyFunSuite {
-
+/*
   test("xsIsNilTest"){
     val a = Intervals.Unbounded
     val b = ALists(a)
@@ -157,4 +157,7 @@ class ATestTests extends AnyFunSuite {
     val j = b.AState(d,  b.AMany(c))
     f.execute(Set(g,h,i,j))
   }
+
+
+ */
 }

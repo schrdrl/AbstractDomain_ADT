@@ -33,6 +33,7 @@ object IntegerW {
     case IntegerNegInf => Double.NegativeInfinity.toInt
   }
 
+
   def <=(iw1: IntegerW, iw2: IntegerW): Boolean = (iw1, iw2) match {
     case (IntegerNegInf, _) => true
     case (_, IntegerInf) => true

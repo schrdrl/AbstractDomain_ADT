@@ -8,7 +8,7 @@ class LoopTests extends AnyFunSuite {
    * tests: Loop Abstract                                  *
    * Tests are just using the abstract type AList          *
    * ****************************************************** */
-
+/*
   test("Concrete Example - ACons") {
     /**
      * int n
@@ -377,4 +377,6 @@ class LoopTests extends AnyFunSuite {
     assert(b.aHead(xs) == b.ASome(i_head))
   }
 
+
+ */
 }

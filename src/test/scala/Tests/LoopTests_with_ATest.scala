@@ -4,7 +4,7 @@ import AList.{ALists, IntegerVal, Intervals}
 import org.scalatest.funsuite.AnyFunSuite
 
 class LoopTests_with_ATest extends AnyFunSuite {
-
+/*
   test("Concrete Example - ACons") {
     /**
      * int n
@@ -244,4 +244,6 @@ class LoopTests_with_ATest extends AnyFunSuite {
     }
   }
 
+
+ */
 }
