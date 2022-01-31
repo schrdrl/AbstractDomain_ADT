@@ -564,7 +564,7 @@ case class ALists(intervals: Intervals) {
   /************************************************************
    *             Methods:   AOption[T] -> T                  *
    ************************************************************/
-    //TODO Rückgabe: AState(AOption[AInt], ABool)
+    //TODO return: AState(AOption[AInt], ABool) -> even necessary?
     /*
   def AOptionContain(ao: AOption[AInt], elem: AInt): ABool = ao match {
     case ANone => AFalse
@@ -576,12 +576,11 @@ case class ALists(intervals: Intervals) {
 
 
   //Method returns the argument of an AOption value
-  //TODO Test
-  def justValue[T](ao: AOption[T]): Set[T] = ao match {
-    case ASome(e) =>  Set(ASome(e).get)
-    case ANone => Set()// throw new Exception("Exception thrown from justAList. Reason: Input was ANone")
-    case AMaybe(e) => ???//Set(AState(ANone, AFalse), AState(ASome(e).get, ATrue))// throw new Exception("Exception thrown from justAList. Reason: Input was AMaybe")
-//TODO AMaybe
+  def justValue[T](ao: AOption[T]): Set[AState_Base] = ao match {
+    case ASome(e) =>  Set(AState(ASome(e).get, ATrue))
+    case ANone => Set(AState(ANone, AFalse))// throw new Exception("Exception thrown from justAList. Reason: Input was ANone")
+    case AMaybe(e) => Set(AState(ANone, AFalse), AState(ASome(e).get, ATrue))
+      // throw new Exception("Exception thrown from justAList. Reason: Input was AMaybe")
   }
 
 
@@ -607,24 +606,15 @@ case class ALists(intervals: Intervals) {
   /************************************************************
    *                      AState, AStmt                       *
    ************************************************************/
-  //Represents a state(AInt, AList). Is used by objects of AStmt and in Sets for Sequences
-  //case class AState(n: AInt, xs: AList) //TODO löschen wenn ausgetauscht
-
 
   trait AState_Base{
     def  first: Any
     def  second: Any
   }
 
-  //case class AState1(first:AInt, second: Any) extends AState_Base[AInt, Any] with AState_BaseAInt[AInt,Any]
+  //Represents an abstract state value. Is used by objects of AStmt and in Sets for Sequences
   case class AState(first:Any, second: Any) extends AState_Base
-  /*
-  case class AState_AIntAList(first:AInt, second: AList) extends AState_Base
-  case class AState_AIntABool(first:AInt, second: ABool) extends AState_Base
-  case class AState_AIntAOp[T](first:AInt, second: AOption[T]) extends AState_Base
-  case class AState_AIntAny(first:AInt, second: Any) extends AState_Base
-  case class AState_AOpABool[T](first : AOption[T], second: ABool) extends  AState_Base
-*/
+
 
   //Representation of a Statement. Is used by Sequences, e.g. IfElse_xsIsNil(stmt1,stmt2)
   trait AStmt {
@@ -661,6 +651,40 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+  //TODO test
+  //Statements assigns AFalse to a Set of AStates -> initialState
+  object AssignAFalse extends AStmt {
+    override def execute(as: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
+      for (a <- as) {
+        if(a.first.isInstanceOf[ABool] ) {
+          result += AState(AFalse, a.second)
+        } else{
+          result += a
+        }
+      }
+      result
+    }
+  }
+
+
+  //TODO test
+  //Statements assigns ATrue to a Set of AStates -> initialState
+  object AssignATrue extends AStmt {
+    override def execute(as: Set[AState_Base]): Set[AState_Base] = {
+      var result: Set[AState_Base] = Set()
+      for (a <- as) {
+        if(a.first.isInstanceOf[ABool] ) {
+          result += AState(ATrue, a.second)
+        } else{
+          result += a
+        }
+      }
+      result
+    }
+  }
+
+
   //Statements adds interval [1;1] to a Set of AStates
   object Add1 extends AStmt {
     override def execute(as: Set[AState_Base]): Set[AState_Base] = {
@@ -668,8 +692,8 @@ case class ALists(intervals: Intervals) {
       for (a <- as) {
 
         a.first match {
-          case int: AInt =>
-            result += AState(intervals.+(int, Interval(IntegerVal(1), IntegerVal(1))), a.second)
+          case aint: AInt =>
+            result += AState(intervals.+(aint, Interval(IntegerVal(1), IntegerVal(1))), a.second)
           case _ =>
             result += a
         }
@@ -685,8 +709,8 @@ case class ALists(intervals: Intervals) {
       var result: Set[AState_Base] = Set()
       for (a <- as) {
         a.first match {
-          case int: AInt =>
-            result += AState(intervals.-(int, Interval(IntegerVal(1), IntegerVal(1))), a.second)
+          case aint: AInt =>
+            result += AState(intervals.-(aint, Interval(IntegerVal(1), IntegerVal(1))), a.second)
           case _ =>
             result += a
         }
@@ -700,8 +724,8 @@ case class ALists(intervals: Intervals) {
       var result: Set[AState_Base] = Set()
       for (a <- as) {
         a.first match {
-          case int: AInt if a.second.isInstanceOf[AList] =>
-            result += AState(intervals.-(int, Interval(IntegerVal(1), IntegerVal(1))), justValue(aTail(a.second.asInstanceOf[AList])).head)
+          case aint: AInt if a.second.isInstanceOf[AList] =>
+            result += AState(intervals.-(aint, Interval(IntegerVal(1), IntegerVal(1))), justValue(aTail(a.second.asInstanceOf[AList])).head)
           case _ =>
             result += a
         }
@@ -715,8 +739,8 @@ case class ALists(intervals: Intervals) {
       var result: Set[AState_Base] = Set()
       for (a <- as) {
         a.first match {
-          case int: AInt if a.second.isInstanceOf[AList] =>
-            result += AState(intervals.+(int, Interval(IntegerVal(1), IntegerVal(1))), justValue(aTail(a.second.asInstanceOf[AList])).head)
+          case aint: AInt if a.second.isInstanceOf[AList] =>
+            result += AState(intervals.+(aint, Interval(IntegerVal(1), IntegerVal(1))), justValue(aTail(a.second.asInstanceOf[AList])).head)
           case _ =>
             result += a
         }
@@ -734,6 +758,8 @@ case class ALists(intervals: Intervals) {
       result
     }
   }
+
+
 
   /*
   /** object of AStmt.
