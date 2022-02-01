@@ -117,7 +117,7 @@ case class ALists(intervals: Intervals) {
 
   //TODO recheck
   //Method appends an element the the end a an AList value
-   def :+(al1: AList, elem: AInt) : Set[AList] = al1 match {
+   def :+(al1: AList, elem: AInt) : Set[AList] = al1 match {  //TODO : AList
      case ANil => Set(ACons(elem, ANil))
      case ACons(h,t) => if(:+(t, elem).tail.nonEmpty) Set(ACons(h, :+(t, elem).head), ACons(h, :+(t, elem).tail.head)) else Set(ACons(h, :+(t, elem).head))//TODO recheck
      case AMany(e) => Set(ACons(elem, ANil), ACons(e, AMany(intervals.union_Interval(e, elem))))  //TODO recheck
@@ -127,7 +127,7 @@ case class ALists(intervals: Intervals) {
 
   //TODO recheck
   //Method concatenates two values of type AList
-   def ++(al1: AList, al2: AList): Set[AList] = (al1, al2) match {
+   def ++(al1: AList, al2: AList): Set[AList] = (al1, al2) match { //TODO : AList
      case (ANil, ANil) => Set(ANil)
      case (ANil, ACons(h,t)) => Set(al2)
      case (ACons(h,t), ANil) => Set(al1)
@@ -606,6 +606,12 @@ case class ALists(intervals: Intervals) {
     def execute(as: Set[AState_Base]): Set[AState_Base]
   }
 
+  case class AAssignFirst(first: Any) extends AStmt {
+    override def execute(as: Set[AState_Base]): Set[AState_Base] = {
+      for(AState(_,second) <- as) yield AState(first,second)
+    }
+  }
+
   //Statements assigns interval [0;0] to a Set of AStates -> initialState
   object AssignN0 extends AStmt { //initial, beginning of loop
     override def execute(as: Set[AState_Base]): Set[AState_Base] = {
@@ -614,7 +620,7 @@ case class ALists(intervals: Intervals) {
         if(a.first.isInstanceOf[AInt]) {
           result += AState(Interval(IntegerVal(0), IntegerVal(0)), a.second)
         } else{
-          result += a
+          ???
         }
       }
       result
@@ -629,7 +635,7 @@ case class ALists(intervals: Intervals) {
         if(a.first.isInstanceOf[AInt] ) {
           result += AState(Interval(IntegerVal(1), IntegerVal(1)), a.second)
         } else{
-          result += a
+          ???
         }
       }
       result
