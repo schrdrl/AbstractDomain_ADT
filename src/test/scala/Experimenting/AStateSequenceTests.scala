@@ -4,6 +4,29 @@ import AList.{ALists, IntegerVal, Intervals}
 import org.scalatest.funsuite.AnyFunSuite
 
 class AStateSequenceTests extends AnyFunSuite {
+
+  test("AssignATrue"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
+    val d = b.AMany(c)
+    val e = b.AFalse
+    val f = b.ATrue
+    val g = b.AState(c, d)
+    val h = b.AState(e, d)
+    val i = b.AState(e, b.ASome(c))
+    val j = b.AState(f, d)
+
+    val k = b.AssignATrue
+
+    println(k.execute(Set(g)))
+    println(k.execute(Set(h)))
+    println(k.execute(Set(i)))
+    println(k.execute(Set(j)))
+    println(k.execute(Set(g,h,i,j)))
+
+  }
+
   /*
   test("AssignN - execute") {
 

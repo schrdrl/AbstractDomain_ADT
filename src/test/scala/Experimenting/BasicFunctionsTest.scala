@@ -326,5 +326,25 @@ class BasicFunctionsTest extends AnyFunSuite {
   }
 
 
+  test("aContains"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
+    val d = b.intervals.Interval(IntegerVal(0),IntegerVal(0))
+    val e = b.AMany(c)
+    val f = b.AMany(d)
+    val g = b.ACons(c, b.ANil)
+    val h = b.ACons(c, b.ACons(c, b.ANil))
+    val i = b.ACons(d, b.ACons(d, b.AMany(c)))
+
+    println(b.aContains(e,c))
+    println(b.aContains(f,c))
+    println(b.aContains(g,c))
+    println(b.aContains(h,c))
+    println(b.aContains(i,c))
+
+  }
+
+
 
 }
