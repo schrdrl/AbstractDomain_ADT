@@ -325,4 +325,54 @@ class UnionWidenTest extends AnyFunSuite {
     println(b.widen_AOptionAList(i,p)) //AMaybe(AMany), AMaybe(ACons)
   }
 
+
+  test("flatten_AList"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
+    val d = b.intervals.Interval(IntegerVal(5), IntegerVal(8))
+    val e = b.ANil
+    val f = b.AMany(c)
+    val g = b.ACons(c, b.ANil)
+    val h = b.ACons(c, b.ACons(d, b.AMany(c)))
+
+    val i = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
+    val j = b.ACons(i, b.ACons(c, b.ACons(d, b.ANil)))
+
+    val k = b.intervals.Interval(IntegerVal(9), IntegerVal(10))
+    val l = b.ACons(i, b.ACons(d, b.ACons(k, b.ANil)))
+
+    println(b.flatten_AList(e))
+    println(b.flatten_AList(f))
+    println(b.flatten_AList(g))
+    println(b.flatten_AList(h))
+    println(b.flatten_AList(j))
+    println(b.flatten_AList(l))
+
+  }
+
+  test("reverse"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
+    val d = b.intervals.Interval(IntegerVal(5), IntegerVal(8))
+    val e = b.intervals.Interval(IntegerVal(9), IntegerVal(10))
+    val f = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
+
+    val g = b.ANil
+    val h = b.AMany(c)
+    val i = b.ACons(c, b.ANil)
+    val j = b.ACons(c, b.ACons(d, b.AMany(c)))
+    val k = b.ACons(f, b.ACons(c, b.ACons(d, b.ANil)))
+    val l = b.ACons(f, b.ACons(d, b.ACons(e, b.ANil)))
+
+    println(b.reverse(g)) //correct
+    println(b.reverse(h)) //correct
+    println(b.reverse(i)) //correct
+    println(b.reverse(j)) //
+    println(b.reverse(k)) //correct
+    println(b.reverse(l)) //correct
+
+  }
+
 }
