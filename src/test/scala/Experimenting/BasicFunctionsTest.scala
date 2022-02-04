@@ -151,15 +151,15 @@ class BasicFunctionsTest extends AnyFunSuite {
     val g = 2
     val h = -2
 
-    assert(b.isConcreteElementOf_Int(g,c))
-    assert(!b.isConcreteElementOf_Int(g,d))
-    assert(b.isConcreteElementOf_Int(g,e))
-    assert(!b.isConcreteElementOf_Int(g,f))
+    assert(b.isConcreteElementOf_AInt(g,c))
+    assert(!b.isConcreteElementOf_AInt(g,d))
+    assert(b.isConcreteElementOf_AInt(g,e))
+    assert(!b.isConcreteElementOf_AInt(g,f))
 
-    assert(!b.isConcreteElementOf_Int(h,c))
-    assert(!b.isConcreteElementOf_Int(h,d))
-    assert(!b.isConcreteElementOf_Int(h,e))
-    assert(b.isConcreteElementOf_Int(h,f))
+    assert(!b.isConcreteElementOf_AInt(h,c))
+    assert(!b.isConcreteElementOf_AInt(h,d))
+    assert(!b.isConcreteElementOf_AInt(h,e))
+    assert(b.isConcreteElementOf_AInt(h,f))
   }
 
   /**********************************
@@ -171,7 +171,7 @@ class BasicFunctionsTest extends AnyFunSuite {
     val b = ALists(a)
     val c = Nil
     val d = b.ANil
-    assert(b.isConcreteElementOf_List(c,d))
+    assert(b.isConcreteElementOf_AList(c,d))
   }
 
   test("Empty list is not concrete element of ACons"){
@@ -180,7 +180,7 @@ class BasicFunctionsTest extends AnyFunSuite {
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
     val d = Nil
     val e = b.ACons(c,b.ANil)
-    assert(!b.isConcreteElementOf_List(d,e))
+    assert(!b.isConcreteElementOf_AList(d,e))
   }
 
   test("Empty list is concrete element of AMany"){
@@ -189,7 +189,7 @@ class BasicFunctionsTest extends AnyFunSuite {
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(5))
     val d = List()
     val e = b.AMany(c)
-    assert(b.isConcreteElementOf_List(d,e))
+    assert(b.isConcreteElementOf_AList(d,e))
   }
 
   test("Non-empty list is not concrete element of ANil"){
@@ -197,7 +197,7 @@ class BasicFunctionsTest extends AnyFunSuite {
     val b = ALists(a)
     val c = b.ANil
     val d = List(1,2,3,4)
-    assert(!b.isConcreteElementOf_List(d,c))
+    assert(!b.isConcreteElementOf_AList(d,c))
   }
 
   test("Non-empty list is concrete element of ACons"){
@@ -220,10 +220,10 @@ class BasicFunctionsTest extends AnyFunSuite {
     val h = b.ACons(d, b.ACons(e, f)) //ACons([5,8], ACons([-1,5], ACons([-1,5], ANil)))
     val k = b.ACons(i1, b.ACons(i2, b.ACons(i3, b.ACons(i4, b.ANil))))
 
-    assert(!b.isConcreteElementOf_List(c,f))
-    assert(!b.isConcreteElementOf_List(c,g))
-    assert(!b.isConcreteElementOf_List(c,h))
-    assert(b.isConcreteElementOf_List(c,k))
+    assert(!b.isConcreteElementOf_AList(c,f))
+    assert(!b.isConcreteElementOf_AList(c,g))
+    assert(!b.isConcreteElementOf_AList(c,h))
+    assert(b.isConcreteElementOf_AList(c,k))
 
   }
 
@@ -240,9 +240,9 @@ class BasicFunctionsTest extends AnyFunSuite {
     val h = b.AMany(e)
     val i = b.AMany(f)
 
-    assert(b.isConcreteElementOf_List(c,g))
-    assert(!b.isConcreteElementOf_List(c,h))
-    assert(!b.isConcreteElementOf_List(c,i))
+    assert(b.isConcreteElementOf_AList(c,g))
+    assert(!b.isConcreteElementOf_AList(c,h))
+    assert(!b.isConcreteElementOf_AList(c,i))
 
   }
 
@@ -252,27 +252,27 @@ class BasicFunctionsTest extends AnyFunSuite {
   test("None is concrete element of ANone"){
     val a = Intervals.Unbounded
     val b = ALists(a)
-    assert(b.isConcreteElementOf_OptionList(None, b.ANone))
+    assert(b.isConcreteElementOf_AOptionAList(None, b.ANone))
   }
 
   test("None is not concrete element of ASome"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
-    assert(!b.isConcreteElementOf_OptionInt(None, b.ASome(c)))
+    assert(!b.isConcreteElementOf_AOptionAInt(None, b.ASome(c)))
   }
 
   test("None is concrete element of AMaybe"){
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1),IntegerVal(4))
-    println(b.isConcreteElementOf_OptionInt(None, b.AMaybe(c)))
+    println(b.isConcreteElementOf_AOptionAInt(None, b.AMaybe(c)))
   }
 
   test("Some is not concrete element of ANone"){
     val a = Intervals.Unbounded
     val b = ALists(a)
-    assert(!b.isConcreteElementOf_OptionInt(Some(1), b.ANone))
+    assert(!b.isConcreteElementOf_AOptionAInt(Some(1), b.ANone))
   }
 
   test("Some is concrete element of ASome"){
@@ -285,8 +285,8 @@ class BasicFunctionsTest extends AnyFunSuite {
     val e = b.ASome(c)
     val f = b.ASome(d)
 
-    assert(b.isConcreteElementOf_OptionInt(Some(1), e))
-    assert(!b.isConcreteElementOf_OptionInt(Some(1), f))
+    assert(b.isConcreteElementOf_AOptionAInt(Some(1), e))
+    assert(!b.isConcreteElementOf_AOptionAInt(Some(1), f))
   }
 
   test("Some is concrete Element of AMaybe"){
@@ -299,8 +299,8 @@ class BasicFunctionsTest extends AnyFunSuite {
     val e = b.AMaybe(c)
     val f = b.AMaybe(d)
 
-    assert(b.isConcreteElementOf_OptionInt(Some(1), e))
-    assert(!b.isConcreteElementOf_OptionInt(Some(1), f))
+    assert(b.isConcreteElementOf_AOptionAInt(Some(1), e))
+    assert(!b.isConcreteElementOf_AOptionAInt(Some(1), f))
 
     println(e.get)
   }
@@ -324,6 +324,8 @@ class BasicFunctionsTest extends AnyFunSuite {
     println(b.justValue(h))
 
   }
+
+
 
 
   test("aContains"){

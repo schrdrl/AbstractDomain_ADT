@@ -33,7 +33,7 @@ class ConcreteLoopTest extends AnyFunSuite {
     val axs: b.AList = b.ACons(c, b.AMany(c))
 
     println("before loop: " + xs)
-    while (xs != Nil && b.isConcreteElementOf_List(xs, axs) && b.isNil(axs) != b.ATrue) {
+    while (xs != Nil && b.isConcreteElementOf_AList(xs, axs) && b.isNil(axs) != b.ATrue) {
 
       println("(" + n + ")before xs: " + xs)
       xs = xs.tail
@@ -67,9 +67,9 @@ class ConcreteLoopTest extends AnyFunSuite {
     var axs: b.AList = b.ACons(c, b.ACons(c, b.ACons(c, b.ANil)))
     var ys: b.AOption[b.AList] = b.ASome(axs)
 
-    while (xs != Nil && b.isConcreteElementOf_List(xs, axs) && b.isNil(axs) != b.ATrue) {
+    while (xs != Nil && b.isConcreteElementOf_AList(xs, axs) && b.isNil(axs) != b.ATrue) {
       var b_AUnknown = true
-      while (xs != Nil && b.isConcreteElementOf_List(xs, axs) && b.isNil(axs) != b.ATrue && b_AUnknown == true) {
+      while (xs != Nil && b.isConcreteElementOf_AList(xs, axs) && b.isNil(axs) != b.ATrue && b_AUnknown == true) {
         println("(" + n + ")before xs: " + xs)
         println("(" + n + ")before axs: " + axs)
         xs = xs.tail
@@ -78,7 +78,7 @@ class ConcreteLoopTest extends AnyFunSuite {
         //if (b.isNil(axs) == b.AUnknown) {
         b_AUnknown = false
      // }
-        if(b.justValue(ys).head.first.isInstanceOf[b.AList]) axs = b.justValue(ys).head.first.asInstanceOf[b.AList]
+        //if(b.justValue(ys).head.first.isInstanceOf[b.AList]) axs = b.justValue(ys).head.first.asInstanceOf[b.AList]
 
       println("(" + n + ")after xs: " + xs)
       println("(" + n + ")after axs: " + axs)
@@ -111,9 +111,9 @@ class ConcreteLoopTest extends AnyFunSuite {
     val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
     var axs: b.AList = b.AMany(c)
     var ys: b.AOption[b.AList] = b.AMaybe(axs)
-    while (xs != Nil && b.isConcreteElementOf_List(xs, axs) && b.isNil(axs) != b.ATrue) {
+    while (xs != Nil && b.isConcreteElementOf_AList(xs, axs) && b.isNil(axs) != b.ATrue) {
       var b_AUnknown = true
-      while (xs != Nil && b.isConcreteElementOf_List(xs, axs) && b.isNil(axs) != b.ATrue && b_AUnknown == true) {
+      while (xs != Nil && b.isConcreteElementOf_AList(xs, axs) && b.isNil(axs) != b.ATrue && b_AUnknown == true) {
         println("(" + n + ")before xs: " + xs)
         println("(" + n + ")before axs: " + axs)
         xs = xs.tail
@@ -122,7 +122,8 @@ class ConcreteLoopTest extends AnyFunSuite {
        // if (b.isNil(axs) == b.AUnknown) {
           b_AUnknown = false
        // }
-        if(b.justValue(ys).head.first.isInstanceOf[b.AList]) axs = b.justValue(ys).head.first.asInstanceOf[b.AList]
+
+        //if(b.justValue(ys).head.first.isInstanceOf[b.AList]) axs = b.justValue(ys).head.first.asInstanceOf[b.AList]
 
         println("(" + n + ")after xs: " + xs)
         println("(" + n + ")after axs: " + axs)

@@ -295,8 +295,6 @@ class SubsetIntersectTests extends AnyFunSuite {
     val g = b.AMaybe(b.ANil)
     val h = b.ASome(b.AMany(c))
     val i = b.AMaybe(b.AMany(c))
-    val j = b.ASome(b.AMany(d))
-    val k = b.AMaybe(b.AMany(d))
 
     val l = b.ASome(b.ACons(c, b.ANil))
     val m = b.AMaybe(b.ACons(c, b.AMany(c)))

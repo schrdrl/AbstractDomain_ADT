@@ -63,18 +63,19 @@ class AppendingPrependingTests extends AnyFunSuite {
 
     val g = b.ANil
     val h = b.AMany(c)
-    val i = b.ACons(c, b.ANil)
+    val i = b.ACons(f, b.ANil)
     val j = b.ACons(c, b.AMany(d))
     val k = b.ACons(c, b.ACons(d, b.AMany(d)))
 
-    println(b.++(g,h))
-    println(b.++(h,g))
-    println(b.++(h,i))
-    println(b.++(i,h))
+    println(b.++(g,h))  //correct
+    println(b.++(h,g)) //correct
+    println(b.++(h,i)) //correct
+    println(b.++(i,h))//correct
     println("")
-    println(b.++(j,g))
-    println(b.++(k,g))
+    println(b.++(j,g)) //correct
+    println(b.++(k,g)) //correct
     println(b.++(j,i))
+    println(b.++(k,h))
 
   }
 

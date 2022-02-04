@@ -43,9 +43,6 @@ class AExprTests extends AnyFunSuite {
     println(g)
     println(g.evaluate(a))
 
-
-
-
   }
 
 }
