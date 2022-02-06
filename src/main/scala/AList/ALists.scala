@@ -533,14 +533,34 @@ case class ALists(intervals: Intervals) {
   }
 
 
-
-
-
-
-  //Representation of a Statement. Is used by Sequences, e.g. IfElse_xsIsNil(stmt1,stmt2)
-  //TODO still necessary? Or just use AExpr
-  trait AStmt{
-    def execute(as: Set[AState]): Set[AState]
+  /**
+   * Abstract statement.
+   * expression of type Set[AState] with e.g
+   *    AUnOp: AState ("AUnOp", "aTail"), ("operand", "AList")
+   *    ABinOp: AState("ABinOp", "-"), ("operator", [1;1]), ("operand", "AInt")
+   *
+   * will return a Set[AState] which contains the updated input AStates
+   */
+   case class AStmt(expression : Set[AState]){
+    def execute(as: Set[AState]) : Set[AState] = {
+      var result : Set[AState] = Set()  //return
+      for(a <- as) {
+        var result_state : AState= AState(Map())
+        for(expr <- expression){
+          if(expr.values.exists(_._1 == "AUnOp")){
+            //evaluate expression
+            val value = AUnOp( expr.lookup("AUnOp").asInstanceOf[String], AConst(a.lookup(expr.lookup("operand").asInstanceOf[String]))).evaluate(a)
+            //update AState
+            result_state = AAssign(expr.lookup("operand").asInstanceOf[String], AConst(value)).execute(Set(a)).head //TODO alternative for head -> could have multiple results
+          }else if(expr.values.exists(_._1 == "ABinOp")){
+            val value = ABinOp(AConst(a.lookup(expr.lookup("operand").asInstanceOf[String])), expr.lookup("ABinOp").asInstanceOf[String], AConst(expr.lookup("operator")) ).evaluate(a)
+            result_state = AAssign(expr.lookup("operand").asInstanceOf[String], AConst(value)).execute(Set(a)).head //TODO alternative for head
+          }
+        } //end of expression
+        result += result_state  //assign results of current state to overall result
+      } //end of as
+      result
+    }
   }
 
 
@@ -558,6 +578,8 @@ case class ALists(intervals: Intervals) {
 
 
 
+
+
   /************************************************************
    *                 Abstract Transformers                    *
    ************************************************************/
@@ -570,9 +592,14 @@ case class ALists(intervals: Intervals) {
   }
 
   //TODO AIF and AIF_ELSE
+/*
+  case class AIf_AExpr(test: ATest, aexpr: Set[AExpr]) extends AStmt {
+    override def execute(as: Set[AState]): Set[AState] = ???
+  }
 
 
 
+ */
 
   //Abstract transformer: AWhile is an abstract representation of a while loop
   //TODO needs improvement

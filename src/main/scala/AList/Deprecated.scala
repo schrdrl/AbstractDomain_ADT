@@ -4,160 +4,15 @@ class Deprecated {
 
 
 
-  //TODO deprecated
+  //TODO deprecated AAssignFirst
   /*
   case class AAssignFirst(first: Any) extends AStmt {
     override def execute(as: Set[AState]): Set[AState] = {
       for(AState(_,second) <- as) yield AState(first,second)
     }
   }
-
-
-//TODO deprecated
-  //Statements assigns interval [0;0] to a Set of AStates -> initialState
-  object AssignN0 extends AStmt { //initial, beginning of loop
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        if(a.first.isInstanceOf[AInt]) {
-          result += AState(Interval(IntegerVal(0), IntegerVal(0)), a.second)
-        } else{
-          ???
-        }
-      }
-      result
-    }
-  }
-//TODO deprecated
-  //Statements assigns a interval [1;1] to a Set of AStates -> initialState
-  object AssignN1 extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        if(a.first.isInstanceOf[AInt] ) {
-          result += AState(Interval(IntegerVal(1), IntegerVal(1)), a.second)
-        } else{
-          ???
-        }
-      }
-      result
-    }
-  }
-
-//TODO deprecated
-  //Statements assigns AFalse to a Set of AStates -> initialState
-  object AssignAFalse extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        if(a.first.isInstanceOf[ABool] ) {
-          result += AState(AFalse, a.second)
-        } else{
-          result += a
-        }
-      }
-      result
-    }
-  }
-
-//TODO deprecated
-  //Statements assigns ATrue to a Set of AStates -> initialState
-  object AssignATrue extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        if(a.first.isInstanceOf[ABool] ) {
-          result += AState(ATrue, a.second)
-        } else{
-          result += a
-        }
-      }
-      result
-    }
-  }
-*/ //TODO deprecated until here
-
-  /* //TODO deprecatet --> use APlus
-  //Statements adds interval [1;1] to a Set of AStates
-  object Add1 extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-
-        a.first match {
-          case int: AInt =>
-            result += AState(intervals.+(int, Interval(IntegerVal(1), IntegerVal(1))), a.second)
-          case _ =>
-            result += a
-        }
-
-      }
-      result
-    }
-  }
-
-//TODO deprecated
-  //Statements subtracts a interval [1;1] off a Set of AStates
-  object Subtract1 extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        a.first match {
-          case int: AInt =>
-            result += AState(intervals.-(int, Interval(IntegerVal(1), IntegerVal(1))), a.second)
-          case _ =>
-            result += a
-        }
-      }
-      result
-    }
-  }
-
-  //TODO deprecated
-  object Subtract1_ATail extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        a.first match {
-          case int: AInt if a.second.isInstanceOf[AList] =>
-            result += AState(intervals.-(int, Interval(IntegerVal(1), IntegerVal(1))), justValue(aTail(a.second.asInstanceOf[AList])).head)
-          case _ =>
-            result += a
-        }
-      }
-      result
-    }
-  }
-
-  object Add1_ATail extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        a.first match {
-          case int: AInt if a.second.isInstanceOf[AList] =>
-            result += AState(intervals.+(int, Interval(IntegerVal(1), IntegerVal(1))), justValue(aTail(a.second.asInstanceOf[AList])).head)
-          case _ =>
-            result += a
-        }
-      }
-      result
-    }
-  }
-
-  object Assign_SameValues extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        result += a
-      }
-      result
-    }
-  }
-
-
-
-
    */
+
 
   /*
   /** object of AStmt.
@@ -620,6 +475,12 @@ object xsIsNotNilTest extends ATest {
     }
   }
 
+
+
+ //Representation of a Statement. Is used by Sequences, e.g. IfElse_xsIsNil(stmt1,stmt2)
+  trait AStmt{
+    def execute(as: Set[AState]): Set[AState]
+  }
 
 
  */
