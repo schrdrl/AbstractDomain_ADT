@@ -55,21 +55,6 @@ case class ALists(intervals: Intervals) {
     case AMany(_) => ASome(Interval(IntegerVal(0), IntegerInf))
   }
 
-  // checks whether a given AList is Nil
-  def isNil(l: AList): Set[ABool] = l match {
-    case ANil => Set(ATrue)
-    case ACons(_, _) => Set(AFalse)
-    case AMany(_) => Set(ATrue, AFalse)
-  }
-
-  //Method splits a given AList into two sets (Empty AList, Non-Empty AList)
-  def ifIsNil(l: AList): (Set[AList], Set[AList]) = l match {
-    case ANil => (Set(ANil), Set())
-    case ACons(h, t) => (Set(), Set(ACons(h, t)))
-    case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
-  }
-
-
 
   /************************************************************
    *                   isConcreteElementOf                    *
@@ -416,9 +401,9 @@ case class ALists(intervals: Intervals) {
 
   //Method returns the argument of an AOption value
   def justValue[T](ao: AOption[T]): Set[AState] = ao match {
-    case ASome(e) =>  Set(AState(Map(("ASome", ASome(e).get),("ASome", ATrue))))
-    case ANone => Set(AState(Map(("ASome", AFalse))))   // throw new Exception("Exception thrown from justAList. Reason: Input was ANone")
-    case AMaybe(e) => Set(AState(Map(("ASome", AFalse))), AState(Map(("ASome", ASome(e).get),("ASome", ATrue))))  // throw new Exception("Exception thrown from justAList. Reason: Input was AMaybe")
+    case ASome(e) =>  Set(AState(Map(("ASome", ASome(e).get))))
+    case ANone => Set(AState(Map(("ANone", ANone))))   // throw new Exception("Exception thrown from justAList. Reason: Input was ANone")
+    case AMaybe(e) => Set(AState(Map(("ANone", ANone))), AState(Map(("ASome", ASome(e).get))))  // throw new Exception("Exception thrown from justAList. Reason: Input was AMaybe")
   }
 
 
@@ -442,7 +427,7 @@ case class ALists(intervals: Intervals) {
   }
 
   /************************************************************
-   *                      AState, AStmt                       *
+   *                          AExpr                           *
    ************************************************************/
 
   //Abstract representation on an expression
@@ -503,21 +488,22 @@ case class ALists(intervals: Intervals) {
     override def evaluate(as: AState): Any = {
       val ae = aexpr.evaluate(as)
       (op,ae) match {
-        case ("aHead" ,ae: AList) => aHead(ae)
-        case ("aTail", ae: AList) => aTail(ae)
-        case ("aLength", ae: AList) => aLength(ae)
+        case ("aHead" ,ae: AList) => justValue(aHead(ae))
+        case ("aTail", ae: AList) => justValue(aTail(ae))
+        case ("aLength", ae: AList) => justValue(aLength(ae))
         //TODO
       }
 
     }
   }
 
-  //TODO
+  //test operators
   case class ATestOp(op: String, aexpr: AExpr) extends AExpr {
     override def evaluate(as: AState): Any = {
       val ae = aexpr.evaluate(as)
       (op,ae) match {
         case("ifIsNil", ae: AList) => ifIsNil(ae)
+        case("ifIsNotNil", ae: AList) => ifIsNotNil(ae)
         //case("isPositive", ae:AInt) => ???
         //case("isNegative", ae:AInt) => ???
         //case("isZero", ae:AInt) => ???
@@ -528,6 +514,9 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+  /************************************************************
+   *                          AStmt                           *
+   ************************************************************/
 
   /**
    * Abstracted statements.
@@ -546,8 +535,15 @@ case class ALists(intervals: Intervals) {
           if(expr.values.exists(_._1 == "AUnOp")){
             //evaluate expression
             val value = AUnOp( expr.lookup("AUnOp").asInstanceOf[String], AConst(a.lookup(expr.lookup("operand").asInstanceOf[String]))).evaluate(a)
-            //update AState
-            result_state = AAssign(expr.lookup("operand").asInstanceOf[String], AConst(value)).execute(Set(a)).head //TODO alternative for head -> could have multiple results (depends on op)
+           //TODO only ASome
+            for (v <- value.asInstanceOf[Set[AState]]){
+              if(v.values.exists(_._1 == "ASome")){
+                //update AState
+                result_state = AAssign(expr.lookup("operand").asInstanceOf[String], AConst(v.lookup("ASome"))).execute(Set(a)).head //TODO alternative for head -> could have multiple results (depends on op)
+              }
+            }
+
+
           }else if(expr.values.exists(_._1 == "ABinOp")){
             val value = ABinOp(AConst(a.lookup(expr.lookup("operand").asInstanceOf[String])), expr.lookup("ABinOp").asInstanceOf[String], AConst(expr.lookup("operator")) ).evaluate(a)
             result_state = AAssign(expr.lookup("operand").asInstanceOf[String], AConst(value)).execute(Set(a)).head //TODO alternative for head -> maybe AAssert_single
@@ -559,13 +555,43 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+  /************************************************************
+   *                          Tests                           *
+   ************************************************************/
 
+
+  // checks whether a given AList is Nil
+  def isNil(l: AList): (Set[ABool],Set[ABool]) = l match {
+    case ANil => (Set(ATrue), Set())
+    case ACons(_, _) =>  ( Set(), Set(AFalse))
+    case AMany(_) => (Set(ATrue),Set(AFalse))
+  }
+
+  //Method splits a given AList into two sets (Empty AList, Non-Empty AList)
+  def ifIsNil(l: AList): (Set[AList], Set[AList]) = l match {
+    case ANil => (Set(ANil), Set())
+    case ACons(h, t) => (Set(), Set(ACons(h, t)))
+    case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
+  }
+
+  //Method splits a given AList into two sets (Non-Empty AList, Empty AList)
+  def ifIsNotNil(l: AList): (Set[AList], Set[AList]) = l match {
+    case ANil => (Set(), Set(ANil))
+    case ACons(h, t) => (Set(ACons(h, t)), Set())
+    case AMany(e) => (Set(ACons(e, AMany(e))), Set(ANil))
+  }
+
+  //TODO
+
+  def ifIsPositive(ai :AInt): (Set[AInt], Set[AInt]) = ???
+
+  def ifIsNegative(ai :AInt): (Set[AInt], Set[AInt]) = ???
+
+  def ifIsZero(ai :AInt): (Set[AInt], Set[AInt]) = ???
 
   /************************************************************
    *                          ATest                           *
    ************************************************************/
-
-
 
   /**
    * Abstracted tests.
@@ -573,8 +599,8 @@ case class ALists(intervals: Intervals) {
    *    ATestOp: AState ("test", "ifIsNil"), ("testedValue", "AList")
    *
    *    IMPORTANT: tests included in ATestOp must have a return statement of type (Set[], Set[])
-   *    (Set[], _) -> negative
-   *    (_, Set[]) -> positive
+   *    (Set[], _) -> success
+   *    (_, Set[]) -> fail
    *
    * will return a Set[AState] which contains the updated input AStates
    */
@@ -585,12 +611,12 @@ case class ALists(intervals: Intervals) {
       for (state <- states){
         var result_state : AState= AState(Map())
         for (test <- tests) {
-
-          val (_,value) = ATestOp(test.lookup("test").asInstanceOf[String],AConst(state.lookup(test.lookup("testedValue").asInstanceOf[String])) ).evaluate(state)
-          println("positive: "+value)
+          val (value,_) = ATestOp(test.lookup("test").asInstanceOf[String],AConst(state.lookup(test.lookup("testedValue").asInstanceOf[String])) ).evaluate(state)
           if(value != Set()) {
-            result_state = AAssign(test.lookup("testedValue").asInstanceOf[String], AConst(value)).execute(Set(state)).head //TODO alternative to head
-            result += result_state
+            for(v <- value.asInstanceOf[Set[Any]]){
+              result_state = AAssign(test.lookup("testedValue").asInstanceOf[String], AConst(v)).execute(Set(state)).head //TODO alternative to head
+              result += result_state
+            }
           }
         }
       }
@@ -602,43 +628,38 @@ case class ALists(intervals: Intervals) {
       for (state <- states){
         var result_state : AState= AState(Map())
         for (test <- tests) {
-
-          val (value,_) = ATestOp(test.lookup("test").asInstanceOf[String],AConst(state.lookup(test.lookup("testedValue").asInstanceOf[String])) ).evaluate(state)
-          println("negative: "+value)
-          if(value != Set()) {
-            result_state = AAssign(test.lookup("testedValue").asInstanceOf[String], AConst(value)).execute(Set(state)).head //TODO alternative to head
-            result += result_state
+          val (_,value) = ATestOp(test.lookup("test").asInstanceOf[String],AConst(state.lookup(test.lookup("testedValue").asInstanceOf[String])) ).evaluate(state)
+          for(v <- value.asInstanceOf[Set[Any]]) {
+            if (value != Set()) {
+              result_state = AAssign(test.lookup("testedValue").asInstanceOf[String], AConst(v)).execute(Set(state)).head //TODO alternative to head
+              result += result_state
+            }
           }
         }
-
       }
       result
     }
   }
 
 
-
-
   /************************************************************
    *                 Abstract Transformers                    *
    ************************************************************/
 
-  //Abstract transformer: AIf is an abstract representation of an If test
+  //Abstract transformer: AIf is an abstract representation of an If and If-Else construct
   case class AIf(test: ATest, left: AStmt, right:AStmt){
       def execute(as: Set[AState]): Set[AState] = {
-      left.execute(test.positive(as)) ++ right.execute(test.negative(as))
+        if(right != AStmt(Set())){ //if else
+          left.execute(test.positive(as)) ++ right.execute(test.negative(as))
+        }else{  //if
+          left.execute(test.positive(as))
+        }
     }
   }
 
-  //TODO AIF and AIF_ELSE
-/*
-  case class AIf_AExpr(test: ATest, aexpr: Set[AExpr]) extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = ???
-  }
 
 
 
- */
 
   //Abstract transformer: AWhile is an abstract representation of a while loop
   //TODO needs improvement
