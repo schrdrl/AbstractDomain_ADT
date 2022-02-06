@@ -69,12 +69,7 @@ case class ALists(intervals: Intervals) {
     case AMany(e) => (Set(ANil), Set(ACons(e, AMany(e))))
   }
 
-  //Method sorts a given AList value into a Set of AStates
-  def isNil_AState(l: AList): Set[AState]= l match {
-    case ANil => Set(AState(Map(("AList0", ANil))))
-    case ACons(h, t) => Set(AState(Map(("AList1", ACons(h, t)))))
-    case AMany(e) => Set(AState(Map(("AList0", ANil), ("AList1", ACons(e, AMany(e))))))
-  }
+
 
   /************************************************************
    *                   isConcreteElementOf                    *
@@ -200,12 +195,6 @@ case class ALists(intervals: Intervals) {
     case (AMaybe(a), AMaybe(b)) => AMaybe(union_AList(a, b))
   }
 
-  //union of two values of type ABool
-  def union_ABool(ab1: ABool, ab2: ABool): Set[ABool] = (ab1, ab2) match {
-    case (AFalse, AFalse) => Set(AFalse)
-    case (ATrue, ATrue) => Set(ATrue)
-    case (ATrue, AFalse) | (AFalse, ATrue) => Set(AFalse, ATrue)
-  }
 
   //intersection of two ALists
   def intersect_AList(al1: AList, al2: AList): AList = (al1, al2) match {
@@ -246,13 +235,6 @@ case class ALists(intervals: Intervals) {
     case (ASome(a), AMaybe(b)) => ASome(intersect_AList(a, b))
     case (AMaybe(a), ASome(b)) => ASome(intersect_AList(a, b))
     case (AMaybe(a), AMaybe(b)) => AMaybe(intersect_AList(a, b))
-  }
-
-  //intersection of two values of type ABool
-  def intersect_ABool(ab1: ABool, ab2: ABool): Set[ABool] = (ab1, ab2) match {
-    case (AFalse, AFalse) => Set(AFalse)
-    case (ATrue, ATrue) => Set(ATrue)
-    case (ATrue, AFalse) | (AFalse, ATrue) => Set()
   }
 
   //checks whether the left AList(first parameter) is a subset of the right AList(second parameter)
@@ -504,12 +486,10 @@ case class ALists(intervals: Intervals) {
         case(l: AInt, "union", r: AInt) => intervals.union_Interval(l,r)
         case(l: AOption[AInt], "union", r: AOption[AInt]) => union_AOption_AInt(l,r)
         case(l: AOption[AList], "union", r: AOption[AList]) => union_AOption_AList(l,r)
-        case(l: ABool, "union", r: ABool) => union_ABool(l,r)
         case(l: AList, "intersect", r: AList) => intersect_AList(l,r)
         case(l: AInt, "intersect", r: AInt) => intervals.intersect_Interval(l,r)
         case(l: AOption[AInt], "intersect", r: AOption[AInt]) => intersect_AOption_AInt(l,r)
         case(l: AOption[AList], "intersect", r: AOption[AList]) => intersect_AOption_AList(l,r)
-        case(l: ABool, "intersect", r: ABool) => intersect_ABool(l,r)
         case(l: AList, "subset", r: AList) => subset_AList(l,r)
         case(l: AList, "widen", r: AList) => widen_AList(l,r)
         //TODO
@@ -532,9 +512,25 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+  //TODO
+  case class ATestOp(op: String, aexpr: AExpr) extends AExpr {
+    override def evaluate(as: AState): Any = {
+      val ae = aexpr.evaluate(as)
+      (op,ae) match {
+        case("ifIsNil", ae: AList) => ifIsNil(ae)
+        //case("isPositive", ae:AInt) => ???
+        //case("isNegative", ae:AInt) => ???
+        //case("isZero", ae:AInt) => ???
+        //case("isATrue", ae:ABool) => ???
+        //case("isAFalse", ae:ABool) => ???
+        //TODO
+      }
+    }
+  }
+
 
   /**
-   * Abstract statement.
+   * Abstracted statements.
    * expression of type Set[AState] with e.g
    *    AUnOp: AState ("AUnOp", "aTail"), ("operand", "AList")
    *    ABinOp: AState("ABinOp", "-"), ("operator", [1;1]), ("operand", "AInt")
@@ -551,10 +547,10 @@ case class ALists(intervals: Intervals) {
             //evaluate expression
             val value = AUnOp( expr.lookup("AUnOp").asInstanceOf[String], AConst(a.lookup(expr.lookup("operand").asInstanceOf[String]))).evaluate(a)
             //update AState
-            result_state = AAssign(expr.lookup("operand").asInstanceOf[String], AConst(value)).execute(Set(a)).head //TODO alternative for head -> could have multiple results
+            result_state = AAssign(expr.lookup("operand").asInstanceOf[String], AConst(value)).execute(Set(a)).head //TODO alternative for head -> could have multiple results (depends on op)
           }else if(expr.values.exists(_._1 == "ABinOp")){
             val value = ABinOp(AConst(a.lookup(expr.lookup("operand").asInstanceOf[String])), expr.lookup("ABinOp").asInstanceOf[String], AConst(expr.lookup("operator")) ).evaluate(a)
-            result_state = AAssign(expr.lookup("operand").asInstanceOf[String], AConst(value)).execute(Set(a)).head //TODO alternative for head
+            result_state = AAssign(expr.lookup("operand").asInstanceOf[String], AConst(value)).execute(Set(a)).head //TODO alternative for head -> maybe AAssert_single
           }
         } //end of expression
         result += result_state  //assign results of current state to overall result
@@ -569,13 +565,56 @@ case class ALists(intervals: Intervals) {
    *                          ATest                           *
    ************************************************************/
 
-  //Trait ATest represents the two states a test has as output
-  trait ATest{
-    def positive(states: Set[AState]): Set[AState]
-    def negative(states: Set[AState]): Set[AState]
+
+
+  /**
+   * Abstracted tests.
+   * expression of type Set[AState] with e.g
+   *    ATestOp: AState ("test", "ifIsNil"), ("testedValue", "AList")
+   *
+   *    IMPORTANT: tests included in ATestOp must have a return statement of type (Set[], Set[])
+   *    (Set[], _) -> negative
+   *    (_, Set[]) -> positive
+   *
+   * will return a Set[AState] which contains the updated input AStates
+   */
+  case class ATest(tests: Set[AState]){
+    def positive(states: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set() //return
+
+      for (state <- states){
+        var result_state : AState= AState(Map())
+        for (test <- tests) {
+
+          val (_,value) = ATestOp(test.lookup("test").asInstanceOf[String],AConst(state.lookup(test.lookup("testedValue").asInstanceOf[String])) ).evaluate(state)
+          println("positive: "+value)
+          if(value != Set()) {
+            result_state = AAssign(test.lookup("testedValue").asInstanceOf[String], AConst(value)).execute(Set(state)).head //TODO alternative to head
+            result += result_state
+          }
+        }
+      }
+      result
+    }
+
+    def negative(states: Set[AState]): Set[AState] = {
+      var result: Set[AState] = Set() //return
+      for (state <- states){
+        var result_state : AState= AState(Map())
+        for (test <- tests) {
+
+          val (value,_) = ATestOp(test.lookup("test").asInstanceOf[String],AConst(state.lookup(test.lookup("testedValue").asInstanceOf[String])) ).evaluate(state)
+          println("negative: "+value)
+          if(value != Set()) {
+            result_state = AAssign(test.lookup("testedValue").asInstanceOf[String], AConst(value)).execute(Set(state)).head //TODO alternative to head
+            result += result_state
+          }
+        }
+
+      }
+      result
+    }
   }
-
-
 
 
 
@@ -585,8 +624,8 @@ case class ALists(intervals: Intervals) {
    ************************************************************/
 
   //Abstract transformer: AIf is an abstract representation of an If test
-  case class AIf(test: ATest, left: AStmt, right:AStmt) extends AStmt{
-    override def execute(as: Set[AState]): Set[AState] = {
+  case class AIf(test: ATest, left: AStmt, right:AStmt){
+      def execute(as: Set[AState]): Set[AState] = {
       left.execute(test.positive(as)) ++ right.execute(test.negative(as))
     }
   }
@@ -603,8 +642,8 @@ case class ALists(intervals: Intervals) {
 
   //Abstract transformer: AWhile is an abstract representation of a while loop
   //TODO needs improvement
-  case class AWhile(test:ATest, body: AStmt) extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
+  case class AWhile(test:ATest, body: AStmt)  {
+      def execute(as: Set[AState]): Set[AState] = {
       var states_at_loop_head: Set[AState] = as
       var states_after_body: Set[AState] = Set()
       var result: Set[AState] = Set()
@@ -665,8 +704,9 @@ case class ALists(intervals: Intervals) {
 
   //Abstract Transformer: AAssume is an abstract representation of an assumption
   //TODO Testcases + scenarios -> functionality
-  case class AAssume(assumption: AStmt) extends AStmt{
-    override def execute(as: Set[AState]): Set[AState] = {
+  //e.g. Boundaries
+  case class AAssume(assumption: AStmt){
+      def execute(as: Set[AState]): Set[AState] = {
       var result: Set[AState] = assumption.execute(as)
       result
     }

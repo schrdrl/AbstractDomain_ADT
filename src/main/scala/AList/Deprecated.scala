@@ -483,5 +483,11 @@ object xsIsNotNilTest extends ATest {
   }
 
 
+  //Trait ATest represents the two states a test has as output
+  trait ATest{
+    def positive(states: Set[AState]): Set[AState]
+    def negative(states: Set[AState]): Set[AState]
+  }
+
  */
 }
