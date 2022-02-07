@@ -109,6 +109,35 @@ class EqualityTests extends AnyFunSuite {
 
   }
 
-  //TODO === AState
+  test("===: AState"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+
+    val c = b.intervals.Interval(IntegerVal(-3),IntegerVal(8))
+    val d = b.intervals.Interval(IntegerVal(-3),IntegerVal(8))
+    val e = b.intervals.Interval(IntegerVal(0),IntegerVal(0))
+
+    val f = b.ANil
+    val g = b.AMany(c)
+    val h = b.ACons(d, b.AMany(e))
+
+    val state1 = b.AState(Map( ("AList", f), ("AInt", c), ("ABool", b.AFalse)))
+    val state2 = b.AState(Map( ("AList", g), ("AInt", d), ("ABool", b.ATrue)))
+    val state3 = b.AState(Map( ("AList", h), ("AInt", e), ("ABool", b.ATrue)))
+    val state4 = b.AState(Map( ("AList", h), ("AInt", e), ("ABool", b.ATrue)))
+    val state5 = b.AState(Map( ("AList", f), ("AInt", c), ("ABool", b.AFalse)))
+
+    val keys = Set("AList", "AInt", "ABool")
+
+    println(b.===(state1, state2, keys))
+    println(b.===(state1, state3, keys))
+    println(b.===(state1, state4, keys))
+    println(b.===(state2, state3, keys))
+    println(b.===(state2, state4, keys))
+    println(b.===(state3, state4, keys))
+    println(b.===(state1, state5, keys))
+
+
+  }
 
 }

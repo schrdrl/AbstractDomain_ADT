@@ -362,14 +362,14 @@ class UnionWidenTest extends AnyFunSuite {
     val g = b.ANil
     val h = b.AMany(c)
     val i = b.ACons(c, b.ANil)
-    val j = b.ACons(c, b.ACons(d, b.AMany(c)))
+    val j = b.ACons(c, b.ACons(d, b.AMany(c)))  //TODO
     val k = b.ACons(f, b.ACons(c, b.ACons(d, b.ANil)))
     val l = b.ACons(f, b.ACons(d, b.ACons(e, b.ANil)))
 
     println(b.reverse(g)) //correct
     println(b.reverse(h)) //correct
     println(b.reverse(i)) //correct
-    println(b.reverse(j)) //
+    println(b.reverse(j))
     println(b.reverse(k)) //correct
     println(b.reverse(l)) //correct
 

@@ -1,7 +1,5 @@
 package AList
 
-import Expressions.ABinOp
-
 import Console.{GREEN, RED, RESET, YELLOW}
 
 /**
@@ -251,7 +249,7 @@ case class ALists(intervals: Intervals) {
     case AMany(e) => AMany(e)
   }
 
-  //TODO check reverse
+
   /**
    * Input: xs Local: ys = [] -> empty List
    * while xs != [] do
@@ -259,28 +257,29 @@ case class ALists(intervals: Intervals) {
    */
   def reverse(al: AList) : AList = al match {
     case ANil => ANil
+    case AMany(e) => AMany(e)
     case ACons(h,t) => {
       var axs : AList = al
       var ays : AList = ANil
+      var tailIsAMany = false
 
+      while(ifIsNotNil(axs)._1.nonEmpty && !tailIsAMany){
 
-      //TODO needs improvement
-      while(===(axs, ANil) == AFalse){  //TODO ABool ===
-       // if(===(===[AList](t, AMany(_)), ATrue) == ATrue){
-         //TODO ACons -> tail starts with AMany: ays = AMany}
-        /*
-        ays = ACons(justValue(aHead(axs)).head.first.asInstanceOf[AInt], ays) //TODO justValue
-        axs = justValue(aTail(axs)).head.first.asInstanceOf[AList]  //TODO justValue
-
-         */
+        val head = justValue(aHead(axs)).head
+        val tail = justValue(aTail(axs)).head
+        if(head.values.exists(_._1 == "ASome") && tail.values.exists(_._1 == "ASome") && !tail.values.exists(_._1 == "ANone")){
+          ays = ACons(head.lookup("ASome").asInstanceOf[AInt], ays)
+          axs = tail.lookup("ASome").asInstanceOf[AList]
+        }else if(tail.values.exists(_._1 == "ANone")){
+          println("Test AMany2")
+            ays = flatten_AList(al) //TODO ACons -> tail is AMany
+            tailIsAMany = true
+        }else{
+          throw new Exception("Exception thrown from reverse. Reason: aHead was ANone")
+        }
       }
       ays
     }
-    //ACons([1,1], ANil) -> ACons([1,1], ANil)
-    //ACons([1,1], ACons([2,2], ACons([3,3], ANil))) -> ACons([3,3], ACons([2,2], ACons([1,1], ANil)))
-    //ACons([1,1], AMany([2,2])) ->AMany([1,2])
-    case AMany(e) => AMany(e)
-
   }
 
   /************************************************************
@@ -355,6 +354,24 @@ case class ALists(intervals: Intervals) {
   }
 
 
+  def ===(as1: AState, as2: AState, keys: Set[String]) : ABool = {
+    var isEqual : ABool= ATrue
+    for(key <- keys){
+      key match {
+        case "AInt" => isEqual = ===(as1.lookup("AInt").asInstanceOf[AInt], as2.lookup("AInt").asInstanceOf[AInt])
+        case "AList" => isEqual = ===(as1.lookup("AList").asInstanceOf[AList], as2.lookup("AList").asInstanceOf[AList])
+        case "ABool" => isEqual = ===(as1.lookup("ABool").asInstanceOf[ABool], as2.lookup("ABool").asInstanceOf[ABool])
+        case "AOption[AInt]" => isEqual = ===(as1.lookup("AOption[AInt]").asInstanceOf[AOption[AInt]], as2.lookup("AOption[AInt]").asInstanceOf[AOption[AInt]])
+        case "AOption[AList]" => isEqual = ===(as1.lookup("AOption[AList]").asInstanceOf[AOption[AList]], as2.lookup("AOption[AList]").asInstanceOf[AOption[AList]])
+      }
+      if(isConcreteElementOf_ABool(false, isEqual)){
+        return AFalse
+      }
+    }
+    isEqual
+  }
+
+
   //Method checks whether an AList value contains an element of AInt
   def aContains(al1: AList, elem: AInt) : ABool = al1 match {
     case ANil => AFalse
@@ -372,7 +389,7 @@ case class ALists(intervals: Intervals) {
   def justValue[T](ao: AOption[T]): Set[AState] = ao match {
     case ASome(e) =>  Set(AState(Map(("ASome", ASome(e).get))))
     case ANone => Set(AState(Map(("ANone", ANone))))   // throw new Exception("Exception thrown from justAList. Reason: Input was ANone")
-    case AMaybe(e) => Set(AState(Map(("ANone", ANone))), AState(Map(("ASome", ASome(e).get))))  // throw new Exception("Exception thrown from justAList. Reason: Input was AMaybe")
+    case AMaybe(e) => Set(AState(Map(("ASome", ASome(e).get))), AState(Map(("ANone", ANone))))  // throw new Exception("Exception thrown from justAList. Reason: Input was AMaybe")
   }
 
 
@@ -448,6 +465,7 @@ case class ALists(intervals: Intervals) {
         case(l: AList, "widen", r: AList) => widen_AList(l,r)
         //TODO
         /*
+        Ideas: AAssume
         case ("<", ae: AInt) => ???
         case (">", ae: AInt) => ???
         case ("<=", ae: AInt) => ???
@@ -490,7 +508,8 @@ case class ALists(intervals: Intervals) {
         case("ifIsZero", ae:AInt) => ifIsZero(ae)
         case("ifIsATrue", ae:ABool) => ifIsATrue(ae)
         case("ifIsAFalse", ae:ABool) => ifIsAFalse(ae)
-        //TODO
+        //ifIsEqual_AInt
+        //ifIsEqual_AList
       }
     }
   }
@@ -573,48 +592,50 @@ case class ALists(intervals: Intervals) {
     case AMany(e) => (Set(ACons(e, AMany(e))), Set(ANil))
   }
 
-  //TODO test
   def ifIsPositive(ai :AInt): (Set[AInt], Set[AInt]) ={
     if(intervals.<(Interval(IntegerVal(0), IntegerVal(0)), ai)){  //ai > 0
       (Set(ai), Set())
-    }else if(IntegerW.<(ai.lb, IntegerVal(0))&& IntegerW.<=(IntegerVal(0), ai.ub)){  //ub > 0 && lb < 0
-      (Set(Interval(IntegerVal(0), ai.ub)), Set(Interval(ai.lb, IntegerVal(-1))))
-    }else if(intervals.<(ai, Interval(IntegerVal(0), IntegerVal(0)))) {//lb < 0 && ub <0
+    }else if(IntegerW.<=(ai.lb, IntegerVal(0))&& IntegerW.<(IntegerVal(0), ai.ub)){  //ub > 0 && lb < 0
+      (Set(Interval(IntegerVal(1), ai.ub)), Set(Interval(ai.lb, IntegerVal(0))))
+    }else  {//lb < 0 && ub <0 //if(intervals.<(ai, Interval(IntegerVal(0), IntegerVal(0))))
      (Set(), Set(ai))
     }
   }
 
-//TODO test
+
   def ifIsNegative(ai :AInt): (Set[AInt], Set[AInt]) = {
     if(intervals.<(ai,  Interval(IntegerVal(0), IntegerVal(0)))){  //ai < 0
       (Set(ai), Set())
     }else if(IntegerW.<(ai.lb, IntegerVal(0))&& IntegerW.<=(IntegerVal(0), ai.ub)){  //ub > 0 && lb < 0
       (Set(Interval(ai.lb, IntegerVal(-1))), Set(Interval(IntegerVal(0), ai.ub)))
-    }else if(intervals.<(Interval(IntegerVal(0), IntegerVal(0)), ai)) {//lb > 0 && ub >0
+    }else  {//lb > 0 && ub >0 //if(intervals.<(Interval(IntegerVal(0), IntegerVal(0)), ai))
       (Set(), Set(ai))
     }
   }
 
-  //TODO test
   def ifIsZero(ai :AInt): (Set[AInt], Set[AInt]) = {
-    if(intervals.===(ai, Interval(IntegerVal(0), IntegerVal(0)))){
+    if(intervals.===(ai, Interval(IntegerVal(0), IntegerVal(0)))){  //ai == 0
       (Set(ai), Set())
-    }else{
+    }else if (IntegerW.<(ai.lb, IntegerVal(0))&& IntegerW.<(IntegerVal(0), ai.ub)) { //lb <0 && ub > 0
+      (Set(Interval(IntegerVal(0), IntegerVal(0))), Set(Interval(ai.lb, IntegerVal(-1)), Interval(IntegerVal(1), ai.ub)))
+    }else{ //ai < 0 || ai > 0
       (Set(), Set(ai))
     }
   }
 
-  //TODO test
   def ifIsATrue(ab: ABool): (Set[ABool], Set[ABool]) = ab match{
     case ATrue => (Set(ATrue), Set())
     case AFalse => (Set(), Set(AFalse))
   }
 
-  //TODO test
   def ifIsAFalse(ab: ABool): (Set[ABool], Set[ABool]) = ab match{
     case ATrue => (Set(), Set(ATrue))
     case AFalse => (Set(AFalse), Set())
   }
+
+  //TODO ifIsEqual_AInt
+ // def ifIsEqual_AInt(ai1: AInt, ai2: AInt) : (Set[AInt], Set[AInt]) = {}
+  //TODO ifIsEqual_AList
 
   /************************************************************
    *                          ATest                           *
@@ -636,10 +657,13 @@ case class ALists(intervals: Intervals) {
       var result: Set[AState] = Set() //return
 
       for (state <- states){
+        //println("State: "+state)
         var result_state : AState= AState(Map())
         for (test <- tests) {
+          //println("Test: "+test)
           val (value,_) = ATestOp(test.lookup("test").asInstanceOf[String],AConst(state.lookup(test.lookup("testedValue").asInstanceOf[String])) ).evaluate(state)
           if(value != Set()) {
+            //println("Value: "+value)
             for(v <- value.asInstanceOf[Set[Any]]){
               result_state = AAssign(test.lookup("testedValue").asInstanceOf[String], AConst(v)).execute(Set(state)).head
               result += result_state
@@ -653,11 +677,14 @@ case class ALists(intervals: Intervals) {
     def negative(states: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set() //return
       for (state <- states){
+       // println("State: "+state)
         var result_state : AState= AState(Map())
         for (test <- tests) {
+         // println("Test: "+test)
           val (_,value) = ATestOp(test.lookup("test").asInstanceOf[String],AConst(state.lookup(test.lookup("testedValue").asInstanceOf[String])) ).evaluate(state)
           for(v <- value.asInstanceOf[Set[Any]]) {
             if (value != Set()) {
+              //println("Value: "+value)
               result_state = AAssign(test.lookup("testedValue").asInstanceOf[String], AConst(v)).execute(Set(state)).head
               result += result_state
             }
