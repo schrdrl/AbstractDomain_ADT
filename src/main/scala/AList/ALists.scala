@@ -671,17 +671,17 @@ case class ALists(intervals: Intervals) {
   }
 
 
-
+  //Abstract Transformer: AAssert is an abstract representation of an assertion
   case class AAssert_test(test: ATest){
     def execute(as: Set[AState]) : (Set[AState], Set[AState]) = {
-      ???
+      (test.positive(as), test.negative(as))
     }
   }
 
 
   //Abstract Transformer: AAssert is an abstract representation of an assertion
   //TODO perhaps: extends AStmt -> use output positive/negative for AVerify() -> hieraus machen
-  case class AAssert(test: ATest) {
+  case class AVerify(test: ATest) {
      def execute(as: Set[AState]) : Unit = {
        if (test.positive(as).nonEmpty) {
          Console.println(s"$RESET${GREEN}Assertion fulfills for state(s): $RESET")  //success
