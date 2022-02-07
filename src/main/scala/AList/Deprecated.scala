@@ -4,101 +4,6 @@ class Deprecated {
 
 
 
-  //TODO deprecated AAssignFirst
-  /*
-  case class AAssignFirst(first: Any) extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      for(AState(_,second) <- as) yield AState(first,second)
-    }
-  }
-   */
-
-
-  /*
-  /** object of AStmt.
-   * Method execute assigns interval [0;0] to a Set of AStates -> initialState
-   * Method assignAnyN assigns any interval n to a Set of AStates
-   */
-  //TODO useful approach?
-  object AssignN extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        result += AState(Interval(IntegerVal(0), IntegerVal(0)), a.xs)
-      }
-      result
-    }
-
-    def assignAnyN(n: AInt, as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        result += AState(n, a.xs)
-      }
-      result
-    }
-  }
-
-  /** object of AStmt.
-   * Method execute subtracts the interval [1;1] to a Set of AStates
-   * Method addAnyN subtracts any interval n off a Set of AStates
-   */
-  object SubtractAnyN extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        result += AState(intervals.-(a.n, Interval(IntegerVal(1), IntegerVal(1))), a.xs)
-      }
-      result
-    }
-
-    def subtractAnyN(n: AInt, as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        result += AState(intervals.-(a.n, n), a.xs)
-      }
-      result
-    }
-
-    def subtractAnyN_aTail(n: AInt, as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        result += AState(intervals.-(a.n, n), justValue(aTail(a.xs)).head)
-      }
-      result
-    }
-  }
-
-
-  /** object of AStmt.
-   * Method execute adds the interval [1;1] to a Set of AStates
-   * Method addAnyN adds any interval n to a Set of AStates
-   */
-  object AddAnyN extends AStmt {
-    override def execute(as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        result += AState(intervals.+(a.n, Interval(IntegerVal(1), IntegerVal(1))), a.xs)
-      }
-      result
-    }
-
-    def addAnyN(n: AInt, as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        result += AState(intervals.+(a.n, n), a.xs)
-      }
-      result
-    }
-
-    def addAnyN_aTail(n: AInt, as: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (a <- as) {
-        result += AState(intervals.+(a.n, n), justValue(aTail(a.xs)).head)
-      }
-      result
-    }
-  }
-*/
 
 
   /*
@@ -131,7 +36,7 @@ class Deprecated {
   */
   /*
    //TODO deprecated
-    //trait "separates" inputs of unary operations in two sets
+    //trait "separates" inputs of binary operations in two sets
     trait ABinOp[A]{
       def positive(a1:A,a2: A ) :  Set[AInt]
       def negative(a1:A,a2: A) : (Set[(A,A)] , Set[(A,A)])
@@ -209,41 +114,6 @@ class Deprecated {
       }
 
   */
-
-
-
-
-  /* TODO deprecated
-  //stmt1 will be executed if xs of the given AState is nil, otherwise stmt2 will be executed
-  case class IfElse_xsIsNil(stmt1: AStmt, stmt2: AStmt) extends AStmt {
-      def execute(as: Set[AState_Base]): Set[AState_Base] = {
-        var result: Set[AState_Base] = Set()
-        for (a <- as) {
-          val (isNil, isNotNil) = ifIsNil(a.second.asInstanceOf[AList])
-
-          val aStatesTrue: Set[AState] = isNil.map(AssignN_SameIntervalToAList(a,_))
-          val aStatesFalse: Set[AState] = isNotNil.map(AssignN_SameIntervalToAList(a,_)) //isNotNil -> aStatesFalse
-
-          result =  stmt1.execute(aStatesTrue) ++ stmt2.execute(aStatesFalse)
-        }
-        result
-      }
-    }
-
-
-
-//The AStmt will be executed if xs of the given AState is nil
-  //TODO needs improvement/Deprecated
-  case class If_xsIsNil(stmt: AStmt) {
-    def execute(as: AState_Base): Set[AState_Base] = {
-      val (aStatesTrue, aStatesFalse) = ifIsNil(as.second.asInstanceOf[AList])
-      val result = for (as1 <- aStatesTrue; as2 <- stmt.execute(Set(as))) yield as2
-      result
-    }
-  }
-  */
-
-
 
 
 
@@ -340,60 +210,10 @@ class Deprecated {
 
 
 
-/*
-  object xsIsNilTest extends ATest {
-    override def positive(states: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (state <- states) {       //1. check if it is an AList
-                                    //2. add this state to the result
-        //TODO multiple AList?
-        if(state.values.exists(_._1 == "AList")){
-          val (isNil, _) = ifIsNil(state.lookup("AList").asInstanceOf[AList]) //TODO alternative?
-          result ++= isNil.map(state)
-        }
-
-       // val (isNil, _) = ifIsNil(???)
-        // result ++= isNil.map(state)
-      }
-     result
-    }
 
 
 
-    override def negative(states: Set[AState]): Set[AState] = {
-      var result: Set[AState] = Set()
-      for (state <- states) {
-        val (_, isNotNil) = ifIsNil(state.xs)
-        result ++= isNotNil.map(state)
-      }
-      result
-    }
-  }
 
- */
-
-
-/*
-object xsIsNotNilTest extends ATest {
-  override def positive(states: Set[AState]): Set[AState] = {
-    var result: Set[AState] = Set()
-    for (state <- states) {
-      val (_, isNotNil) = ifIsNil(state.xs)
-      result = isNotNil.map(AssignN_SameIntervalToAList(state,_))
-    }
-    result
-  }
-
-  override def negative(states: Set[AState]): Set[AState] = {
-    var result: Set[AState] = Set()
-    for (state <- states) {
-      val (isNil, _) = ifIsNil(state.xs)
-      result = isNil.map(AssignN_SameIntervalToAList(state,_))
-    }
-    result
-    }
-}
-*/
 /*
   object nIsPositive extends ATest {
     override def positive(states: Set[AState]): Set[AState] = {
@@ -477,17 +297,6 @@ object xsIsNotNilTest extends ATest {
 
 
 
- //Representation of a Statement. Is used by Sequences, e.g. IfElse_xsIsNil(stmt1,stmt2)
-  trait AStmt{
-    def execute(as: Set[AState]): Set[AState]
-  }
-
-
-  //Trait ATest represents the two states a test has as output
-  trait ATest{
-    def positive(states: Set[AState]): Set[AState]
-    def negative(states: Set[AState]): Set[AState]
-  }
 
  */
 }

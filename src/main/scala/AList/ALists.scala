@@ -447,6 +447,18 @@ case class ALists(intervals: Intervals) {
         case(l: AList, "subset", r: AList) => subset_AList(l,r)
         case(l: AList, "widen", r: AList) => widen_AList(l,r)
         //TODO
+        /*
+        case ("<", ae: AInt) => ???
+        case (">", ae: AInt) => ???
+        case ("<=", ae: AInt) => ???
+        case (">=", ae: AInt) => ???
+        case ("==", ae: AInt) => ???
+        case ("!=", ae: AInt) => ???
+        case ("==", ae: AList) => ???
+        case ("!=", ae: AList) => ???
+        case ("==", ae: ABool) => ???
+        case ("!=", ae: ABool) => ???
+         */
       }
 
     }
@@ -473,15 +485,17 @@ case class ALists(intervals: Intervals) {
       (op,ae) match {
         case("ifIsNil", ae: AList) => ifIsNil(ae)
         case("ifIsNotNil", ae: AList) => ifIsNotNil(ae)
-        //case("isPositive", ae:AInt) => ???
-        //case("isNegative", ae:AInt) => ???
-        //case("isZero", ae:AInt) => ???
-        //case("isATrue", ae:ABool) => ???
-        //case("isAFalse", ae:ABool) => ???
+        case("ifIsPositive", ae:AInt) => ifIsPositive(ae)
+        case("ifIsNegative", ae:AInt) => ifIsNegative(ae)
+        case("ifIsZero", ae:AInt) => ifIsZero(ae)
+        case("ifIsATrue", ae:ABool) => ifIsATrue(ae)
+        case("ifIsAFalse", ae:ABool) => ifIsAFalse(ae)
         //TODO
       }
     }
   }
+
+
 
   /************************************************************
    *                          AStmt                           *
@@ -559,13 +573,48 @@ case class ALists(intervals: Intervals) {
     case AMany(e) => (Set(ACons(e, AMany(e))), Set(ANil))
   }
 
-  //TODO
+  //TODO test
+  def ifIsPositive(ai :AInt): (Set[AInt], Set[AInt]) ={
+    if(intervals.<(Interval(IntegerVal(0), IntegerVal(0)), ai)){  //ai > 0
+      (Set(ai), Set())
+    }else if(IntegerW.<(ai.lb, IntegerVal(0))&& IntegerW.<=(IntegerVal(0), ai.ub)){  //ub > 0 && lb < 0
+      (Set(Interval(IntegerVal(0), ai.ub)), Set(Interval(ai.lb, IntegerVal(-1))))
+    }else if(intervals.<(ai, Interval(IntegerVal(0), IntegerVal(0)))) {//lb < 0 && ub <0
+     (Set(), Set(ai))
+    }
+  }
 
-  def ifIsPositive(ai :AInt): (Set[AInt], Set[AInt]) = ???
+//TODO test
+  def ifIsNegative(ai :AInt): (Set[AInt], Set[AInt]) = {
+    if(intervals.<(ai,  Interval(IntegerVal(0), IntegerVal(0)))){  //ai < 0
+      (Set(ai), Set())
+    }else if(IntegerW.<(ai.lb, IntegerVal(0))&& IntegerW.<=(IntegerVal(0), ai.ub)){  //ub > 0 && lb < 0
+      (Set(Interval(ai.lb, IntegerVal(-1))), Set(Interval(IntegerVal(0), ai.ub)))
+    }else if(intervals.<(Interval(IntegerVal(0), IntegerVal(0)), ai)) {//lb > 0 && ub >0
+      (Set(), Set(ai))
+    }
+  }
 
-  def ifIsNegative(ai :AInt): (Set[AInt], Set[AInt]) = ???
+  //TODO test
+  def ifIsZero(ai :AInt): (Set[AInt], Set[AInt]) = {
+    if(intervals.===(ai, Interval(IntegerVal(0), IntegerVal(0)))){
+      (Set(ai), Set())
+    }else{
+      (Set(), Set(ai))
+    }
+  }
 
-  def ifIsZero(ai :AInt): (Set[AInt], Set[AInt]) = ???
+  //TODO test
+  def ifIsATrue(ab: ABool): (Set[ABool], Set[ABool]) = ab match{
+    case ATrue => (Set(ATrue), Set())
+    case AFalse => (Set(), Set(AFalse))
+  }
+
+  //TODO test
+  def ifIsAFalse(ab: ABool): (Set[ABool], Set[ABool]) = ab match{
+    case ATrue => (Set(), Set(ATrue))
+    case AFalse => (Set(AFalse), Set())
+  }
 
   /************************************************************
    *                          ATest                           *

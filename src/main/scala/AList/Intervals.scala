@@ -43,6 +43,8 @@ object IntegerW {
 
   def <(iw1: IntegerW, iw2: IntegerW): Boolean = <=(iw1, iw2) && iw1 != iw2
 
+  def ==(iw1: IntegerW, iw2: IntegerW): Boolean =  iw1 == iw2
+
 
   private
   def min2(iw1: IntegerW, iw2: IntegerW): IntegerW = (iw1, iw2) match {
@@ -243,6 +245,11 @@ case class Intervals(mlb: IntegerW = IntegerNegInf, mub: IntegerW = IntegerInf) 
   //added <=
   def <=(i1: Interval, i2: Interval): Boolean = {
     IntegerW.<=(i1.lb, i2.lb) && IntegerW.<=(i1.ub, i2.ub)
+  }
+
+  //added <
+  def <(i1: Interval, i2: Interval): Boolean = {
+    IntegerW.<(i1.lb, i2.lb) && IntegerW.<(i1.ub, i2.ub)
   }
 
 
