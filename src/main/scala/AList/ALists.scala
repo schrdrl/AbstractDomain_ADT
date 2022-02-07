@@ -2,7 +2,7 @@ package AList
 
 import Expressions.ABinOp
 
-import Console.{GREEN, RED, RESET}
+import Console.{GREEN, RED, RESET, YELLOW}
 
 /**
  * AList is an abstract domain of numerical lists (belonging to algebraic data types)
@@ -672,35 +672,35 @@ case class ALists(intervals: Intervals) {
 
 
   //Abstract Transformer: AAssert is an abstract representation of an assertion
-  case class AAssert_test(test: ATest){
+  case class AAssert(test: ATest){
     def execute(as: Set[AState]) : (Set[AState], Set[AState]) = {
       (test.positive(as), test.negative(as))
     }
   }
 
-
-  //Abstract Transformer: AAssert is an abstract representation of an assertion
-  //TODO perhaps: extends AStmt -> use output positive/negative for AVerify() -> hieraus machen
-  case class AVerify(test: ATest) {
-     def execute(as: Set[AState]) : Unit = {
-       if (test.positive(as).nonEmpty) {
-         Console.println(s"$RESET${GREEN}Assertion fulfills for state(s): $RESET")  //success
-         test.positive(as).foreach(posElement => Console.println(s"$RESET$GREEN $posElement $RESET"))
-       }
-       println("")
-
-       if (test.negative(as).nonEmpty) {
-         Console.println(s"$RESET${RED}Assertion fails for state(s):$RESET") //fails
-         test.negative(as).foreach(negElement => Console.println(s"$RESET$RED $negElement $RESET"))
-         //-> return input
-       }
-
-       //yellow for might fail/unknown/warning -> return input
+  //Abstract Transformer: AVerify
+  case class AVerify(test: ATest){
+    def execute(as: Set[AState]) : Unit = {
+      for(a <- as){
+        if(test.positive(Set(a)).nonEmpty && test.negative(Set(a)).isEmpty){
+          Console.println(s"$RESET${GREEN}Assertion fulfills for output-state: $RESET" +a)  //success
+          test.positive(Set(a)).foreach(posElement => Console.println(s"$RESET$GREEN $posElement $RESET" +"\n"))
+        }else if(test.positive(Set(a)).isEmpty && test.negative(Set(a)).nonEmpty){
+          Console.println(s"$RESET${RED}Assertion fails for output-state:$RESET" +a) //fails
+          test.negative(Set(a)).foreach(negElement => Console.println(s"$RESET$RED $negElement $RESET"+"\n"))
+        }else{ //test.positive(Set(a)).nonEmpty && test.negative(Set(a)).nonEmpty
+          Console.println(s"$RESET${YELLOW}Assertion might fulfill for output-state: $RESET" +a)  //success
+          test.positive(Set(a)).foreach(posElement => Console.println(s"$RESET$YELLOW $posElement $RESET"))
+          Console.println(s"$RESET${YELLOW}Assertion might fail for output-state: $RESET" +a) //fails
+          test.negative(Set(a)).foreach(negElement => Console.println(s"$RESET$YELLOW $negElement $RESET"+"\n"))
+        }
+      }
     }
   }
 
-  //TODO outer verification of the program code
-  //case class AVerify()
+
+
+
 
   //Abstract Transformer: AAssume is an abstract representation of an assumption
   //TODO Testcases + scenarios -> functionality
