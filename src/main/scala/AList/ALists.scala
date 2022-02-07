@@ -56,53 +56,6 @@ case class ALists(intervals: Intervals) {
   }
 
 
-  /************************************************************
-   *                   isConcreteElementOf                    *
-   ************************************************************/
-
-  //checks whether an integer value is a concrete Element of an Interval.
-  def isConcreteElementOf_AInt(i: Int, ai: AInt): Boolean = {
-    intervals.contains(ai, i)
-  }
-
-  //checks whether a list is a concrete Element of AList.
-  def isConcreteElementOf_AList(l: List[Int], al: AList): Boolean = (l, al) match {
-    case (Nil, ANil) => true
-    case (Nil, ACons(_, _)) => false
-    case (Nil, AMany(_)) => true //AMany = ANil ≀ ACons(e, Many(e))
-    case (x :: xs, ANil) => false
-    case (x :: xs, ACons(ax, axs)) => isConcreteElementOf_AInt(x, ax) && isConcreteElementOf_AList(xs, axs)
-    case (x :: xs, AMany(ax)) =>
-      isConcreteElementOf_AInt(x, ax) && isConcreteElementOf_AList(xs, al)
-  }
-
-  //checks whether an Option[Int] is a concrete Element of an interval AOption[AInt].
-  def isConcreteElementOf_AOptionAInt(o: Option[Int], ao: AOption[AInt]): Boolean = (o, ao) match {
-    case (None, ANone) => true
-    case (None, ASome(_)) => false
-    case (None, AMaybe(_)) => true
-    case (Some(_), ANone) => false
-    case (Some(h1), ASome(h2)) => intervals.contains(h2, h1)
-    case (Some(h1), AMaybe(h2)) => intervals.contains(h2, h1)
-  }
-
-  //checks whether an Option[List[Int]] is a concrete Element of an interval AOption[AList].
-  def isConcreteElementOf_AOptionAList(o: Option[List[Int]], ao: AOption[AList]): Boolean = (o, ao) match {
-    case (None, ANone) => true
-    case (None, ASome(_)) => false
-    case (None, AMaybe(_)) => true
-    case (Some(_), ANone) => false
-    case (Some(h1), ASome(h2)) => isConcreteElementOf_AList(h1, h2)
-    case (Some(h1), AMaybe(h2)) => isConcreteElementOf_AList(h1, h2)
-  }
-
-  //checks whether a Boolean value is a concrete Element of an ABool.
-  def isConcreteElementOf_ABool(b: Boolean, ab: ABool): Boolean = (b, ab) match {
-    case (true, ATrue) => true
-    case (false, AFalse) => true
-    case (false, ATrue) | (true, AFalse) => false
-  }
-
 
   /************************************************************
    *                Advanced Functions over ALists            *
@@ -273,6 +226,22 @@ case class ALists(intervals: Intervals) {
     case (AMaybe(a), ASome(b)) => AMaybe(widen_AList(a,b))
     case (ASome(a), AMaybe(b)) => AMaybe(widen_AList(a,b))
   }
+
+
+  //widening of two AStates at the specified keys
+  def widen_AState(as1: AState, as2 : AState, keys: Set[String]) : AState = {
+    var state : AState = as1
+    for (op <- keys){
+      op match {
+        case "AInt" =>  state = AAssign("AInt", AConst(intervals.Lattice.widen(state.lookup("AInt").asInstanceOf[AInt], as2.lookup("AInt").asInstanceOf[AInt]))).execute(Set(state,as2)).head
+        case "AList" => state = AAssign("AList", AConst(widen_AList(state.lookup("AList").asInstanceOf[AList], as2.lookup("AList").asInstanceOf[AList]))).execute(Set(state,as2)).head
+       //TODO
+      }
+    }
+    state
+  }
+
+
 
   //TODO recheck -> widen or union_AList
   //Method flattens a given AList value (not empty) to a more compact AMany-format
@@ -530,29 +499,38 @@ case class ALists(intervals: Intervals) {
     def execute(as: Set[AState]) : Set[AState] = {
       var result : Set[AState] = Set()  //return
       for(a <- as) {
-        var result_state : AState= AState(Map())
+        var result_state : AState= a
         for(expr <- expression){
           if(expr.values.exists(_._1 == "AUnOp")){
             //evaluate expression
-            val value = AUnOp( expr.lookup("AUnOp").asInstanceOf[String], AConst(a.lookup(expr.lookup("operand").asInstanceOf[String]))).evaluate(a)
-           //TODO only ASome
+            val value = AUnOp( expr.lookup("AUnOp").asInstanceOf[String], AConst(result_state.lookup(expr.lookup("operand").asInstanceOf[String]))).evaluate(result_state)
             for (v <- value.asInstanceOf[Set[AState]]){
               if(v.values.exists(_._1 == "ASome")){
                 //update AState
-                result_state = AAssign(expr.lookup("operand").asInstanceOf[String], AConst(v.lookup("ASome"))).execute(Set(a)).head //TODO alternative for head -> could have multiple results (depends on op)
+                result_state = AAssign(expr.lookup("operand").asInstanceOf[String], AConst(v.lookup("ASome"))).execute(Set(result_state)).head
               }
             }
-
-
           }else if(expr.values.exists(_._1 == "ABinOp")){
-            val value = ABinOp(AConst(a.lookup(expr.lookup("operand").asInstanceOf[String])), expr.lookup("ABinOp").asInstanceOf[String], AConst(expr.lookup("operator")) ).evaluate(a)
-            result_state = AAssign(expr.lookup("operand").asInstanceOf[String], AConst(value)).execute(Set(a)).head //TODO alternative for head -> maybe AAssert_single
+            val value = ABinOp(AConst(result_state.lookup(expr.lookup("operand").asInstanceOf[String])), expr.lookup("ABinOp").asInstanceOf[String], AConst(expr.lookup("operator")) ).evaluate(result_state)
+            result_state = AAssign(expr.lookup("operand").asInstanceOf[String], AConst(value)).execute(Set(result_state)).head
           }
         } //end of expression
         result += result_state  //assign results of current state to overall result
       } //end of as
       result
     }
+  }
+
+
+  //Method collects operands used in a Set of AStates of AStmt
+  def getOperands(expressions:Set[AState]) : Set[String] = {
+    var result : Set[String] = Set()
+    for(expr <- expressions){
+      if(expr.values.exists(_._1 == "operand")){
+        result += expr.lookup("operand").asInstanceOf[String]
+      }
+    }
+    result
   }
 
   /************************************************************
@@ -614,7 +592,7 @@ case class ALists(intervals: Intervals) {
           val (value,_) = ATestOp(test.lookup("test").asInstanceOf[String],AConst(state.lookup(test.lookup("testedValue").asInstanceOf[String])) ).evaluate(state)
           if(value != Set()) {
             for(v <- value.asInstanceOf[Set[Any]]){
-              result_state = AAssign(test.lookup("testedValue").asInstanceOf[String], AConst(v)).execute(Set(state)).head //TODO alternative to head
+              result_state = AAssign(test.lookup("testedValue").asInstanceOf[String], AConst(v)).execute(Set(state)).head
               result += result_state
             }
           }
@@ -631,7 +609,7 @@ case class ALists(intervals: Intervals) {
           val (_,value) = ATestOp(test.lookup("test").asInstanceOf[String],AConst(state.lookup(test.lookup("testedValue").asInstanceOf[String])) ).evaluate(state)
           for(v <- value.asInstanceOf[Set[Any]]) {
             if (value != Set()) {
-              result_state = AAssign(test.lookup("testedValue").asInstanceOf[String], AConst(v)).execute(Set(state)).head //TODO alternative to head
+              result_state = AAssign(test.lookup("testedValue").asInstanceOf[String], AConst(v)).execute(Set(state)).head
               result += result_state
             }
           }
@@ -658,50 +636,51 @@ case class ALists(intervals: Intervals) {
   }
 
 
-
-
-
   //Abstract transformer: AWhile is an abstract representation of a while loop
-  //TODO needs improvement
-  case class AWhile(test:ATest, body: AStmt)  {
-      def execute(as: Set[AState]): Set[AState] = {
-      var states_at_loop_head: Set[AState] = as
-      var states_after_body: Set[AState] = Set()
+  case class AWhile(test: ATest, body: AStmt){
+    def execute(as: Set[AState]) : Set[AState] = {
+      var states = as
       var result: Set[AState] = Set()
-      var abort_loop = false
+      var afterWiden = AState(Map())
+      var stopLoop = false
 
-      while (test.positive(states_at_loop_head).nonEmpty && (!abort_loop)) {
-        states_after_body = body.execute(test.positive(states_at_loop_head))
-        println("After loop-execution:" + states_after_body.head)
-       // result = Set(AState(intervals.Lattice.widen(states_at_loop_head.head.first, states_after_body.head.n), widen_AList(states_at_loop_head.head.xs, states_after_body.head.xs)))
-        println("After widen:" + result.head)
-        println("")
+      while(test.positive(states).nonEmpty && !stopLoop){  //1. test condition
+        val positiveStates = test.positive(states)
+        println("Test outcome (positive): " +positiveStates)
 
-        //TODO TEST
-        /*
-        if (AStateEqual(states_at_loop_head.head, result.head) == AFalse)  {
-          states_at_loop_head = result
-        } else if (AStateEqual(states_at_loop_head.head, result.head) == ATrue) {
-          abort_loop = true
+        for(pos <- positiveStates){
+          println("Current AState: " +pos)
+          val afterExecution = body.execute(Set(pos))//2. execute body for each state in positive state
+          println("After execution: " +afterExecution)
+          afterWiden = widen_AState(pos, afterExecution.head, getOperands(body.expression))//3. widen state and after execution output
+          println("After widening: " +afterWiden)
+          result += afterWiden//4. add to result
+          println("Result after widening: " +result)
         }
 
-
-         */
-
-      }
-
-      if (result.nonEmpty) {
-        println("After loop:" + result)
-      } else {
-        println("Not in loop")
+        if(states == result){ //5. compare whether the result still changes from the states at the loop head
+          stopLoop = true
+          println("Loop stops here" +"\n")
+        }else{
+          states = result
+          println("New state: " +states +"\n")
+        }
       }
       result
     }
   }
 
 
+
+  case class AAssert_test(test: ATest){
+    def execute(as: Set[AState]) : (Set[AState], Set[AState]) = {
+      ???
+    }
+  }
+
+
   //Abstract Transformer: AAssert is an abstract representation of an assertion
-  //TODO perhaps: extends AStmt -> use output positive/negative for AVerify()
+  //TODO perhaps: extends AStmt -> use output positive/negative for AVerify() -> hieraus machen
   case class AAssert(test: ATest) {
      def execute(as: Set[AState]) : Unit = {
        if (test.positive(as).nonEmpty) {
@@ -733,6 +712,53 @@ case class ALists(intervals: Intervals) {
     }
   }
 
+
+  /************************************************************
+   *                   isConcreteElementOf                    *
+   ************************************************************/
+
+  //checks whether an integer value is a concrete Element of an Interval.
+  def isConcreteElementOf_AInt(i: Int, ai: AInt): Boolean = {
+    intervals.contains(ai, i)
+  }
+
+  //checks whether a list is a concrete Element of AList.
+  def isConcreteElementOf_AList(l: List[Int], al: AList): Boolean = (l, al) match {
+    case (Nil, ANil) => true
+    case (Nil, ACons(_, _)) => false
+    case (Nil, AMany(_)) => true //AMany = ANil ≀ ACons(e, Many(e))
+    case (x :: xs, ANil) => false
+    case (x :: xs, ACons(ax, axs)) => isConcreteElementOf_AInt(x, ax) && isConcreteElementOf_AList(xs, axs)
+    case (x :: xs, AMany(ax)) =>
+      isConcreteElementOf_AInt(x, ax) && isConcreteElementOf_AList(xs, al)
+  }
+
+  //checks whether an Option[Int] is a concrete Element of an interval AOption[AInt].
+  def isConcreteElementOf_AOptionAInt(o: Option[Int], ao: AOption[AInt]): Boolean = (o, ao) match {
+    case (None, ANone) => true
+    case (None, ASome(_)) => false
+    case (None, AMaybe(_)) => true
+    case (Some(_), ANone) => false
+    case (Some(h1), ASome(h2)) => intervals.contains(h2, h1)
+    case (Some(h1), AMaybe(h2)) => intervals.contains(h2, h1)
+  }
+
+  //checks whether an Option[List[Int]] is a concrete Element of an interval AOption[AList].
+  def isConcreteElementOf_AOptionAList(o: Option[List[Int]], ao: AOption[AList]): Boolean = (o, ao) match {
+    case (None, ANone) => true
+    case (None, ASome(_)) => false
+    case (None, AMaybe(_)) => true
+    case (Some(_), ANone) => false
+    case (Some(h1), ASome(h2)) => isConcreteElementOf_AList(h1, h2)
+    case (Some(h1), AMaybe(h2)) => isConcreteElementOf_AList(h1, h2)
+  }
+
+  //checks whether a Boolean value is a concrete Element of an ABool.
+  def isConcreteElementOf_ABool(b: Boolean, ab: ABool): Boolean = (b, ab) match {
+    case (true, ATrue) => true
+    case (false, AFalse) => true
+    case (false, ATrue) | (true, AFalse) => false
+  }
 
 
 

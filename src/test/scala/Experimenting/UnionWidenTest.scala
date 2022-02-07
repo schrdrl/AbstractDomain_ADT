@@ -375,4 +375,20 @@ class UnionWidenTest extends AnyFunSuite {
 
   }
 
+  test("widen AState"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+    val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(3))
+    val d = b.intervals.Interval(IntegerVal(5), IntegerVal(8))
+    val e = b.ANil
+    val f = b.ACons(c, b.ANil)
+
+    val state1 = b.AState(Map( ("AInt", c),("AList", e)))
+    val state2 = b.AState(Map( ("AInt", d),("AList", f)))
+
+    val widenAState = b.widen_AState(state1, state2, Set("AInt", "AList"))
+    println(widenAState)
+
+
+  }
 }

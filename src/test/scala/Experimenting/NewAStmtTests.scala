@@ -38,4 +38,24 @@ class NewAStmtTests extends AnyFunSuite {
 
   }
 
+  test("getOperand"){
+    val a = Intervals.Unbounded
+    val b = ALists(a)
+
+    val c = b.intervals.Interval(IntegerVal(2),IntegerVal(3))
+    val d = b.intervals.Interval(IntegerVal(1),IntegerVal(1))
+    val e = b.intervals.Interval(IntegerVal(0),IntegerVal(0))
+
+    val f = b.ANil
+    val g = b.AMany(c)
+    val h = b.ACons(d, b.AMany(e))
+
+    val op1 = b.AState(Map( ("ABinOp", "-"), ("operator", d), ("operand", "AInt")))
+    val op2 = b.AState(Map(("AUnOp", "aTail"),("operand", "AList")))
+
+    val getOp = b.getOperands(Set(op1, op2))
+
+    println(getOp)
+  }
+
 }
