@@ -250,11 +250,7 @@ case class ALists(intervals: Intervals) {
   }
 
 
-  /**
-   * Input: xs Local: ys = [] -> empty List
-   * while xs != [] do
-   * ys = Cons(xs.head, ys) xs = xs.tail
-   */
+  //method reverses a given AList
   def reverse(al: AList) : AList = al match {
     case ANil => ANil
     case AMany(e) => AMany(e)
@@ -266,13 +262,12 @@ case class ALists(intervals: Intervals) {
       while(ifIsNotNil(axs)._1.nonEmpty && !tailIsAMany){
 
         val head = justValue(aHead(axs)).head
-        val tail = justValue(aTail(axs)).head
-        if(head.values.exists(_._1 == "ASome") && tail.values.exists(_._1 == "ASome") && !tail.values.exists(_._1 == "ANone")){
+        val tail = justValue(aTail(axs))
+        if(head.values.exists(_._1 == "ASome") && tail.head.values.exists(_._1 == "ASome") && tail.tail.isEmpty){
           ays = ACons(head.lookup("ASome").asInstanceOf[AInt], ays)
-          axs = tail.lookup("ASome").asInstanceOf[AList]
-        }else if(tail.values.exists(_._1 == "ANone")){
-          println("Test AMany2")
-            ays = flatten_AList(al) //TODO ACons -> tail is AMany
+          axs = tail.head.lookup("ASome").asInstanceOf[AList]
+        }else if(tail.head.values.exists(_._1 == "ASome") && tail.tail.head.values.exists(_._1 == "ANone")){
+            ays = flatten_AList(al)
             tailIsAMany = true
         }else{
           throw new Exception("Exception thrown from reverse. Reason: aHead was ANone")
