@@ -3,41 +3,13 @@ package AList
 class Deprecated {
 
   /*
- //TODO deprecated
- //trait "separates" the input of a unary operations in two sets
- trait AUnOp[A]{
-   def positive(a:A): Set[A]
-   def negative(a:A): Set[A]
- }
-//TODO deprecated -> need new version
- //checks whether an AList is empty and returns the empty and non-empty parts of it
- object AIsNil extends AUnOp[AList]{
-   override def positive(a: AList): Set[AList] = a match{
-     case ANil => Set(a)
-     case ACons(_,_) => Set()
-     case AMany(e) => Set(ANil)
-   }
-
-   override def negative(a: AList): Set[AList] = a match {
-     case ANil => Set()
-     case ACons(_,_) => Set(a)
-     case AMany(e) => Set(ACons(e, AMany(e)))
-   }
- }
-
-
-
-
-
-  */
-  /*
    //TODO deprecated
     //trait "separates" inputs of binary operations in two sets
     trait ABinOp[A]{
       def positive(a1:A,a2: A ) :  Set[AInt]
       def negative(a1:A,a2: A) : (Set[(A,A)] , Set[(A,A)])
     }
-   //TODO deprecated
+   //TODO needs improvement
 
       object AIntEqual extends ABinOp[AInt] {
         //returns the interval both inputs have in common

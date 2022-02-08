@@ -62,33 +62,26 @@ case class ALists(intervals: Intervals) {
    //Method prepends an element on the front a an AList value
    def +:(elem: AInt, al2: AList) : AList = ACons(elem, al2 )
 
-  //TODO recheck
   //Method appends an element the the end a an AList value
    def :+(al1: AList, elem: AInt) : AList = al1 match {
      case ANil => ACons(elem, ANil)
      case ACons(h,t) => ACons(h,:+(t, elem))
-     //if(:+(t, elem).tail.nonEmpty) Set(ACons(h, :+(t, elem).head), ACons(h, :+(t, elem).tail.head)) else Set(ACons(h, :+(t, elem).head))
-     case AMany(e) => AMany(intervals.Lattice.widen(e, elem)) //TODO test
-    //Set(ACons(elem, ANil), ACons(e, AMany(intervals.union_Interval(e, elem))))
-     //1. case: ANil -> ACons(elem, ANil)
-     //2. case: ACons(e, AMany(e)) -> ACons(e, ACons(elem, ANil)) oder ACons(e, ACons(elem, AMany(e))) oder ACons(e, AMany(e union elem)) ???
+     case AMany(e) => AMany(intervals.union_Interval(e, elem))  //TODO recheck
+
    }
 
-  //TODO recheck
+
   //Method concatenates two values of type AList
-  //TODO is union the best solution here? -> interval can be too wide
-   def ++(al1: AList, al2: AList): AList = (al1, al2) match { //TODO : AList
+   def ++(al1: AList, al2: AList): AList = (al1, al2) match {
      case (ANil, ANil) =>ANil
      case (ANil, ACons(h,t)) => ACons(h,t)
      case (ACons(h,t), ANil) => ACons(h,t)
      case (ANil, AMany(e)) => AMany(e)
      case (AMany(e), ANil) => AMany(e)
      case (AMany(e1), AMany(e2)) => AMany(intervals.union_Interval(e1,e2))
-     case (AMany(e1), ACons(h,t)) => union_AList(al1, flatten_AList(al2))//Set(al2, ACons(e1, union_AList(al1, al2))) //TODO recheck
+     case (AMany(e1), ACons(h,t)) => union_AList(al1, flatten_AList(al2))   //TODO recheck
      case (ACons(h,t), AMany(e2)) => ACons(h, ++(t, al2))
-     //if(++(t,ACons(e2,AMany(e2))).tail.nonEmpty) Set(ACons(h, ++(t,ACons(e2,AMany(e2))).head), ACons(h, ++(t,ACons(e2,AMany(e2))).tail.head)) else Set(al1, ACons(h,++(t,ACons(e2,AMany(e2))).head)) //TODO recheck
      case (ACons(h1, t1), ACons(h2, t2)) => ACons(h1, ++(t1, al2))
-    //if(++(t1, al2).tail.nonEmpty) Set(ACons(h1, ++(t1, al2).head),ACons(h1, ++(t1, al2).tail.head)) else Set(ACons(h1, ++(t1, al2).head))
    }
 
 
@@ -254,7 +247,7 @@ case class ALists(intervals: Intervals) {
   def reverse(al: AList) : AList = al match {
     case ANil => ANil
     case AMany(e) => AMany(e)
-    case ACons(h,t) => {
+    case ACons(h,t) =>
       var axs : AList = al
       var ays : AList = ANil
       var tailIsAMany = false
@@ -274,7 +267,6 @@ case class ALists(intervals: Intervals) {
         }
       }
       ays
-    }
   }
 
   /************************************************************
@@ -359,7 +351,7 @@ case class ALists(intervals: Intervals) {
         case "AOption[AInt]" => isEqual = ===(as1.lookup("AOption[AInt]").asInstanceOf[AOption[AInt]], as2.lookup("AOption[AInt]").asInstanceOf[AOption[AInt]])
         case "AOption[AList]" => isEqual = ===(as1.lookup("AOption[AList]").asInstanceOf[AOption[AList]], as2.lookup("AOption[AList]").asInstanceOf[AOption[AList]])
       }
-      if(isConcreteElementOf_ABool(false, isEqual)){
+      if(isConcreteElementOf_ABool(b = false, isEqual)){
         return AFalse
       }
     }
