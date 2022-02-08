@@ -233,8 +233,7 @@ case class ALists(intervals: Intervals) {
   }
 
 
-
-  //TODO recheck -> widen or union_AList
+  //TODO recheck
   //Method flattens a given AList value (not empty) to a more compact AMany-format
   def flatten_AList(al: AList) : AList = al match {
     case ANil => ANil
@@ -453,16 +452,16 @@ case class ALists(intervals: Intervals) {
         //TODO
         /*
         Ideas: AAssume
-        case ("<", ae: AInt) => ???
-        case (">", ae: AInt) => ???
-        case ("<=", ae: AInt) => ???
-        case (">=", ae: AInt) => ???
-        case ("==", ae: AInt) => ???
-        case ("!=", ae: AInt) => ???
-        case ("==", ae: AList) => ???
-        case ("!=", ae: AList) => ???
-        case ("==", ae: ABool) => ???
-        case ("!=", ae: ABool) => ???
+        case (l: AInt, "<", r: AInt) => ???
+        case (l: AInt, ">", r: AInt) => ???
+        case (l: AInt, "<=", r: AInt) => ???
+        case (l: AInt, ">=", r: AInt) => ???
+        case (l: AInt, "==", r: AInt) => ???
+        case (l: AInt, "!=", r: AInt) => ???
+        case (l: AList, "==", r: AList) => ???
+        case (l: AList, "!=", r: AList) => ???
+        case (l: ABool, "==", r: ABool) => ???
+        case (l: ABool, "!=", r: ABool) => ???
          */
       }
 
@@ -621,7 +620,7 @@ case class ALists(intervals: Intervals) {
   }
 
   //TODO ifIsEqual_AInt
- // def ifIsEqual_AInt(ai1: AInt, ai2: AInt) : (Set[AInt], Set[AInt]) = {}
+
   //TODO ifIsEqual_AList
 
   /************************************************************
@@ -642,7 +641,6 @@ case class ALists(intervals: Intervals) {
   case class ATest(tests: Set[AState]){
     def positive(states: Set[AState]): Set[AState] = {
       var result: Set[AState] = Set() //return
-
       for (state <- states){
         //println("State: "+state)
         var result_state : AState= AState(Map())
