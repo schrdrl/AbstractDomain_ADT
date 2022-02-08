@@ -4,7 +4,7 @@ import AList.{ALists, IntegerVal, Intervals}
 import org.scalatest.funsuite.AnyFunSuite
 
 class LoopTests_with_ATest extends AnyFunSuite {
-/*
+
   test("Concrete Example - ACons") {
     /**
      * int n
@@ -21,47 +21,44 @@ class LoopTests_with_ATest extends AnyFunSuite {
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
+    val d = b.intervals.Interval(IntegerVal(1), IntegerVal(1))
 
     val xs: b.AList = b.ACons(c, b.ACons(c, b.ACons(c, b.ANil))) //b.ACons(c, b.ACons(c, b.ANil))
     val n = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
 
     //initial state
-    val init_state = Set(b.AState(n, xs))
+    val init_state = Set(b.AState(Map(("AInt",n), ("AList", xs))))
     println("Initial State: " + init_state)
     println("")
 
-    //Test/Condition for while loop
-    val conditionLoop = b.xsIsNotNilTest
+    //Test/Condition for AWhile loop
+    val testLoop = b.ATest(Set(b.AState(Map(("test", "ifIsNotNil"),("testedValue", "AList")))))
 
-    //Statement to execute in the while-loop
-    val stmt = b.Subtract1_ATail
+    //Statement to be executed in the AWhile-loop
+    val stmt1=  b.AState(Map( ("ABinOp", "-"), ("operator", d), ("operand", "AInt")))  //subtract
+    val stmt2= b.AState(Map(("AUnOp", "aTail"),("operand", "AList")))  //tail
+    val stmt = b.AStmt(Set(stmt1, stmt2))
 
-    //while loop
-    val loopTest = b.AWhile(conditionLoop, stmt).execute(init_state)
+    //AWhile loop
+    val awhile = b.AWhile(testLoop, stmt).execute(init_state)
 
-    //Test/Condition for assertions
-    val conditionAssert1 = b.xsIsNilTest
-    val conditionAssert2 = b.nIsNegative
+    //AAssertions
+    val assert1 =  b.AState(Map(("test", "ifIsNil"),("testedValue", "AList")))
+    val assert2 =  b.AState(Map(("test", "ifIsNegative"),("testedValue", "AInt")))
+    val assertions = b.ATest(Set(assert1, assert2))
 
-    //Assertions
-    val assertAfterExecution1 = b.AAssert(conditionAssert1)
-    println("")
-    println("assert xs == nil")
-    if (loopTest.nonEmpty) {
-      assertAfterExecution1.execute(loopTest)
-    } else {
-      assertAfterExecution1.execute(init_state)
+    val aassert = b.AAssert(assertions).execute(awhile)
+    //println(aassert)
+
+    //AVerify
+    if(aassert != (Set(), Set())){
+      val averify = b.AVerify(assertions).execute(awhile)
+    }else{
+      val averify = b.AVerify(assertions).execute(init_state)
     }
-    println("")
-    println("assert n <= 0")
-    val assertAfterExecution2 = b.AAssert(conditionAssert2)
 
-    if (loopTest.nonEmpty) {
-      assertAfterExecution2.execute(loopTest)
-    } else {
-      assertAfterExecution2.execute(init_state)
-    }
   }
+
 
   test("Concrete Example - ANil") {
     /**
@@ -78,46 +75,40 @@ class LoopTests_with_ATest extends AnyFunSuite {
 
     val a = Intervals.Unbounded
     val b = ALists(a)
+    val d = b.intervals.Interval(IntegerVal(1), IntegerVal(1))
 
     val xs: b.AList = b.ANil
     val n = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
 
     //initial state
-    val init_state = Set(b.AState(n, xs))
+    val init_state = Set(b.AState(Map(("AInt",n), ("AList", xs))))
     println("Initial State: " + init_state)
     println("")
 
-    //Test/Condition for while loop
-    val conditionLoop = b.xsIsNotNilTest
+    //Test/Condition for AWhile loop
+    val testLoop = b.ATest(Set(b.AState(Map(("test", "ifIsNotNil"),("testedValue", "AList")))))
 
-    //Statement to execute in the while-loop
-    val stmt = b.Subtract1_ATail
+    //Statement to be executed in the AWhile-loop
+    val stmt1=  b.AState(Map( ("ABinOp", "-"), ("operator", d), ("operand", "AInt")))  //subtract
+    val stmt2= b.AState(Map(("AUnOp", "aTail"),("operand", "AList")))  //tail
+    val stmt = b.AStmt(Set(stmt1, stmt2))
 
-    //while loop
-    val loopTest = b.AWhile(conditionLoop, stmt).execute(init_state)
+    //AWhile loop
+    val awhile = b.AWhile(testLoop, stmt).execute(init_state)
 
-    //Test/Condition for assertions
-    val conditionAssert1 = b.xsIsNilTest
-    val conditionAssert2 = b.nIsNegative
+    //AAssertions
+    val assert1 =  b.AState(Map(("test", "ifIsNil"),("testedValue", "AList")))
+    val assert2 =  b.AState(Map(("test", "ifIsNegative"),("testedValue", "AInt")))
+    val assertions = b.ATest(Set(assert1, assert2))
 
-    //Assertions
-    val assertAfterExecution1 = b.AAssert(conditionAssert1)
-    println("")
-    println("assert xs == nil")
+    val aassert = b.AAssert(assertions).execute(awhile)
+    //println(aassert)
 
-    if (loopTest.nonEmpty) {
-      assertAfterExecution1.execute(loopTest)
-    } else {
-      assertAfterExecution1.execute(init_state)
-    }
-    println("")
-    println("assert n <= 0")
-    val assertAfterExecution2 = b.AAssert(conditionAssert2)
-
-    if (loopTest.nonEmpty) {
-      assertAfterExecution2.execute(loopTest)
-    } else {
-      assertAfterExecution2.execute(init_state)
+    //AVerify
+    if(aassert != (Set(), Set())){
+      val averify = b.AVerify(assertions).execute(awhile)
+    }else{
+      val averify = b.AVerify(assertions).execute(init_state)
     }
   }
 
@@ -138,49 +129,46 @@ class LoopTests_with_ATest extends AnyFunSuite {
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
+    val d = b.intervals.Interval(IntegerVal(1), IntegerVal(1))
 
     val xs: b.AList = b.AMany(c)
     val n = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
 
     //initial state
-    val init_state = Set(b.AState(n, xs))
+    val init_state = Set(b.AState(Map(("AInt",n), ("AList", xs))))
     println("Initial State: " + init_state)
     println("")
 
-    //Test/Condition for while loop
-    val conditionLoop = b.xsIsNotNilTest
+    //Test/Condition for AWhile loop
+    val testLoop = b.ATest(Set(b.AState(Map(("test", "ifIsNotNil"),("testedValue", "AList")))))
 
-    //Statement to execute in the while-loop
-    val stmt = b.Subtract1_ATail
+    //Statement to be executed in the AWhile-loop
+    val stmt1=  b.AState(Map( ("ABinOp", "-"), ("operator", d), ("operand", "AInt")))  //subtract
+    val stmt2= b.AState(Map(("AUnOp", "aTail"),("operand", "AList")))  //tail
+    val stmt = b.AStmt(Set(stmt1, stmt2))
 
-    //while loop
-    val loopTest = b.AWhile(conditionLoop, stmt).execute(init_state)
+    //AWhile loop
+    val awhile = b.AWhile(testLoop, stmt).execute(init_state)
 
-    //Test/Condition for assertions
-    val conditionAssert1 = b.xsIsNilTest
-    val conditionAssert2 = b.nIsNegative
+    //AAssertions
+    val assert1 =  b.AState(Map(("test", "ifIsNil"),("testedValue", "AList")))
+    val assert2 =  b.AState(Map(("test", "ifIsNegative"),("testedValue", "AInt")))
+    val assertions = b.ATest(Set(assert1, assert2))
 
-    //Assertions
-    val assertAfterExecution1 = b.AAssert(conditionAssert1)
-    println("")
-    println("assert xs == nil")
-    if (loopTest.nonEmpty) {
-      assertAfterExecution1.execute(loopTest)
-    } else {
-      assertAfterExecution1.execute(init_state)
-    }
-    println("")
-    println("assert n <= 0")
-    val assertAfterExecution2 = b.AAssert(conditionAssert2)
+    val aassert = b.AAssert(assertions).execute(awhile)
+    //println(aassert)
 
-    if (loopTest.nonEmpty) {
-      assertAfterExecution2.execute(loopTest)
-    } else {
-      assertAfterExecution2.execute(init_state)
+    //AVerify
+    if(aassert != (Set(), Set())){
+      val averify = b.AVerify(assertions).execute(awhile)
+    }else{
+      val averify = b.AVerify(assertions).execute(init_state)
     }
   }
 
-//TODO output: code execution failed for:_ & successful for input:_
+
+
+
   test("Concrete Example - Set[AList]") {
     /**
      * int n
@@ -196,54 +184,47 @@ class LoopTests_with_ATest extends AnyFunSuite {
     val a = Intervals.Unbounded
     val b = ALists(a)
     val c = b.intervals.Interval(IntegerVal(-1), IntegerVal(5))
+    val d = b.intervals.Interval(IntegerVal(1), IntegerVal(1))
     val n = b.intervals.Interval(IntegerVal(0), IntegerVal(0))
 
-    var counter = 0
+    var counter = 1
     val axs: Set[b.AList] = Set(b.ANil, b.ACons(c, b.ANil), b.ACons(c, b.ACons(c, b.ANil)), b.ACons(c, b.AMany(c)), b.AMany(c))
     for (xs <- axs) {
-      println("------ Round: " + counter +" ,initial state: " +xs +" -----")
+      println("--------------------------------- Round: " + counter + "------------------------------")
 
       //initial state
-      val init_state = Set(b.AState(n, xs))
+      val init_state = Set(b.AState(Map(("AInt",n), ("AList", xs))))
       println("Initial State: " + init_state)
       println("")
 
-      //Test/Condition for while loop
-      val conditionLoop = b.xsIsNotNilTest
+      //Test/Condition for AWhile loop
+      val testLoop = b.ATest(Set(b.AState(Map(("test", "ifIsNotNil"),("testedValue", "AList")))))
 
-      //Statement to execute in the while-loop
-      val stmt = b.Subtract1_ATail
+      //Statement to be executed in the AWhile-loop
+      val stmt1=  b.AState(Map( ("ABinOp", "-"), ("operator", d), ("operand", "AInt")))  //subtract
+      val stmt2= b.AState(Map(("AUnOp", "aTail"),("operand", "AList")))  //tail
+      val stmt = b.AStmt(Set(stmt1, stmt2))
 
-      //while loop
-      val loopTest = b.AWhile(conditionLoop, stmt).execute(init_state)
+      //AWhile loop
+      val awhile = b.AWhile(testLoop, stmt).execute(init_state)
 
-      //Test/Condition for assertions
-      val conditionAssert1 = b.xsIsNilTest
-      val conditionAssert2 = b.nIsNegative
+      //AAssertions
+      val assert1 =  b.AState(Map(("test", "ifIsNil"),("testedValue", "AList")))
+      val assert2 =  b.AState(Map(("test", "ifIsNegative"),("testedValue", "AInt")))
+      val assertions = b.ATest(Set(assert1, assert2))
 
-      //Assertions
-      val assertAfterExecution1 = b.AAssert(conditionAssert1)
-      println("")
-      println("assert xs == nil")
-      if (loopTest.nonEmpty) {
-        assertAfterExecution1.execute(loopTest)
-      } else {
-        assertAfterExecution1.execute(init_state)
+      val aassert = b.AAssert(assertions).execute(awhile)
+      //println(aassert)
+
+      //AVerify
+      if(aassert != (Set(), Set())){
+        val averify = b.AVerify(assertions).execute(awhile)
+      }else{
+        val averify = b.AVerify(assertions).execute(init_state)
       }
-      println("")
-      println("assert n <= 0")
-      val assertAfterExecution2 = b.AAssert(conditionAssert2)
-
-      if (loopTest.nonEmpty) {
-        assertAfterExecution2.execute(loopTest)
-      } else {
-        assertAfterExecution2.execute(init_state)
-      }
-      println("------------------------------End Round: " + counter + "------------------------------")
+      println("------------------------------ End Round: " + counter + "-----------------------------\n")
       counter += 1
     }
   }
 
-
- */
 }

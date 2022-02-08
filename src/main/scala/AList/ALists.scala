@@ -593,10 +593,10 @@ case class ALists(intervals: Intervals) {
   }
 
   def ifIsPositive(ai :AInt): (Set[AInt], Set[AInt]) ={
-    if(intervals.<(Interval(IntegerVal(0), IntegerVal(0)), ai)){  //ai > 0
+    if(intervals.<=(Interval(IntegerVal(0), IntegerVal(0)), ai)){  //ai >= 0
       (Set(ai), Set())
     }else if(IntegerW.<=(ai.lb, IntegerVal(0))&& IntegerW.<(IntegerVal(0), ai.ub)){  //ub > 0 && lb < 0
-      (Set(Interval(IntegerVal(1), ai.ub)), Set(Interval(ai.lb, IntegerVal(0))))
+      (Set(Interval(IntegerVal(0), ai.ub)), Set(Interval(ai.lb, IntegerVal(-1))))
     }else  {//lb < 0 && ub <0 //if(intervals.<(ai, Interval(IntegerVal(0), IntegerVal(0))))
      (Set(), Set(ai))
     }
@@ -604,10 +604,10 @@ case class ALists(intervals: Intervals) {
 
 
   def ifIsNegative(ai :AInt): (Set[AInt], Set[AInt]) = {
-    if(intervals.<(ai,  Interval(IntegerVal(0), IntegerVal(0)))){  //ai < 0
+    if(intervals.<=(ai,  Interval(IntegerVal(0), IntegerVal(0)))){  //ai <= 0
       (Set(ai), Set())
-    }else if(IntegerW.<(ai.lb, IntegerVal(0))&& IntegerW.<=(IntegerVal(0), ai.ub)){  //ub > 0 && lb < 0
-      (Set(Interval(ai.lb, IntegerVal(-1))), Set(Interval(IntegerVal(0), ai.ub)))
+    }else if(IntegerW.<=(ai.lb, IntegerVal(0))&& IntegerW.<(IntegerVal(0), ai.ub)){  //ub > 0 && lb < 0
+      (Set(Interval(ai.lb, IntegerVal(0))), Set(Interval(IntegerVal(1), ai.ub)))
     }else  {//lb > 0 && ub >0 //if(intervals.<(Interval(IntegerVal(0), IntegerVal(0)), ai))
       (Set(), Set(ai))
     }
@@ -721,25 +721,26 @@ case class ALists(intervals: Intervals) {
       var stopLoop = false
 
       while(test.positive(states).nonEmpty && !stopLoop){  //1. test condition
+        result = Set()
         val positiveStates = test.positive(states)
-        println("Test outcome (positive): " +positiveStates)
+         // println("Test outcome (positive): " +positiveStates)
 
         for(pos <- positiveStates){
-          println("Current AState: " +pos)
+         // println("Current AState: " +pos)
           val afterExecution = body.execute(Set(pos))//2. execute body for each state in positive state
-          println("After execution: " +afterExecution)
+          //println("After execution: " +afterExecution)
           afterWiden = widen_AState(pos, afterExecution.head, getOperands(body.expression))//3. widen state and after execution output
-          println("After widening: " +afterWiden)
+         // println("After widening: " +afterWiden)
           result += afterWiden//4. add to result
-          println("Result after widening: " +result)
+          //println("Result after widening: " +result)
         }
 
         if(states == result){ //5. compare whether the result still changes from the states at the loop head
           stopLoop = true
-          println("Loop stops here" +"\n")
+         // println("Loop stops here" +"\n")
         }else{
           states = result
-          println("New state: " +states +"\n")
+          //println("New state: " +states +"\n")
         }
       }
       result
