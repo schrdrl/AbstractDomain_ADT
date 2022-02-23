@@ -17,7 +17,7 @@ class NewAStmtTests extends AnyFunSuite {
     val g = b.AMany(c)
     val h = b.ACons(d, b.AMany(e))
 
-    val op1 = b.AState(Map( ("ABinOp", "-"), ("operator", d), ("operand", "AInt")))
+    val op1 = b.AState(Map( ("ABinOp", "-"), ("operator", d), ("operand", "AInt"))) // n - [1;1]
     val op2 = b.AState(Map(("AUnOp", "aTail"),("operand", "AList")))
 
     val state1 = b.AState(Map( ("AList", f), ("AInt", c), ("ABool", b.ATrue)))
