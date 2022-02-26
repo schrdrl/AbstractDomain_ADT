@@ -1,6 +1,6 @@
 package tests_clean_code
 
-import a.{ACons, AConst, AFalse, AInt, AMany, ANil, AOp, ASome, AState, ATrue, AUnknown, AVar}
+import AList_CleanCode.{ACons, AConst, AFalse, AInt, AMany, ANil, AOp, ASome, AState, ATrue, AUnknown, AVar}
 import org.scalatest.funsuite.AnyFunSuite
 
 class CleanCode_Tests extends AnyFunSuite {
@@ -15,6 +15,7 @@ class CleanCode_Tests extends AnyFunSuite {
         //widen
         println("\nwiden: ABool")
         println(a.widen(a))
+        println(b.widen(b))
         println(a.widen(b))
         println(a.widen(c))
         println(a.widen(List(b,c)))
@@ -116,6 +117,9 @@ class CleanCode_Tests extends AnyFunSuite {
     val aconst1 = AConst(ATrue)
     val aconst2 = AConst(AInt(Some(-1), Some(5)))
     val aconst3 = AConst(ANil)
+    val aconst4 = AConst(AMany(AInt(Some(-1), Some(5))))
+    val aconst5 = AConst(ACons(AInt(Some(-1), Some(5)), ANil))
+
     println(aconst1.evaluate(a))
     println(aconst1)
     println(aconst2.evaluate(a))
@@ -135,6 +139,9 @@ class CleanCode_Tests extends AnyFunSuite {
     println(aop1.evaluate(a))
     val aop2 = AOp("-", List(aconst2,aconst2))
     println(aop2.evaluate(a))
+
+    val aop3 = AOp("aLength", List(aconst5))
+    println("aLength "+aop3.evaluate(a))
 
 
   }

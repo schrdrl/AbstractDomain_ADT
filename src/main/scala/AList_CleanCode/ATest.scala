@@ -27,8 +27,13 @@ case class APred(op: String, name: String) extends ATest {
       case ("isNil", ANil)         => Set(ANil)
       case ("isNil", ACons(_, _))  => Set()
       case ("isNil", AMany(elems)) => Set(ANil)
-      //TODO add missing tests (isZero, isOne, isTop, isNegative, isPositive)
-        //TODO contains
+      case ("isATrue", ATrue) => Set(ATrue)
+      case ("isATrue", AFalse) => Set()
+      case ("isATrue", AUnknown) => Set(ATrue)
+
+
+      //TODO add missing tests (isZero, isOne, isTop, isNegative, isPositive, isEqual, contains)
+
     }
   }
 
@@ -37,6 +42,9 @@ case class APred(op: String, name: String) extends ATest {
       case ("isNil", ANil)                 => Set()
       case ("isNil", ACons(_, _))          => Set(value)
       case ("isNil", value @ AMany(elems)) => Set(ACons(elems, value))
+      case ("isATrue", ATrue) => Set()
+      case ("isATrue", AFalse) => Set(AFalse)
+      case ("isATrue", AUnknown) => Set(AFalse)
       //TODO add missing tests
     }
   }
@@ -51,3 +59,7 @@ case class APred(op: String, name: String) extends ATest {
       yield as.updated(name, newValue)
   }
 }
+
+//TODO add missing tests (isZero, isOne, isTop, isNegative, isPositive, isEqual, ifIsATrue, contains)
+
+

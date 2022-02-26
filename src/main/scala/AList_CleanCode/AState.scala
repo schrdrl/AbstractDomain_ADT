@@ -15,6 +15,11 @@ case class AState(vars: Map[String, AVal]) {
 
     AState(vars.toMap)
   }
+
+
+  //TODO equals
+
+
 }
 
 object AState {
