@@ -14,7 +14,7 @@ sealed trait AVal {
   def justValue(): AVal = {
     this match {
       case ASome(a) => a
-      case AMaybe(a) => throw new Exception("Exception thrown from justValue. Reason: Input was AMaybe")
+      case AMaybe(_) => throw new Exception("Exception thrown from justValue. Reason: Input was AMaybe")
       case ANone => throw new Exception("Exception thrown from justValue. Reason: Input was ANone")
     }
   }
@@ -29,7 +29,7 @@ sealed trait ABool extends AVal {
     }
   }
 
-  def ===(that: AVal): ABool = {
+  def ===(that: ABool): ABool = {
     (this, that) match {
       case (AFalse, AFalse) | (ATrue, ATrue) => ATrue
       case (AFalse, ATrue) | (ATrue, AFalse) => AFalse
@@ -37,7 +37,7 @@ sealed trait ABool extends AVal {
     }
   }
 
-  def !==(that: AVal): ABool = {
+  def !==(that: ABool): ABool = {
     (this, that) match {
       case (AFalse, AFalse) | (ATrue, ATrue) => AFalse
       case (AFalse, ATrue) | (ATrue, AFalse) => ATrue
@@ -71,13 +71,15 @@ sealed trait ABool extends AVal {
 }
 
 case object ATrue extends ABool
+
 case object AFalse extends ABool
+
 case object AUnknown extends ABool
 
 object AInt {
-  val top = AInt(None, None)
-  val zero = AInt(0)
-  val one = AInt(1)
+  val top: AInt = AInt(None, None)
+  val zero: AInt = AInt(0)
+  val one: AInt = AInt(1)
 
   def apply(n: Int): AInt = AInt(Some(n), Some(n))
 
@@ -95,7 +97,7 @@ object AInt {
     (a, b) match {
       case (_, None) => false
       case (None, Some(_)) => true
-      case (Some(a), Some(b)) => (a < b)
+      case (Some(a), Some(b)) => a < b
     }
   }
 
@@ -103,7 +105,7 @@ object AInt {
     (a, b) match {
       case (_, None) => false
       case (None, Some(_)) => true
-      case (Some(a), Some(b)) => (a < b || a == b)
+      case (Some(a), Some(b)) => a < b || a == b
     }
   }
 
@@ -160,7 +162,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
-  override def toString = {
+  override def toString: String = {
     (lb, ub) match {
       case (None, None) => "(-∞,∞)"
       case (Some(lb), None) => "[" + lb + ",∞)"
@@ -169,8 +171,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
-
-  //TODO recheck -> maybe move to ATest
+  //TODO recheck -> maybe move to ATest if useful
   def contains(that: AVal): ABool = {
     that match {
       case that: AInt =>
@@ -188,6 +189,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
+  //TODO what happens if one value is None
   def intersect(that: AVal): AOption = {
     that match {
       case that: AInt =>
@@ -204,8 +206,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
-//TODO not sure if I will keep this (might use it in equals)
-// TODO recheck -> maybe move to ATest
+  //TODO what happens if one value is None
   def split(that: Option[Int], s: String): Set[AInt] = {
     that match {
       case that: Option[Int] =>
@@ -219,45 +220,55 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
         }
     }
   }
-/*
-  //TODO test + recheck + use split method
-  // TODO recheck -> maybe move to ATest
-  def equals(that: AVal): (Set[(AInt, AInt)], Set[(AInt, AInt)]) = {
+
+  //(same part, part that's different from that)
+  //TODO what happens if one value is None
+  def ===(that: AInt): (Set[AInt], Set[AInt]) = {
     that match {
       case that: AInt =>
-        if (this.asInstanceOf[AInt].intersect(that) == ANone) (Set(), Set()) //not equal at all
-        else if (this == that) (Set(this), Set(this)) //same intervalls
-        else {
-          if (this.lb == that.lb) { //exactly the same boundaries
-            if (this.ub == that.ub) {
-              (Set((null, null)), Set((null, null)))
+        if ((AInt.<(this.lb, that.lb) && AInt.<(this.ub, that.lb)) || (AInt.<(that.ub, this.lb) && AInt.<(that.ub, this.ub))) (Set(), Set(this)) //that is not in this
+        else if (this == that) (Set(this), Set()) //same intervals
+        else { //this and that have equal parts
+
+          if (this.lb == that.lb) {
+            if(that.ub == None){
+              (Set(this), Set())
+            }else if(this.lb == None){
+              (Set(this), Set())
             } else if (AInt.<(this.ub, that.ub)) {
-              (Set((null, null)), Set((null, AInt(AInt.binop(_ + _, this.ub, Some(1)), that.ub))))
+              (Set(this.intersect(that).justValue().asInstanceOf[AInt]), Set())
             } else { // if(AInt.<(that.ub, this.ub)){
-              (Set((null, AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub))), Set((null, null)))
+              (Set(this.intersect(that).justValue().asInstanceOf[AInt]), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
             }
           } else if (AInt.<(this.lb, that.lb)) {
-            if (this.ub == that.ub) {
-              (Set((AInt(this.lb, AInt.binop(_ - _, that.lb, Some(1))), null)), Set((null, null)))
+            if(that.ub == None){
+             (Set(this), Set())
+            }else if(this.lb == None){
+              (Set(this), Set())
+            } else if (this.ub == that.ub) {
+              (Set(this.intersect(that).justValue().asInstanceOf[AInt]), Set(AInt(this.lb, AInt.binop(_ - _, that.lb, Some(1)))))
             } else if (AInt.<(this.ub, that.ub)) {
-              (Set((AInt(this.lb, AInt.binop(_ - _, that.lb, Some(1))), null)), Set((null, AInt(AInt.binop(_ + _, this.ub, Some(1)), that.ub))))
+              (Set(this.intersect(that).justValue().asInstanceOf[AInt]), Set(AInt(this.lb, AInt.binop(_ - _, that.lb, Some(1)))))
             } else { //if(AInt.<(that.ub, this.ub))
-              (Set((AInt(this.lb, AInt.binop(_ - _, that.lb, Some(1))), AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub))), Set((null, null)))
+              (Set(this.intersect(that).justValue().asInstanceOf[AInt]), Set(AInt(this.lb, AInt.binop(_ - _, that.lb, Some(1))), AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
+
             }
           } else { //if(AInt.<(that.lb, this.lb))
-            if (this.ub == that.ub) {
-              (Set((null, null)), Set((AInt(that.lb, AInt.binop(_ - _, this.lb, Some(1))), null)))
+            if(that.ub == None){
+              (Set(this), Set())
+            }else if(this.lb == None){
+              (Set(this), Set())
+            } else if(this.ub == that.ub) {   //TODO add that.ub == None and this.ub == None
+              (Set(this.intersect(that).justValue().asInstanceOf[AInt]), Set())
             } else if (AInt.<(this.ub, that.ub)) {
-              (Set((null, null)), Set((AInt(that.lb, AInt.binop(_ - _, this.lb, Some(1))), AInt(AInt.binop(_ + _, this.ub, Some(1)), that.ub))))
+              (Set(this.intersect(that).justValue().asInstanceOf[AInt]), Set())
             } else { //if(AInt.<(that.ub, this.ub))
-              (Set((null, AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub))), Set((AInt(that.lb, AInt.binop(_ - _, this.lb, Some(1))), null)))
+              (Set(this.intersect(that).justValue().asInstanceOf[AInt]), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
             }
           }
         }
     }
   }
-
- */
 }
 
 
@@ -282,12 +293,20 @@ sealed trait AOption extends AVal {
 }
 
 case object ANone extends AOption
+
 case class ASome(get: AVal) extends AOption
+
 case class AMaybe(get: AVal) extends AOption
 
 sealed trait AList extends AVal {
 
   def flatten: List[AVal]
+
+  def flatten_All(): AList = this match {
+    case ANil => ANil
+    case ACons(h, t) => AMany(h).union(t)
+    case AMany(e) => AMany(e)
+  }
 
   def widen(that: AVal): AList = {
     (this, that) match {
@@ -326,11 +345,11 @@ sealed trait AList extends AVal {
     (this, that) match {
       case (ANil, ANil) => ANil
 
-      case (ANil, ACons(a, as)) => ANil
-      case (ACons(a, as), ANil) => ANil
+      case (ANil, ACons(_, _)) => ANil
+      case (ACons(_, _), ANil) => ANil
 
-      case (ANil, AMany(e)) => ANil
-      case (AMany(e), ANil) => ANil
+      case (ANil, AMany(_)) => ANil
+      case (AMany(_), ANil) => ANil
 
       case (ACons(a, as), AMany(e)) => if (a.asInstanceOf[AInt].intersect(e) != ANone) ACons(a.asInstanceOf[AInt].intersect(e).justValue(), as.intersect(AMany(e))) else ANil
       case (AMany(e), ACons(a, as)) => if (e.asInstanceOf[AInt].intersect(a) != ANone) ACons(e.asInstanceOf[AInt].intersect(a).justValue(), AMany(e).intersect(as)) else ANil
@@ -346,11 +365,11 @@ sealed trait AList extends AVal {
     (this, that) match {
       case (ANil, ANil) => ATrue
 
-      case (ANil, ACons(a, as)) => AFalse
-      case (ACons(a, as), ANil) => ATrue
+      case (ANil, ACons(_, _)) => AFalse
+      case (ACons(_, _), ANil) => ATrue
 
-      case (ANil, AMany(e)) => ATrue
-      case (AMany(e), ANil) => ATrue
+      case (ANil, AMany(_)) => ATrue
+      case (AMany(_), ANil) => ATrue
 
       case (ACons(a, as), AMany(e)) => a.asInstanceOf[AInt].contains(e) && as.subset(AMany(e))
       case (AMany(e), ACons(a, as)) => e.asInstanceOf[AInt].contains(a) && AMany(e).subset(as)
@@ -359,18 +378,75 @@ sealed trait AList extends AVal {
       case (ACons(a, as), ACons(b, bs)) => a.asInstanceOf[AInt].contains(b) && as.subset(bs)
     }
   }
+
+
+  //reverses an AList value
+  def reverse(): AList = {
+    this match {
+      case ANil => ANil
+      case AMany(e) => AMany(e)
+      case ACons(_, _) =>
+        var axs: AList = this
+        var ays: AList = ANil
+        var tailIsAMany = false
+        val testCond = APred("isNil", "xs")
+        var state = AState(Map(("xs", axs)))
+
+        while (testCond.positive(axs).isEmpty && testCond.negative(axs).nonEmpty && !tailIsAMany) { //while !isNil
+          val head = AOp("aHead", List(AVar("xs"))).evaluate(state).justValue()
+          val tail = AOp("aTail", List(AVar("xs"))).evaluate(state).justValue()
+
+          if (testCond.positive(tail).isEmpty && testCond.negative(tail).nonEmpty || tail == ANil) { //tail is not AMany but can be ACons or ANil
+            ays = ACons(head, ays)
+            axs = tail.asInstanceOf[AList]
+            state = state.updated("xs", axs)
+          } else if (testCond.positive(tail).nonEmpty && testCond.negative(tail).nonEmpty) { //tail is AMany
+            ays = this.flatten_All()
+            tailIsAMany = true
+          } else {
+            throw new Exception("Exception thrown from reverse.")
+          }
+        }
+        ays
+    }
+  }
+
+
+  //prepends an element on the front a an AList value
+  def +:(elem: AInt, al2: AList): AList = ACons(elem, al2)
+
+  //appends an element the the end a an AList value
+  def :+(al1: AList, elem: AInt): AList = al1 match {
+    case ANil => ACons(elem, ANil)
+    case ACons(h, t) => ACons(h, :+(t, elem))
+    case AMany(e) => AMany(e.asInstanceOf[AInt].union(elem))
+  }
+
+  //Method concatenates two values of type AList
+  def ++(al1: AList, al2: AList): AList = (al1, al2) match {
+    case (ANil, ANil) => ANil
+    case (ANil, ACons(h, t)) => ACons(h, t)
+    case (ACons(h, t), ANil) => ACons(h, t)
+    case (ANil, AMany(e)) => AMany(e)
+    case (AMany(e), ANil) => AMany(e)
+    case (AMany(e1), AMany(e2)) => AMany(e1.asInstanceOf[AInt].union(e2))
+    case (AMany(_), ACons(_, _)) => al1.widen(al2) //TODO test
+    case (ACons(h, t), AMany(_)) => ACons(h, ++(t, al2))
+    case (ACons(h1, t1), ACons(_, _)) => ACons(h1, ++(t1, al2))
+  }
+
 }
 
 case object ANil extends AList {
-  def flatten = Nil
+  def flatten: List[AVal] = Nil
 }
 
 case class ACons(head: AVal, tail: AList) extends AList {
-  def flatten = head :: tail.flatten
+  def flatten: List[AVal] = head :: tail.flatten
 }
 
 case class AMany(elems: AVal) extends AList {
-  def flatten = List(elems)
+  def flatten: List[AVal] = List(elems)
 
 }
 

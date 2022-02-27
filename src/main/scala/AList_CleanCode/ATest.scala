@@ -32,9 +32,12 @@ case class APred(op: String, name: String) extends ATest {
       case ("isATrue", AUnknown) => Set(ATrue)
       case ("isZero", ai : AInt) => if(ai.split(AInt.zero.lb, "neither").nonEmpty) Set(AInt.zero) else Set()
       case ("isOne", ai : AInt) => if(ai.split(AInt.one.lb, "neither").nonEmpty) Set(AInt.one) else Set()
+      case ("isTop", ai : AInt) => if(ai == AInt(None,None)) Set(AInt.top) else Set()
+      case ("isNegative", ai : AInt) =>if(ai.===(AInt(None, Some(0)))._1.nonEmpty) ai.===(AInt(None, Some(0)))._1.asInstanceOf[Set[AVal]] else Set()
+      case ("isPositive", ai : AInt) =>if(ai.===(AInt(Some(0), None))._1.nonEmpty) ai.===(AInt(Some(0), None))._1.asInstanceOf[Set[AVal]] else Set()
 
 
-      //TODO add missing tests (isTop, isNegative, isPositive, isEqual, contains)
+      //TODO add missing tests (isPositive, isEqual, contains)
 
     }
   }
@@ -49,6 +52,9 @@ case class APred(op: String, name: String) extends ATest {
       case ("isATrue", AUnknown) => Set(AFalse)
       case ("isZero", ai : AInt) => if(ai.split(AInt.zero.lb, "neither").nonEmpty) ai.split(AInt.zero.lb, "neither").asInstanceOf[Set[AVal]] else Set(ai)
       case ("isOne", ai : AInt) => if(ai.split(AInt.one.lb, "neither").nonEmpty) ai.split(AInt.one.lb, "neither").asInstanceOf[Set[AVal]] else Set(ai)
+      case ("isTop", ai : AInt) => if(ai != AInt(None,None)) Set(AInt.top) else Set()
+      case ("isNegative", ai : AInt) =>if(ai.===(AInt(None, Some(0)))._2.nonEmpty) ai.===(AInt(None, Some(0)))._2.asInstanceOf[Set[AVal]] else Set()
+      case ("isPositive", ai : AInt) =>if(ai.===(AInt(Some(0), None))._2.nonEmpty) ai.===(AInt(Some(0), None))._2.asInstanceOf[Set[AVal]] else Set()
       //TODO add missing tests
     }
   }
@@ -64,6 +70,8 @@ case class APred(op: String, name: String) extends ATest {
   }
 }
 
-//TODO add missing tests (isZero, isOne, isTop, isNegative, isPositive, isEqual, ifIsATrue, contains)
+//TODO add missing tests (isNegative, isPositive, isEqual, ifIsATrue, contains)
+
+
 
 

@@ -50,4 +50,46 @@ class BasicFuntionTests extends AnyFunSuite {
     println(e.subset(f))
   }
 
+  test("reverse:AList"){
+    val a = AInt.one
+    val b = AInt.apply(10)
+    val c = AInt.apply(-1, 5)
+
+    val d = ANil
+    val e = AMany(a)
+    val f = ACons(a, ACons(b, AMany(c)))
+    val g = ACons(c, ACons(b, ANil))
+
+    println(d.reverse())  //correct
+    println(e.reverse())  //correct
+    println(f.reverse()) //correct
+    println(g.reverse()) //correct
+
+  }
+
+
+  test("===: AInt"){
+    val a = AInt.one
+    val b = AInt.apply(10)
+    val c = AInt.apply(-1, 5)
+
+    println(a.===(b)._1)
+    println(a.===(b)._2+"\n")
+
+    println(a.===(c)._1)
+    println(a.===(c)._2+"\n")
+
+    println(b.===(a)._1)
+    println(b.===(a)._2+"\n")
+
+    println(b.===(c)._1)
+    println(b.===(c)._2+"\n")
+
+    println(c.===(a)._1)
+    println(c.===(a)._2+"\n")
+
+    println(c.===(b)._1)
+    println(c.===(b)._2+"\n")
+  }
+
 }

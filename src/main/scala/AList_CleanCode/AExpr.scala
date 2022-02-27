@@ -41,7 +41,7 @@ case class AOp(op: String, args: List[AExpr]) extends AExpr {
       case ("aHead", List(AMany(elems))) =>  AMaybe(elems)
       case ("aTail", List(ANil)) => ANone
       case ("aTail", List(ACons(_, tail))) => ASome(tail)
-      case ("aTail", List(AMany(elems))) => AMaybe(elems)
+      case ("aTail", List(AMany(elems))) => AMaybe(AMany(elems))
       case ("aLength", List(ANil)) => ANone
       case ("aLength", List(ACons(head, tail))) => ASome(AInt(Some(0), Some(aes.head.asInstanceOf[AList].flatten.length)))
       case ("aLength", List(AMany(elems))) => AMaybe(AInt(Some(0),None))
