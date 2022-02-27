@@ -206,19 +206,20 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
 
 //TODO not sure if I will keep this (might use it in equals)
 // TODO recheck -> maybe move to ATest
-  def split(that: AVal, s: String): (Set[AInt], Set[AInt]) = {
+  def split(that: Option[Int], s: String): Set[AInt] = {
     that match {
       case that: Option[Int] =>
-        if (AInt.<(that, this.lb) || AInt.<(this.ub, that)) (Set(this), Set()) //that is not in this
+        if (AInt.<(that, this.lb) || AInt.<(this.ub, that)) Set() //that is not in this
         else { //that is in this
           s match {
-            case "lower" => (Set(AInt(this.lb, that)), Set(AInt(AInt.binop(_ + _, that, Some(1)), this.ub)))
-            case "upper" => (Set(AInt(this.lb, AInt.binop(_ - _, that, Some(1)))), Set(AInt(that, this.ub)))
+            case "lower" => Set(AInt(this.lb, that), AInt(AInt.binop(_ + _, that, Some(1)), this.ub))
+            case "upper" => Set(AInt(this.lb, AInt.binop(_ - _, that, Some(1))), AInt(that, this.ub))
+            case "neither" => Set(AInt(this.lb, AInt.binop(_ - _, that, Some(1))), AInt(AInt.binop(_ + _, that, Some(1)), this.ub))
           }
         }
     }
   }
-
+/*
   //TODO test + recheck + use split method
   // TODO recheck -> maybe move to ATest
   def equals(that: AVal): (Set[(AInt, AInt)], Set[(AInt, AInt)]) = {
@@ -255,7 +256,10 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
         }
     }
   }
+
+ */
 }
+
 
 sealed trait AOption extends AVal {
   def widen(that: AVal): AOption = {

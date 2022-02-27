@@ -30,9 +30,11 @@ case class APred(op: String, name: String) extends ATest {
       case ("isATrue", ATrue) => Set(ATrue)
       case ("isATrue", AFalse) => Set()
       case ("isATrue", AUnknown) => Set(ATrue)
+      case ("isZero", ai : AInt) => if(ai.split(AInt.zero.lb, "neither").nonEmpty) Set(AInt.zero) else Set()
+      case ("isOne", ai : AInt) => if(ai.split(AInt.one.lb, "neither").nonEmpty) Set(AInt.one) else Set()
 
 
-      //TODO add missing tests (isZero, isOne, isTop, isNegative, isPositive, isEqual, contains)
+      //TODO add missing tests (isTop, isNegative, isPositive, isEqual, contains)
 
     }
   }
@@ -45,6 +47,8 @@ case class APred(op: String, name: String) extends ATest {
       case ("isATrue", ATrue) => Set()
       case ("isATrue", AFalse) => Set(AFalse)
       case ("isATrue", AUnknown) => Set(AFalse)
+      case ("isZero", ai : AInt) => if(ai.split(AInt.zero.lb, "neither").nonEmpty) ai.split(AInt.zero.lb, "neither").asInstanceOf[Set[AVal]] else Set(ai)
+      case ("isOne", ai : AInt) => if(ai.split(AInt.one.lb, "neither").nonEmpty) ai.split(AInt.one.lb, "neither").asInstanceOf[Set[AVal]] else Set(ai)
       //TODO add missing tests
     }
   }
