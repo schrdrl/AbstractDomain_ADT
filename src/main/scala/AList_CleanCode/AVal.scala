@@ -204,7 +204,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
-
+//TODO not sure if I will keep this (might use it in equals)
   def split(that: AVal, s: String): (Set[AInt], Set[AInt]) = {
     that match {
       case that: Option[Int] =>
