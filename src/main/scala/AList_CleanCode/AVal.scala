@@ -170,7 +170,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
   }
 
 
-  //TODO recheck
+  //TODO recheck -> maybe move to ATest
   def contains(that: AVal): ABool = {
     that match {
       case that: AInt =>
@@ -205,6 +205,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
   }
 
 //TODO not sure if I will keep this (might use it in equals)
+// TODO recheck -> maybe move to ATest
   def split(that: AVal, s: String): (Set[AInt], Set[AInt]) = {
     that match {
       case that: Option[Int] =>
@@ -219,6 +220,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
   }
 
   //TODO test + recheck + use split method
+  // TODO recheck -> maybe move to ATest
   def equals(that: AVal): (Set[(AInt, AInt)], Set[(AInt, AInt)]) = {
     that match {
       case that: AInt =>
