@@ -71,9 +71,7 @@ sealed trait ABool extends AVal {
 }
 
 case object ATrue extends ABool
-
 case object AFalse extends ABool
-
 case object AUnknown extends ABool
 
 object AInt {
@@ -189,24 +187,24 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
-  //TODO what happens if one value is None
+
   def intersect(that: AVal): AOption = {
     that match {
       case that: AInt =>
         if (this == that) ASome(this)
         else {
-          val newlb = if (AInt.<=(this.lb, that.lb)) that.lb else if (AInt.<=(that.lb, this.lb)) this.lb else ANone
-          val newub = if (AInt.<=(this.ub, that.ub)) this.ub else if (AInt.<=(that.ub, this.ub)) that.ub else ANone
-          if (newlb == ANone && newub == ANone) {
+          val newlb = if (AInt.<=(this.lb, that.lb) || this.lb == None) that.lb else if (AInt.<=(that.lb, this.lb) || that.lb == None) this.lb else None
+          val newub = if (AInt.<=(this.ub, that.ub) || that.ub == None) this.ub else if (AInt.<=(that.ub, this.ub) || this.ub == None) that.ub else None
+          if (newlb == None && newub == None) {
             ANone
           } else {
-            ASome(AInt.apply(newlb.asInstanceOf[Option[Int]], newub.asInstanceOf[Option[Int]]))
+            ASome(AInt.apply(newlb, newub))
           }
         }
     }
   }
 
-  //TODO what happens if one value is None
+  //TODO what happens if that is None
   def split(that: Option[Int], s: String): Set[AInt] = {
     that match {
       case that: Option[Int] =>
@@ -221,13 +219,17 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
-  //(same part, part that's different from that)
-  //TODO test more edge cases
+  //checks which parts of two intervals are the same (same part, part that's different from that)
   def ===(that: AInt): (Set[AInt], Set[AInt]) = {
     that match {
       case that: AInt =>
-        if ((AInt.<(this.lb, that.lb) && AInt.<(this.ub, that.lb) && that.lb != None) || (AInt.<(that.ub, this.lb) && AInt.<(that.ub, this.ub) && that.ub != None)) (Set(), Set(this)) //that is not in this
+        if ((that.lb != None && that.ub != None) && ((AInt.<(this.lb, that.lb) && AInt.<(this.ub, that.lb)) || (AInt.<(that.ub, this.lb) && AInt.<(that.ub, this.ub)))) (Set(), Set(this)) //that is not in this
         else if (this == that) (Set(this), Set()) //same intervals
+        else if(this.lb == None && this.ub == None) {
+          if(that.lb == None) (Set(AInt(None, that.ub)), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), None)))
+          else if(that.ub == None) (Set(AInt(that.lb, None)), Set(AInt(None, AInt.binop(_-_, that.lb, Some(1)))))
+          else (Set(that), Set(AInt(None,AInt.binop(_ - _, that.lb, Some(1))), AInt(AInt.binop(_ + _, that.ub, Some(1)), None)))
+        }
         else { //this and that have equal parts
           if (this.lb == that.lb) {
             if(that.ub == None){
@@ -291,9 +293,7 @@ sealed trait AOption extends AVal {
 }
 
 case object ANone extends AOption
-
 case class ASome(get: AVal) extends AOption
-
 case class AMaybe(get: AVal) extends AOption
 
 sealed trait AList extends AVal {
@@ -433,7 +433,40 @@ sealed trait AList extends AVal {
     case (ACons(h1, t1), ACons(_, _)) => ACons(h1, ++(t1, al2))
   }
 
+/*
+  //TODO ===
+  //checks which parts of this are equal to that: (same parts, parts that differ)
+  def ===(that: AList): (Set[AList], Set[AList]) = {
+    (this, that) match {
+      case (ANil, ANil) => (Set(ANil), Set())
+
+      case (ANil, AMany(e)) => (Set(ANil), Set())
+      case (AMany(e), ANil) => (Set(ANil), Set(ACons(e, AMany(e))))
+
+      case (ANil, ACons(h, t)) => (Set(), Set(ANil))
+      case (ACons(h, t), ANil) => (Set(), Set(ACons(h, t)))
+
+      case (AMany(_), ACons(_, _)) => ???
+      case (ACons(h, t), AMany(_)) => ???
+
+      case (AMany(e1), AMany(e2)) =>
+        val eq = e1.asInstanceOf[AInt].===(e2.asInstanceOf[AInt])._1
+        val noneq = e1.asInstanceOf[AInt].===(e2.asInstanceOf[AInt])._2
+        //TODO needs improvement
+        if (eq.nonEmpty && noneq.isEmpty) (Set(AMany(e1)), Set())
+        else if (eq.nonEmpty && noneq.nonEmpty && noneq.tail.tail == null) (Set(AMany(eq.head)), Set(AMany(noneq.tail.head)))
+        else if (eq.nonEmpty && noneq.nonEmpty && noneq.tail.tail != null) (Set(AMany(eq.head)), Set(AMany(noneq.tail.head), AMany(noneq.tail.tail.head)))
+        else (Set(), Set(AMany(e1)))
+      case (ACons(h1, t1), ACons(h2, t2)) => ???
+
+    }
+  }
+
+ */
 }
+
+
+
 
 case object ANil extends AList {
   def flatten: List[AVal] = Nil
