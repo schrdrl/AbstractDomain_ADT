@@ -222,14 +222,13 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
   }
 
   //(same part, part that's different from that)
-  //TODO what happens if one value is None
+  //TODO test more edge cases
   def ===(that: AInt): (Set[AInt], Set[AInt]) = {
     that match {
       case that: AInt =>
-        if ((AInt.<(this.lb, that.lb) && AInt.<(this.ub, that.lb)) || (AInt.<(that.ub, this.lb) && AInt.<(that.ub, this.ub))) (Set(), Set(this)) //that is not in this
+        if ((AInt.<(this.lb, that.lb) && AInt.<(this.ub, that.lb) && that.lb != None) || (AInt.<(that.ub, this.lb) && AInt.<(that.ub, this.ub) && that.ub != None)) (Set(), Set(this)) //that is not in this
         else if (this == that) (Set(this), Set()) //same intervals
         else { //this and that have equal parts
-
           if (this.lb == that.lb) {
             if(that.ub == None){
               (Set(this), Set())
@@ -242,7 +241,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
             }
           } else if (AInt.<(this.lb, that.lb)) {
             if(that.ub == None){
-             (Set(this), Set())
+             (Set(AInt(that.lb, this.ub)), Set(AInt(this.lb, AInt.binop(_ - _, that.lb, Some(1)))))
             }else if(this.lb == None){
               (Set(this), Set())
             } else if (this.ub == that.ub) {
@@ -251,14 +250,13 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
               (Set(this.intersect(that).justValue().asInstanceOf[AInt]), Set(AInt(this.lb, AInt.binop(_ - _, that.lb, Some(1)))))
             } else { //if(AInt.<(that.ub, this.ub))
               (Set(this.intersect(that).justValue().asInstanceOf[AInt]), Set(AInt(this.lb, AInt.binop(_ - _, that.lb, Some(1))), AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
-
             }
           } else { //if(AInt.<(that.lb, this.lb))
             if(that.ub == None){
               (Set(this), Set())
             }else if(this.lb == None){
               (Set(this), Set())
-            } else if(this.ub == that.ub) {   //TODO add that.ub == None and this.ub == None
+            } else if(this.ub == that.ub) {
               (Set(this.intersect(that).justValue().asInstanceOf[AInt]), Set())
             } else if (AInt.<(this.ub, that.ub)) {
               (Set(this.intersect(that).justValue().asInstanceOf[AInt]), Set())
