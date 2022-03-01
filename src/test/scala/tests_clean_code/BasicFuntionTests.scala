@@ -1,5 +1,5 @@
 package tests_clean_code
-import AList_CleanCode.{ACons, AInt, AMany, ANil}
+import AList_CleanCode.{ACons, AInt, AMany, AMaybe, ANil, ANone, ASome}
 import org.scalatest.funsuite.AnyFunSuite
 class BasicFuntionTests extends AnyFunSuite {
 
@@ -145,6 +145,99 @@ class BasicFuntionTests extends AnyFunSuite {
     println("that: "+d)
     println(f.===(d)._1)
     println(f.===(d)._2+"\n")
+
+
+  }
+
+  //TODO
+  test("===: AList"){
+    val a = AInt.one
+    val b = AInt.apply(10)
+    val c = AInt.apply(-1, 5)
+
+    val d = ANil
+    val e = AMany(a)
+    val f = AMany(c)
+    val g = ACons(a, ACons(b, AMany(c)))
+    val h = ACons(c, ACons(b, ANil))
+
+    println("this: "+d)
+    println("that: "+d)
+    println(d.===(d)._1)
+    println(d.===(d)._2 +"\n")
+
+    println("this: "+d)
+    println("that: "+e)
+    println(d.===(e)._1)
+    println(d.===(e)._2+"\n")
+
+    println("this: "+e)
+    println("that: "+d)
+    println(e.===(d)._1)
+    println(e.===(d)._2+"\n")
+
+    println("this: "+e)
+    println("that: "+f)
+    println(e.===(f)._1)
+    println(e.===(f)._2+"\n")
+
+    println("this: "+f)
+    println("that: "+e)
+    println(f.===(e)._1)
+    println(f.===(e)._2+"\n")
+
+    //TODO ACons, ACons
+
+    //TODO AMany, ACons
+
+    //TODO ACons, AMany
+
+  }
+
+
+  test("===: AOption"){
+    val a = AInt.one
+    val b = AInt.apply(10)
+    val c = AInt.apply(-1, 5)
+
+    val d = ANone
+    val e = ASome(a)
+    val f = AMaybe(a)
+    val g = ASome(b)
+    val h = AMaybe(c)
+    val i = ASome(c)
+
+    println("this: "+d)
+    println("that: "+d)
+    println(d.===(d)+"\n")
+
+    println("this: "+d)
+    println("that: "+e)
+    println(d.===(e)+"\n")
+
+    println("this: "+d)
+    println("that: "+f)
+    println(d.===(f)+"\n")
+
+    println("this: "+e)
+    println("that: "+g)
+    println(e.===(g)+"\n")
+
+    println("this: "+h)
+    println("that: "+e)
+    println(h.===(e)+"\n")
+
+    println("this: "+h)
+    println("that: "+f)
+    println(h.===(f)+"\n")
+
+    println("this: "+i)
+    println("that: "+e)
+    println(i.===(e)+"\n")
+
+    println("this: "+i)
+    println("that: "+f)
+    println(i.===(f)+"\n")
 
 
   }

@@ -290,6 +290,81 @@ sealed trait AOption extends AVal {
       case (ASome(a), ASome(b)) => ASome(a widen b)
     }
   }
+
+  //checks which parts of this equals that: (equal parts, parts that differ)
+  def ===(that: AOption) : (Set[AOption], Set[AOption]) ={
+    (this, that) match {
+      case (ANone, ANone) => (Set(ANone), Set())
+
+      case (ANone, ASome(e)) => (Set(), Set(ANone))
+      case (ASome(e), ANone) => (Set(), Set(ASome(e)))
+
+      case (ANone, AMaybe(e)) => (Set(ANone), Set())
+      case (AMaybe(e), ANone) => (Set(ANone), Set(ASome(e)))
+
+      case (ASome(e1), AMaybe(e2)) =>
+        var output : (Set[AOption], Set[AOption]) = (Set(), Set())
+        if(e1.isInstanceOf[AInt]) {
+          val eq = e1.asInstanceOf[AInt].===(e2.asInstanceOf[AInt])._1
+          val noneq = e1.asInstanceOf[AInt].===(e2.asInstanceOf[AInt])._2
+          if(eq.nonEmpty && noneq.isEmpty) output = (Set(ASome(e1)), Set())
+          else if(eq.isEmpty && noneq.nonEmpty) output = (Set(), Set(ASome(e1)))
+          else{
+            var noneq_out : Set[AOption] = Set()
+            for(n <- noneq) noneq_out += ASome(n)
+            output = (Set(ASome(eq.head)), noneq_out)
+          }
+        }
+        output
+       // else if(e1.isInstanceOf[AList]) ???
+
+
+      case (AMaybe(e1), ASome(e2)) =>
+        var output : (Set[AOption], Set[AOption]) = (Set(), Set())
+        if(e1.isInstanceOf[AInt]) {
+        val eq = e1.asInstanceOf[AInt].===(e2.asInstanceOf[AInt])._1
+        val noneq = e1.asInstanceOf[AInt].===(e2.asInstanceOf[AInt])._2
+        if (eq.nonEmpty && noneq.isEmpty) output = (Set(AMaybe(e1)), Set())
+        else if (eq.isEmpty && noneq.nonEmpty) output = (Set(), Set(AMaybe(e1)))
+        else {
+          var noneq_out: Set[AOption] = Set(ANone)
+          for (n <- noneq) noneq_out += AMaybe(n)
+          output = (Set(ASome(eq.head)), noneq_out)
+        }
+      }
+        output
+
+      case (ASome(e1), ASome(e2)) =>
+        var output : (Set[AOption], Set[AOption]) = (Set(), Set())
+        if(e1.isInstanceOf[AInt]) {
+        val eq = e1.asInstanceOf[AInt].===(e2.asInstanceOf[AInt])._1
+        val noneq = e1.asInstanceOf[AInt].===(e2.asInstanceOf[AInt])._2
+        if (eq.nonEmpty && noneq.isEmpty) output = (Set(ASome(e1)), Set())
+        else if (eq.isEmpty && noneq.nonEmpty) output = (Set(), Set(ASome(e1)))
+        else {
+          var noneq_out: Set[AOption] = Set()
+          for (n <- noneq) noneq_out += ASome(n)
+          output = (Set(ASome(eq.head)), noneq_out)
+        }
+      }
+        output
+      case (AMaybe(e1), AMaybe(e2)) =>
+        var output : (Set[AOption], Set[AOption]) = (Set(), Set())
+        if(e1.isInstanceOf[AInt]) {
+          val eq = e1.asInstanceOf[AInt].===(e2.asInstanceOf[AInt])._1
+          val noneq = e1.asInstanceOf[AInt].===(e2.asInstanceOf[AInt])._2
+          if (eq.nonEmpty && noneq.isEmpty) output =  (Set(AMaybe(e1)), Set())
+          else if (eq.isEmpty && noneq.nonEmpty) output = (Set(), Set(AMaybe(e1)))
+          else {
+            var noneq_out: Set[AOption] = Set()
+            for (n <- noneq) noneq_out += AMaybe(n)
+            output = (Set(AMaybe(eq.head)), noneq_out)
+          }
+        }
+        output
+    }
+  }
+
 }
 
 case object ANone extends AOption
@@ -428,15 +503,16 @@ sealed trait AList extends AVal {
     case (ANil, AMany(e)) => AMany(e)
     case (AMany(e), ANil) => AMany(e)
     case (AMany(e1), AMany(e2)) => AMany(e1.asInstanceOf[AInt].union(e2))
-    case (AMany(_), ACons(_, _)) => al1.widen(al2) //TODO test
+    case (AMany(_), ACons(_, _)) => al1.widen(al2)
     case (ACons(h, t), AMany(_)) => ACons(h, ++(t, al2))
     case (ACons(h1, t1), ACons(_, _)) => ACons(h1, ++(t1, al2))
   }
 
-/*
+
   //TODO ===
   //checks which parts of this are equal to that: (same parts, parts that differ)
   def ===(that: AList): (Set[AList], Set[AList]) = {
+
     (this, that) match {
       case (ANil, ANil) => (Set(ANil), Set())
 
@@ -446,23 +522,37 @@ sealed trait AList extends AVal {
       case (ANil, ACons(h, t)) => (Set(), Set(ANil))
       case (ACons(h, t), ANil) => (Set(), Set(ACons(h, t)))
 
-      case (AMany(_), ACons(_, _)) => ???
-      case (ACons(h, t), AMany(_)) => ???
+      case (AMany(e), ACons(h, t)) => ??? //TODO use flatten to get the elements of ACons
+      case (ACons(h, t), AMany(e)) => ???
 
       case (AMany(e1), AMany(e2)) =>
         val eq = e1.asInstanceOf[AInt].===(e2.asInstanceOf[AInt])._1
         val noneq = e1.asInstanceOf[AInt].===(e2.asInstanceOf[AInt])._2
-        //TODO needs improvement
         if (eq.nonEmpty && noneq.isEmpty) (Set(AMany(e1)), Set())
         else if (eq.nonEmpty && noneq.nonEmpty && noneq.tail.tail == null) (Set(AMany(eq.head)), Set(AMany(noneq.tail.head)))
-        else if (eq.nonEmpty && noneq.nonEmpty && noneq.tail.tail != null) (Set(AMany(eq.head)), Set(AMany(noneq.tail.head), AMany(noneq.tail.tail.head)))
+        else if (eq.nonEmpty && noneq.nonEmpty && noneq.tail.nonEmpty) (Set(AMany(eq.head)), Set(AMany(noneq.head), AMany(noneq.tail.head)))
         else (Set(), Set(AMany(e1)))
-      case (ACons(h1, t1), ACons(h2, t2)) => ???
 
+      case (ACons(h1, t1), ACons(h2, t2)) =>
+        val flatten_this = this.flatten
+        val flatten_that = that.flatten
+        val length_this = this.flatten.size
+        val length_that = that.flatten.size
+        var i = if(length_this < length_that) length_that else length_this  //take the length of the shorter list
+        var j = 0
+        var eq = ???
+        var noneq = ???
+
+        //jeweils eine Position weiter
+        while (j < i ){
+          //vgl die Intervalle, den gleichen Teil
+
+          j = j+1
+        }
+       ???
     }
   }
 
- */
 }
 
 

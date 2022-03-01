@@ -37,8 +37,6 @@ case class APred(op: String, name: String) extends ATest {
       case ("isPositive", ai : AInt) =>if(ai.===(AInt(Some(0), None))._1.nonEmpty) ai.===(AInt(Some(0), None))._1.asInstanceOf[Set[AVal]] else Set()
 
 
-      //TODO add missing tests (isPositive, isEqual, contains)
-
     }
   }
 
@@ -55,7 +53,7 @@ case class APred(op: String, name: String) extends ATest {
       case ("isTop", ai : AInt) => if(ai != AInt(None,None)) Set(AInt.top) else Set()
       case ("isNegative", ai : AInt) =>if(ai.===(AInt(None, Some(0)))._2.nonEmpty) ai.===(AInt(None, Some(0)))._2.asInstanceOf[Set[AVal]] else Set()
       case ("isPositive", ai : AInt) =>if(ai.===(AInt(Some(0), None))._2.nonEmpty) ai.===(AInt(Some(0), None))._2.asInstanceOf[Set[AVal]] else Set()
-      //TODO add missing tests
+
     }
   }
 
@@ -70,7 +68,7 @@ case class APred(op: String, name: String) extends ATest {
   }
 }
 
-//TODO add missing tests (isNegative, isPositive, isEqual, ifIsATrue, contains)
+
 
 
 
