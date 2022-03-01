@@ -26,6 +26,8 @@ case class AAssert(cond: ATest) extends AStmt {
   }
 }
 
+//TODO AVerify
+
 case class AAssign(name: String, expr: AExpr) extends AStmt {
   def execute(as: Set[AState]): Set[AState] = {
     for (a <- as) yield {

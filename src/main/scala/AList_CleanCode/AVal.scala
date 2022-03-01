@@ -14,7 +14,7 @@ sealed trait AVal {
   def justValue(): AVal = {
     this match {
       case ASome(a) => a
-      case AMaybe(_) => throw new Exception("Exception thrown from justValue. Reason: Input was AMaybe")
+      case AMaybe(a) => a//throw new Exception("Exception thrown from justValue. Reason: Input was AMaybe") //TODO what about ANone Case
       case ANone => throw new Exception("Exception thrown from justValue. Reason: Input was ANone")
     }
   }
@@ -106,7 +106,6 @@ object AInt {
       case (Some(a), Some(b)) => a < b || a == b
     }
   }
-
 }
 
 case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
@@ -203,6 +202,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
         }
     }
   }
+
 
   //TODO what happens if that is None
   def split(that: Option[Int], s: String): Set[AInt] = {
@@ -381,6 +381,16 @@ sealed trait AList extends AVal {
     case AMany(e) => AMany(e)
   }
 
+    def flatten_JustAInt(): AOption = this match {
+      case ANil => ANone
+      case ACons(h,t) =>
+        var i: AInt = h.asInstanceOf[AInt]
+        val flatten = t.flatten
+        for(f <- flatten) i = i.union(f)
+        ASome(i)
+      case AMany(e) => AMaybe(e)
+  }
+
   def widen(that: AVal): AList = {
     (this, that) match {
       case (ANil, ANil) => ANil
@@ -453,6 +463,7 @@ sealed trait AList extends AVal {
   }
 
 
+
   //reverses an AList value
   def reverse(): AList = {
     this match {
@@ -486,30 +497,32 @@ sealed trait AList extends AVal {
 
 
   //prepends an element on the front a an AList value
-  def +:(elem: AInt, al2: AList): AList = ACons(elem, al2)
+  def prepend(elem: AInt): AList = ACons(elem, this)
 
   //appends an element the the end a an AList value
-  def :+(al1: AList, elem: AInt): AList = al1 match {
+  def append(elem: AInt): AList =
+    this match {
     case ANil => ACons(elem, ANil)
-    case ACons(h, t) => ACons(h, :+(t, elem))
+    case ACons(h, t) => ACons(h, t.append(elem))
     case AMany(e) => AMany(e.asInstanceOf[AInt].union(elem))
   }
 
   //Method concatenates two values of type AList
-  def ++(al1: AList, al2: AList): AList = (al1, al2) match {
+  def concat(that: AList): AList =
+    (this, that) match {
     case (ANil, ANil) => ANil
     case (ANil, ACons(h, t)) => ACons(h, t)
     case (ACons(h, t), ANil) => ACons(h, t)
     case (ANil, AMany(e)) => AMany(e)
     case (AMany(e), ANil) => AMany(e)
     case (AMany(e1), AMany(e2)) => AMany(e1.asInstanceOf[AInt].union(e2))
-    case (AMany(_), ACons(_, _)) => al1.widen(al2)
-    case (ACons(h, t), AMany(_)) => ACons(h, ++(t, al2))
-    case (ACons(h1, t1), ACons(_, _)) => ACons(h1, ++(t1, al2))
+    case (AMany(_), ACons(_, _)) => this.widen(that)
+    case (ACons(h, t), AMany(_)) => ACons(h, t.concat(that))
+    case (ACons(h1, t1), ACons(_, _)) => ACons(h1, this.concat(that))
   }
 
 
-  //TODO ===
+  //TODO === (if it is even necessary)
   //checks which parts of this are equal to that: (same parts, parts that differ)
   def ===(that: AList): (Set[AList], Set[AList]) = {
 

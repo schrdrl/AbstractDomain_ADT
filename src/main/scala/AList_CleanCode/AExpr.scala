@@ -35,7 +35,7 @@ case class AOp(op: String, args: List[AExpr]) extends AExpr {
       case ("||", List(l:ABool, r:ABool)) => l.||(r)
       case ("!", List(ab:ABool)) => ab.!()
 
-      //added AOption
+
       case ("aHead", List(ANil)) => ANone
       case ("aHead", List(ACons(head, _))) => ASome(head)
       case ("aHead", List(AMany(elems))) =>  AMaybe(elems)
@@ -48,10 +48,12 @@ case class AOp(op: String, args: List[AExpr]) extends AExpr {
       case("union", List(l: AList,r: AList)) => l.union(r)
       case("intersect", List(l: AList,r: AList)) => l.intersect(r)
       case("subset", List(l: AList,r: AList)) => l.subset(r)
+      case("concat", List(l: AList,r: AList)) => l.concat(r)
+      case("append", List(l: AList,r: AInt)) => l.append(r)
+      case("prepend", List(l: AList,r: AInt)) => l.prepend(r)
+      case("reverse", List(l: AList)) => l.reverse()
 
 
-
-      //TODO add missing methods
     }
   }
 }
