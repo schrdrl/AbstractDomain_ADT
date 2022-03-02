@@ -91,9 +91,10 @@ object AInt {
     }
   }
 
+  //TODO needs improvement
   def <(a: Option[Int], b: Option[Int]): Boolean = {
     (a, b) match {
-      case (_, None) => false
+      case (_, None) => true //TODO should be true?
       case (None, Some(_)) => true
       case (Some(a), Some(b)) => a < b
     }
@@ -180,20 +181,21 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
   def union(that: AVal): AInt = {
     that match {
       case that: AInt =>
-        val newlb = if (AInt.<(this.lb, that.lb)) this.lb else that.lb
-        val newub = if (AInt.<(this.ub, that.ub)) that.ub else this.ub
+        val newlb = if (AInt.<(this.lb, that.lb)) this.lb else if (AInt.<(that.lb, this.lb)) that.lb else None
+        val newub = if (AInt.<(this.ub, that.ub)) that.ub else if (AInt.<(that.ub, this.ub)) this.ub else None
         AInt(newlb, newub)
     }
   }
 
 
+  //TODO test without  == None -> made improvements on <
   def intersect(that: AVal): AOption = {
     that match {
       case that: AInt =>
         if (this == that) ASome(this)
         else {
-          val newlb = if (AInt.<=(this.lb, that.lb) || this.lb == None) that.lb else if (AInt.<=(that.lb, this.lb) || that.lb == None) this.lb else None
-          val newub = if (AInt.<=(this.ub, that.ub) || that.ub == None) this.ub else if (AInt.<=(that.ub, this.ub) || this.ub == None) that.ub else None
+          val newlb = if (AInt.<=(this.lb, that.lb)) that.lb else if (AInt.<(that.lb, this.lb)) this.lb else None
+          val newub = if (AInt.<=(this.ub, that.ub)) this.ub else if (AInt.<(that.ub, this.ub)) that.ub else None
           if (newlb == None && newub == None) {
             ANone
           } else {
@@ -373,6 +375,8 @@ case class AMaybe(get: AVal) extends AOption
 
 sealed trait AList extends AVal {
 
+  //TODO foreach
+
   def flatten: List[AVal]
 
   def flatten_All(): AList = this match {
@@ -434,6 +438,7 @@ sealed trait AList extends AVal {
       case (ANil, AMany(_)) => ANil
       case (AMany(_), ANil) => ANil
 
+      //TODO -> abort if any element of ACons
       case (ACons(a, as), AMany(e)) => if (a.asInstanceOf[AInt].intersect(e) != ANone) ACons(a.asInstanceOf[AInt].intersect(e).justValue(), as.intersect(AMany(e))) else ANil
       case (AMany(e), ACons(a, as)) => if (e.asInstanceOf[AInt].intersect(a) != ANone) ACons(e.asInstanceOf[AInt].intersect(a).justValue(), AMany(e).intersect(as)) else ANil
 

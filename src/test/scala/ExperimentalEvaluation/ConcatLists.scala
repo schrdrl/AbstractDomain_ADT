@@ -10,7 +10,7 @@ class ConcatLists extends AnyFunSuite {
 
   test("concatenating two lists"){
     val axs = AMany(AInt(Some(0), Some(10)))
-    val ays = AMany(AInt(Some(5), Some(7)))  //TODO AInt(Some(0), None)
+    val ays = AMany(AInt(Some(5), None)) //TODO AInt(Some(0), None)
 
     val init1 = AState(Map("xs" -> axs))
     val init2 = AState(Map("xs" -> ays))
@@ -21,17 +21,17 @@ class ConcatLists extends AnyFunSuite {
     val test = APred("isPositive", "xs")
     //check whether the lists contain only positive elements
     val arePos = AAssert(test).execute(as0)
-    println(arePos)
+    println("(is_pos,not_pos): "+arePos)
 
     //concatenating the lists
     val op = AOp("concat", as1).evaluate(init1) //: AList
-    println(op)
+    println("After concat: "+op)
     val init3 = AState(Map("xs" -> op))
     val as2 = Set(init3)
 
     //check whether the output also contains only positive elements
     val isPos = AAssert(test).execute(as2)
-    println(isPos)
+    println("(is_pos,not_pos): "+isPos)
 
 
   }

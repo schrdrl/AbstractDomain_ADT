@@ -21,8 +21,10 @@ case class AAssert(cond: ATest) extends AStmt {
     val pos = cond.positive(as)
     val neg = cond.negative(as)
 
-    assert(neg.isEmpty) // TODO: better error handling here!
-    pos
+    if(neg.isEmpty) pos
+    else {
+      throw new Exception ("Exception occured while performing AAssert. Reason: neg is not empty")
+    }
   }
 }
 

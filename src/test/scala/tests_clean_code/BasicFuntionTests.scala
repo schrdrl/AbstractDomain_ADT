@@ -34,7 +34,8 @@ class BasicFuntionTests extends AnyFunSuite {
     println(d.intersect(e))
     println(d.intersect(f))
     println(e.intersect(e))
-    println(e.intersect(f))
+    println(f.intersect(e)) //TODO should be ANil
+    println(e.intersect(f)) //TODO should be ANil
     println(e.intersect(h))
     println(h.intersect(e))
   }
