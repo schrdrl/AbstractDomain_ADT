@@ -91,10 +91,10 @@ object AInt {
     }
   }
 
-  //TODO needs improvement
+
   def <(a: Option[Int], b: Option[Int]): Boolean = {
     (a, b) match {
-      case (_, None) => true //TODO should be true?
+      case (_, None) => true //was false
       case (None, Some(_)) => true
       case (Some(a), Some(b)) => a < b
     }
@@ -102,7 +102,7 @@ object AInt {
 
   def <=(a: Option[Int], b: Option[Int]): Boolean = {
     (a, b) match {
-      case (_, None) => false
+      case (_, None) => true
       case (None, Some(_)) => true
       case (Some(a), Some(b)) => a < b || a == b
     }
