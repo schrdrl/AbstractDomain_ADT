@@ -34,10 +34,15 @@ class BasicFuntionTests extends AnyFunSuite {
     println(d.intersect(e))
     println(d.intersect(f))
     println(e.intersect(e))
-    println(f.intersect(e)) //TODO should be ANil
-    println(e.intersect(f)) //TODO should be ANil
+    println(AMany(c).intersect(e))
+    println(ACons(c, ANil).intersect(ACons(a, ANil)))
+    println(f.intersect(e)) //TODO ANil || ACons([1,1],ANil)
+    println(e.intersect(f)) //TODO ANil || ACons([1,1],ANil)
     println(e.intersect(h))
     println(h.intersect(e))
+    println(a.intersect(g))
+
+
   }
 
   test("subset:AList"){

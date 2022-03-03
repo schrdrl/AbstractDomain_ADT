@@ -14,7 +14,7 @@ sealed trait AVal {
   def justValue(): AVal = {
     this match {
       case ASome(a) => a
-      case AMaybe(a) => a//throw new Exception("Exception thrown from justValue. Reason: Input was AMaybe") //TODO what about ANone Case
+      case AMaybe(a) => throw new Exception("Exception thrown from justValue. Reason: Input was AMaybe")
       case ANone => throw new Exception("Exception thrown from justValue. Reason: Input was ANone")
     }
   }
@@ -94,7 +94,7 @@ object AInt {
 
   def <(a: Option[Int], b: Option[Int]): Boolean = {
     (a, b) match {
-      case (_, None) => true //was false
+      case (_, None) => true //updated
       case (None, Some(_)) => true
       case (Some(a), Some(b)) => a < b
     }
@@ -111,7 +111,7 @@ object AInt {
 
 case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
   def unary_-(): AInt = {
-    AInt(ub, lb)
+    AInt(Some(-ub.get), Some(-lb.get))
   }
 
   def +(that: AVal): AInt = {
@@ -169,15 +169,6 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
-  //TODO recheck -> maybe move to ATest if useful
-  def contains(that: AVal): ABool = {
-    that match {
-      case that: AInt =>
-        if (AInt.<=(this.lb, that.lb) && AInt.<=(that.ub, this.ub)) ATrue
-        else AFalse
-    }
-  }
-
   def union(that: AVal): AInt = {
     that match {
       case that: AInt =>
@@ -188,38 +179,47 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
   }
 
 
-  //TODO test without  == None -> made improvements on <
+  def contains(that: AVal): ABool = {
+    that match {
+      case that: AInt =>
+        if (AInt.<=(this.lb, that.lb) && AInt.<=(that.ub, this.ub)) ATrue
+        else AFalse
+    }
+  }
+
+  def <(that: AVal) : Boolean = {
+    that match {
+      case that: AInt =>
+        AInt.<(this.lb, that.lb) && AInt.<(this.ub, that.ub)
+    }
+  }
+
+  def <=(that: AVal) : Boolean = {
+    that match {
+      case that: AInt =>
+        AInt.<=(this.lb, that.lb) && AInt.<=(this.ub, that.ub)
+    }
+  }
+
   def intersect(that: AVal): AOption = {
     that match {
       case that: AInt =>
         if (this == that) ASome(this)
+        else if((this.lb != None && this.ub != None && that.lb != None && that.ub != None) && ((AInt.<(this.lb, that.lb) && AInt.<(this.ub, that.lb)) || (AInt.<(that.ub, this.lb) && AInt.<(that.ub, this.ub)))) ANone
         else {
-          val newlb = if (AInt.<=(this.lb, that.lb)) that.lb else if (AInt.<(that.lb, this.lb)) this.lb else None
+          val newlb = if (AInt.<=(this.lb, that.lb) && that.lb != None) that.lb else if (AInt.<(that.lb, this.lb) && this.lb != None) this.lb else None
           val newub = if (AInt.<=(this.ub, that.ub)) this.ub else if (AInt.<(that.ub, this.ub)) that.ub else None
           if (newlb == None && newub == None) {
             ANone
-          } else {
+          } else if(this.contains(AInt(newlb,newub)) == ATrue && that.contains(AInt(newlb,newub)) == ATrue) {
             ASome(AInt.apply(newlb, newub))
+          }else{
+            ANone
           }
         }
     }
   }
 
-
-  //TODO what happens if that is None
-  def split(that: Option[Int], s: String): Set[AInt] = {
-    that match {
-      case that: Option[Int] =>
-        if (AInt.<(that, this.lb) || AInt.<(this.ub, that)) Set() //that is not in this
-        else { //that is in this
-          s match {
-            case "lower" => Set(AInt(this.lb, that), AInt(AInt.binop(_ + _, that, Some(1)), this.ub))
-            case "upper" => Set(AInt(this.lb, AInt.binop(_ - _, that, Some(1))), AInt(that, this.ub))
-            case "neither" => Set(AInt(this.lb, AInt.binop(_ - _, that, Some(1))), AInt(AInt.binop(_ + _, that, Some(1)), this.ub))
-          }
-        }
-    }
-  }
 
   //checks which parts of two intervals are the same (same part, part that's different from that)
   def ===(that: AInt): (Set[AInt], Set[AInt]) = {
@@ -271,6 +271,22 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
         }
     }
   }
+
+
+  //TODO useful? Check Testcases
+  def split(that: Option[Int], s: String): Set[AInt] = {
+    that match {
+      case that: Option[Int] =>
+        if (AInt.<(that, this.lb) || AInt.<(this.ub, that)) Set() //that is not in this
+        else { //that is in this
+          s match {
+            case "lower" => Set(AInt(this.lb, that), AInt(AInt.binop(_ + _, that, Some(1)), this.ub))
+            case "upper" => Set(AInt(this.lb, AInt.binop(_ - _, that, Some(1))), AInt(that, this.ub))
+            case "neither" => Set(AInt(this.lb, AInt.binop(_ - _, that, Some(1))), AInt(AInt.binop(_ + _, that, Some(1)), this.ub))
+          }
+        }
+    }
+  }
 }
 
 
@@ -318,7 +334,7 @@ sealed trait AOption extends AVal {
           }
         }
         output
-       // else if(e1.isInstanceOf[AList]) ???
+       // else if(e1.isInstanceOf[AList]) ??? //TODO
 
 
       case (AMaybe(e1), ASome(e2)) =>
@@ -379,13 +395,13 @@ sealed trait AList extends AVal {
 
   def flatten: List[AVal]
 
-  def flatten_All(): AList = this match {
+  def flatten_All: AList = this match {
     case ANil => ANil
     case ACons(h, t) => AMany(h).union(t)
     case AMany(e) => AMany(e)
   }
 
-    def flatten_JustAInt(): AOption = this match {
+    def flatten_JustAInt: AOption = this match {
       case ANil => ANone
       case ACons(h,t) =>
         var i: AInt = h.asInstanceOf[AInt]
@@ -438,7 +454,7 @@ sealed trait AList extends AVal {
       case (ANil, AMany(_)) => ANil
       case (AMany(_), ANil) => ANil
 
-      //TODO -> abort if any element of ACons
+      //TODO -> abort if any element of ACons returns ANone, maybe use foreach? Or while loop
       case (ACons(a, as), AMany(e)) => if (a.asInstanceOf[AInt].intersect(e) != ANone) ACons(a.asInstanceOf[AInt].intersect(e).justValue(), as.intersect(AMany(e))) else ANil
       case (AMany(e), ACons(a, as)) => if (e.asInstanceOf[AInt].intersect(a) != ANone) ACons(e.asInstanceOf[AInt].intersect(a).justValue(), AMany(e).intersect(as)) else ANil
 
@@ -490,7 +506,7 @@ sealed trait AList extends AVal {
             axs = tail.asInstanceOf[AList]
             state = state.updated("xs", axs)
           } else if (testCond.positive(tail).nonEmpty && testCond.negative(tail).nonEmpty) { //tail is AMany
-            ays = this.flatten_All()
+            ays = this.flatten_All
             tailIsAMany = true
           } else {
             throw new Exception("Exception thrown from reverse.")
@@ -551,7 +567,7 @@ sealed trait AList extends AVal {
         else if (eq.nonEmpty && noneq.nonEmpty && noneq.tail.nonEmpty) (Set(AMany(eq.head)), Set(AMany(noneq.head), AMany(noneq.tail.head)))
         else (Set(), Set(AMany(e1)))
 
-      case (ACons(h1, t1), ACons(h2, t2)) =>
+      case (ACons(h1, t1), ACons(h2, t2)) =>  //TODO maybe foreach?
         val flatten_this = this.flatten
         val flatten_that = that.flatten
         val length_this = this.flatten.size
