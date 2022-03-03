@@ -11,7 +11,7 @@ sealed trait AVal {
     }
   }
 
-  //TODO AMaybe -> ANone | ASome
+  //TODO AMaybe -> ANone | ASome -> ATest("isAMaybe", ao: AOption)
   def justValue(): AVal = {
     this match {
       case ASome(a) => a
@@ -310,6 +310,7 @@ sealed trait AOption extends AVal {
     }
   }
 
+  //TODO necessary?
   //checks which parts of this equals that: (equal parts, parts that differ)
   def ===(that: AOption) : (Set[AOption], Set[AOption]) ={
     (this, that) match {
@@ -455,9 +456,8 @@ sealed trait AList extends AVal {
       case (ANil, AMany(_)) => ANil
       case (AMany(_), ANil) => ANil
 
-      //TODO -> abort if any element of ACons returns ANone, maybe use foreach? Or while loop
-      case (ACons(a, as), AMany(e)) => if (a.asInstanceOf[AInt].intersect(e) != ANone) ACons(a.asInstanceOf[AInt].intersect(e).justValue(), as.intersect(AMany(e))) else ANil
-      case (AMany(e), ACons(a, as)) => if (e.asInstanceOf[AInt].intersect(a) != ANone) ACons(e.asInstanceOf[AInt].intersect(a).justValue(), AMany(e).intersect(as)) else ANil
+      case (ACons(a, as), AMany(e)) => if (a.asInstanceOf[AInt].intersect(e) != ANone) ACons(a.asInstanceOf[AInt].intersect(e).justValue(), as.intersect(that)) else ANil
+      case (AMany(e), ACons(a, as)) => if (e.asInstanceOf[AInt].intersect(a) != ANone) ACons(e.asInstanceOf[AInt].intersect(a).justValue(), this.intersect(as)) else ANil
 
       case (AMany(e1), AMany(e2)) => if (e1.asInstanceOf[AInt].intersect(e2) != ANone) AMany(e1.asInstanceOf[AInt].intersect(e2).justValue()) else ANil
       case (ACons(a, as), ACons(b, bs)) => if (a.asInstanceOf[AInt].intersect(b) != ANone) ACons(a.asInstanceOf[AInt].intersect(b).justValue(), as.intersect(bs)) else ANil
