@@ -9,8 +9,8 @@ class ConcatLists extends AnyFunSuite {
    */
 
   test("concatenating two lists"){
-    val axs = AMany(AInt(Some(0), Some(10)))
-    val ays = AMany(AInt(Some(5), None)) //TODO AInt(Some(0), None)
+    val axs = AMany(AInt(Some(2), Some(10)))
+    val ays = AMany(AInt(Some(0), None))
 
     val init1 = AState(Map("xs" -> axs))
     val init2 = AState(Map("xs" -> ays))

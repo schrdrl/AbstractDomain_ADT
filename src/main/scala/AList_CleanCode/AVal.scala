@@ -11,10 +11,11 @@ sealed trait AVal {
     }
   }
 
+  //TODO AMaybe -> ANone | ASome
   def justValue(): AVal = {
     this match {
       case ASome(a) => a
-      case AMaybe(a) => throw new Exception("Exception thrown from justValue. Reason: Input was AMaybe")
+      case AMaybe(a) => a //throw new Exception("Exception thrown from justValue. Reason: Input was AMaybe")
       case ANone => throw new Exception("Exception thrown from justValue. Reason: Input was ANone")
     }
   }
