@@ -77,7 +77,9 @@ case class AWhile(test: ATest, body: AStmt, max: Int = Int.MaxValue)
       k = k - 1
 
       val pos = test.positive(as)
+     // println("Test-pos: "+pos)
       val cs = body.execute(pos)
+      //println("cs: "+cs)
 
       as = AState.widenAll(as ++ cs)
       run = (as != bs)

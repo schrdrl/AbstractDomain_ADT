@@ -54,6 +54,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     AInt(ub, lb)
   }
 
+
   def +(that: AVal): AInt = {
     that match {
       case that: AInt =>

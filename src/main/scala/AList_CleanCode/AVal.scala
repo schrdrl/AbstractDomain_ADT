@@ -12,6 +12,7 @@ sealed trait AVal {
   }
 
   //hasConcreteElement(that:Any) : Boolean
+  //def hasConcreteElement(that:Any) :Boolean
 
   //TODO AMaybe -> ANone | ASome -> ATest("isAMaybe", ao: AOption)
   def justValue(): AVal = {
@@ -24,10 +25,19 @@ sealed trait AVal {
 }
 
 sealed trait ABool extends AVal {
+
+  def hasConcreteElement(that:Any) : Boolean ={
+    (this, that) match {
+      case (ATrue, true) | (AFalse, false) => true
+      case (ATrue, false) | (AFalse, true) => false
+      case (AUnknown, false) | (AUnknown, false) => true
+    }
+  }
+
   def widen(that: AVal): ABool = {
     (this, that) match {
-      case (ATrue, ATrue) => ATrue //updated: instead of ==
-      case (AFalse, AFalse) => AFalse //updated: instead of ==
+      case (ATrue, ATrue) => ATrue
+      case (AFalse, AFalse) => AFalse
       case (_: ABool, _: ABool) => AUnknown
     }
   }
@@ -115,7 +125,7 @@ object AInt {
 case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
 
   def hasConcreteElement(that:Any) : Boolean ={
-    (this.lb, this.ub, that) match {
+    (lb, ub, that) match {
       case (None, None, i: Int) => true
       case (None, Some(e), i: Int) => i <= e
       case (Some(e), None, i: Int) => i >= e
@@ -125,8 +135,28 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
 
 
   def unary_-(): AInt = {
-    AInt(Some(-ub.get), Some(-lb.get))
+    (lb,ub) match {
+      case (None, None) => AInt(Some(0), None)
+      case (_, None) => AInt(None, Some(-lb.get))
+      case (None,_) => AInt(Some(-ub.get),None)
+      case _ => AInt(Some(-ub.get), Some(-lb.get))
+    }
   }
+
+    def abs() : AInt = {
+      (lb, ub) match {
+        case (None, None) => AInt(None, None)
+        case (_, None) => if(AInt.<(this.lb, Some(0))) AInt(Some(-lb.get), None) else this
+        case (None, _) => if(AInt.<(this.ub, Some(0))) AInt(Some(-ub.get), None) else AInt(ub, None)
+        case _ =>
+          val newlb = if(AInt.<(this.lb, Some(0))) Some(-lb.get)else lb
+          val newub = if(AInt.<(this.ub, Some(0))) Some(-ub.get)else ub
+
+          val newInterval = if (AInt.<=(newlb, newub)) AInt(newlb, newub) else  AInt(newub, newlb)
+          newInterval
+      }
+    }
+
 
   def +(that: AVal): AInt = {
     that match {

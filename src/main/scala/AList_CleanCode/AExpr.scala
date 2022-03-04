@@ -20,6 +20,7 @@ case class AOp(op: String, args: List[AExpr]) extends AExpr {
 
     (op, aes) match {
       case ("-", List(a: AInt)) => -a
+      case ("abs", List(a: AInt)) => a.abs()
 
       case ("+", List(l: AInt, r: AInt)) => l + r
       case ("-", List(l: AInt, r: AInt)) => l - r
