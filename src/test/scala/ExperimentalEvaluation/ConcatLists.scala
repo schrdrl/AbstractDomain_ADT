@@ -12,7 +12,7 @@ class ConcatLists extends AnyFunSuite {
     val axs = AMany(AInt(Some(2), Some(10)))
     val ays = AMany(AInt(Some(0), None))
 
-    val init1 = AState(Map("xs" -> axs))
+    val init1 = AState(Map("xs" -> axs)) //TODO "ys" -> ays, one init
     val init2 = AState(Map("xs" -> ays))
 
     val as0 = Set(init1,init2)

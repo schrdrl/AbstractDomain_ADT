@@ -36,15 +36,13 @@ case class AOp(op: String, args: List[AExpr]) extends AExpr {
       case ("!", List(ab:ABool)) => ab.!()
 
 
-      case ("aHead", List(ANil)) => ANone
-      case ("aHead", List(ACons(head, _))) => ASome(head)
-      case ("aHead", List(AMany(elems))) =>  AMaybe(elems)
-      case ("aTail", List(ANil)) => ANone
-      case ("aTail", List(ACons(_, tail))) => ASome(tail)
-      case ("aTail", List(AMany(elems))) => AMaybe(AMany(elems))
-      case ("aLength", List(ANil)) => ANone
-      case ("aLength", List(ACons(head, tail))) => ASome(AInt(Some(0), Some(aes.head.asInstanceOf[AList].flatten.length)))
-      case ("aLength", List(AMany(elems))) => AMaybe(AInt(Some(0),None))
+      case ("head", List(ANil)) => ANone
+      case ("head", List(ACons(head, _))) => ASome(head).justValue()
+      case ("head", List(AMany(elems))) =>  AMaybe(elems).justValue() //TODO AMaybe
+      case ("tail", List(ANil)) => ANone
+      case ("tail", List(ACons(_, tail))) => ASome(tail).justValue()
+      case ("tail", List(AMany(elems))) => AMaybe(AMany(elems)).justValue() //TODO AMaybe
+      case ("length", List(al: AList)) => al.length
       case("union", List(l: AList,r: AList)) => l.union(r)
       case("intersect", List(l: AList,r: AList)) => l.intersect(r)
       case("subset", List(l: AList,r: AList)) => l.subset(r)

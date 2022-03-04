@@ -11,6 +11,8 @@ sealed trait AVal {
     }
   }
 
+  //hasConcreteElement(that:Any) : Boolean
+
   //TODO AMaybe -> ANone | ASome -> ATest("isAMaybe", ao: AOption)
   def justValue(): AVal = {
     this match {
@@ -111,6 +113,17 @@ object AInt {
 }
 
 case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
+
+  def hasConcreteElement(that:Any) : Boolean ={
+    (this.lb, this.ub, that) match {
+      case (None, None, i: Int) => true
+      case (None, Some(e), i: Int) => i <= e
+      case (Some(e), None, i: Int) => i >= e
+      case (Some(e1), Some(e2), i: Int) => i <= e1 && i >= e2
+    }
+  }
+
+
   def unary_-(): AInt = {
     AInt(Some(-ub.get), Some(-lb.get))
   }
@@ -394,6 +407,7 @@ case class AMaybe(get: AVal) extends AOption
 sealed trait AList extends AVal {
 
   //TODO foreach
+  def length: AInt
 
   def flatten: List[AVal]
 
@@ -519,14 +533,14 @@ sealed trait AList extends AVal {
 
 
   //prepends an element on the front a an AList value
-  def prepend(elem: AInt): AList = ACons(elem, this)
+  def prepend(elem: AVal): AList = ACons(elem, this)
 
   //appends an element the the end a an AList value
-  def append(elem: AInt): AList =
+  def append(elem: AVal): AList =
     this match {
     case ANil => ACons(elem, ANil)
     case ACons(h, t) => ACons(h, t.append(elem))
-    case AMany(e) => AMany(e.asInstanceOf[AInt].union(elem))
+    case AMany(e) => AMany(e.widen(elem))
   }
 
   //Method concatenates two values of type AList
@@ -537,7 +551,7 @@ sealed trait AList extends AVal {
     case (ACons(h, t), ANil) => ACons(h, t)
     case (ANil, AMany(e)) => AMany(e)
     case (AMany(e), ANil) => AMany(e)
-    case (AMany(e1), AMany(e2)) => AMany(e1.asInstanceOf[AInt].union(e2))
+    case (AMany(e1), AMany(e2)) => AMany(e1.widen(e2))
     case (AMany(_), ACons(_, _)) => this.widen(that)
     case (ACons(h, t), AMany(_)) => ACons(h, t.concat(that))
     case (ACons(h1, t1), ACons(_, _)) => ACons(h1, this.concat(that))
@@ -595,14 +609,17 @@ sealed trait AList extends AVal {
 
 case object ANil extends AList {
   def flatten: List[AVal] = Nil
+  def length: AInt = AInt.zero
 }
 
 case class ACons(head: AVal, tail: AList) extends AList {
   def flatten: List[AVal] = head :: tail.flatten
+  def length: AInt = AInt(Some(1), None)
 }
 
 case class AMany(elems: AVal) extends AList {
   def flatten: List[AVal] = List(elems)
+  def length: AInt = AInt(Some(0), None)
 
 }
 

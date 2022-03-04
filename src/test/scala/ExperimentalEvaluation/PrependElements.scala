@@ -12,8 +12,8 @@ class PrependElements extends AnyFunSuite {
    * }
    *
    * assert xs.head == n
-   * assert xs.tail ==[0; i.ub-1]
-   * assert xs.length == [0; i]
+   * assert xs.tail ==[0; n.ub-1]
+   * assert xs.length == [0; n] //0 <= n
    *
    */
 

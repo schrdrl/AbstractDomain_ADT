@@ -8,7 +8,7 @@ class IncrementElements extends AnyFunSuite {
    * - add one to the counter n : AInt
    *
    * assert xs == ANil
-   * assert n  >= 0 (is positive)
+   * assert n  >= 0 (length is positive)
    */
 
 }
