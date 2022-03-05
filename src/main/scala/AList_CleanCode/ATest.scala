@@ -33,14 +33,14 @@ case class APred(op: String, name: String) extends ATest {
       case ("isZero", ai : AInt) => if(ai.split(AInt.zero.lb, "neither").nonEmpty) Set(AInt.zero) else Set()
       case ("isOne", ai : AInt) => if(ai.split(AInt.one.lb, "neither").nonEmpty) Set(AInt.one) else Set()
       //case ("isTop", ai : AInt) => if(ai == AInt(None,None)) Set(AInt.top) else Set()
-      case ("isNegative", ai : AInt) => if(ai.===(AInt(None, Some(0)))._1.nonEmpty) ai.===(AInt(None, Some(0)))._1.asInstanceOf[Set[AVal]] else Set()
-      case ("isPositive", ai : AInt) => if(ai.===(AInt(Some(0), None))._1.nonEmpty) ai.===(AInt(Some(0), None))._1.asInstanceOf[Set[AVal]] else Set()
+      case ("isNegative", ai : AInt) => if(ai.===(AInt(None, Some(0)))._1.nonEmpty) ai.===(AInt(None, Some(0)))._1 else Set()
+      case ("isPositive", ai : AInt) => if(ai.===(AInt(Some(0), None))._1.nonEmpty) ai.===(AInt(Some(0), None))._1 else Set()
 
       case ("isZero", al : AList) => if(al.flatten_JustAInt.justValue().asInstanceOf[AInt].split(AInt.zero.lb, "neither").nonEmpty) Set(AInt.zero) else Set()
       case ("isOne", al : AList) => if(al.flatten_JustAInt.justValue().asInstanceOf[AInt].split(AInt.one.lb, "neither").nonEmpty) Set(AInt.one) else Set()
       //case ("isTop", al : AList) => if(al.flatten_JustAInt.justValue().asInstanceOf[AInt] == AInt(None,None)) Set(AInt.top) else Set()
-      case ("isNegative", al : AList) => if(al.flatten_JustAInt.justValue().asInstanceOf[AInt].===(AInt(None, Some(0)))._1.nonEmpty) al.flatten_JustAInt.justValue().asInstanceOf[AInt].===(AInt(None, Some(0)))._1.asInstanceOf[Set[AVal]] else Set()
-      case ("isPositive", al : AList) => if(al.flatten_JustAInt.justValue().asInstanceOf[AInt].===(AInt(Some(0), None))._1.nonEmpty) al.flatten_JustAInt.justValue().asInstanceOf[AInt].===(AInt(Some(0), None))._1.asInstanceOf[Set[AVal]] else Set()
+      case ("isNegative", al : AList) => if(al.flatten_JustAInt.justValue().===(AInt(None, Some(0)))._1.nonEmpty) al.flatten_JustAInt.justValue().===(AInt(None, Some(0)))._1 else Set()
+      case ("isPositive", al : AList) => if(al.flatten_JustAInt.justValue().===(AInt(Some(0), None))._1.nonEmpty) al.flatten_JustAInt.justValue().===(AInt(Some(0), None))._1 else Set()
 
     }
   }
@@ -56,14 +56,14 @@ case class APred(op: String, name: String) extends ATest {
       case ("isZero", ai : AInt) => if(ai.split(AInt.zero.lb, "neither").nonEmpty) ai.split(AInt.zero.lb, "neither").asInstanceOf[Set[AVal]] else Set(ai)
       case ("isOne", ai : AInt) => if(ai.split(AInt.one.lb, "neither").nonEmpty) ai.split(AInt.one.lb, "neither").asInstanceOf[Set[AVal]] else Set(ai)
       //case ("isTop", ai : AInt) => if(ai != AInt(None,None)) Set(AInt.top) else Set()
-      case ("isNegative", ai : AInt) => if(ai.===(AInt(None, Some(0)))._2.nonEmpty) ai.===(AInt(None, Some(0)))._2.asInstanceOf[Set[AVal]] else Set()
-      case ("isPositive", ai : AInt) => if(ai.===(AInt(Some(0), None))._2.nonEmpty) ai.===(AInt(Some(0), None))._2.asInstanceOf[Set[AVal]] else Set()
+      case ("isNegative", ai : AInt) => if(ai.===(AInt(None, Some(0)))._2.nonEmpty) ai.===(AInt(None, Some(0)))._2 else Set()
+      case ("isPositive", ai : AInt) => if(ai.===(AInt(Some(0), None))._2.nonEmpty) ai.===(AInt(Some(0), None))._2 else Set()
 
-      case ("isZero", al : AList) => if(al.flatten_JustAInt.justValue().asInstanceOf[AInt].split(AInt.zero.lb, "neither").nonEmpty) al.flatten_JustAInt.justValue().asInstanceOf[AInt].split(AInt.zero.lb, "neither").asInstanceOf[Set[AVal]] else Set(al.flatten_JustAInt.justValue().asInstanceOf[AInt])
-      case ("isOne", al : AList) => if(al.flatten_JustAInt.justValue().asInstanceOf[AInt].split(AInt.one.lb, "neither").nonEmpty) al.flatten_JustAInt.justValue().asInstanceOf[AInt].split(AInt.one.lb, "neither").asInstanceOf[Set[AVal]] else Set(al.flatten_JustAInt.justValue().asInstanceOf[AInt])
+      case ("isZero", al : AList) => if(al.flatten_JustAInt.justValue().asInstanceOf[AInt].split(AInt.zero.lb, "neither").nonEmpty) al.flatten_JustAInt.justValue().asInstanceOf[AInt].split(AInt.zero.lb, "neither").asInstanceOf[Set[AVal]] else Set(al.flatten_JustAInt.justValue())
+      case ("isOne", al : AList) => if(al.flatten_JustAInt.justValue().asInstanceOf[AInt].split(AInt.one.lb, "neither").nonEmpty) al.flatten_JustAInt.justValue().asInstanceOf[AInt].split(AInt.one.lb, "neither").asInstanceOf[Set[AVal]] else Set(al.flatten_JustAInt.justValue())
       //case ("isTop", al : AList) => if(al.flatten_JustAInt.justValue().asInstanceOf[AInt] != AInt(None,None)) Set(AInt.top) else Set()
-      case ("isNegative", al : AList) => if(al.flatten_JustAInt.justValue().asInstanceOf[AInt].===(AInt(None, Some(0)))._2.nonEmpty) al.flatten_JustAInt.justValue().asInstanceOf[AInt].===(AInt(None, Some(0)))._2.asInstanceOf[Set[AVal]] else Set()
-      case ("isPositive", al : AList) => if(al.flatten_JustAInt.justValue().asInstanceOf[AInt].===(AInt(Some(0), None))._2.nonEmpty) al.flatten_JustAInt.justValue().asInstanceOf[AInt].===(AInt(Some(0), None))._2.asInstanceOf[Set[AVal]] else Set()
+      case ("isNegative", al : AList) => if(al.flatten_JustAInt.justValue().===(AInt(None, Some(0)))._2.nonEmpty) al.flatten_JustAInt.justValue().===(AInt(None, Some(0)))._2 else Set()
+      case ("isPositive", al : AList) => if(al.flatten_JustAInt.justValue().===(AInt(Some(0), None))._2.nonEmpty) al.flatten_JustAInt.justValue().===(AInt(Some(0), None))._2 else Set()
 
     }
   }

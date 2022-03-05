@@ -282,6 +282,9 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     that match {
       case that: AInt =>
         if ((that.lb != None && that.ub != None) && ((AInt.<(lb, that.lb) && AInt.<(ub, that.lb)) || (AInt.<(that.ub, lb) && AInt.<(that.ub, ub)))) (Set(), Set(this)) //that is not in this
+        else if((that.lb != None && that.ub == None) && (AInt.<(lb, that.lb) && AInt.<(ub, that.lb))) (Set(), Set(this))
+        else if((that.ub != None && that.lb == None) && (AInt.<(that.ub, lb) && AInt.<(that.ub, ub))) (Set(), Set(this))
+
         else if (this == that) (Set(this), Set()) //same intervals
         else if(this.lb == None && this.ub == None) {
           if(that.lb == None) (Set(AInt(None, that.ub)), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), None)))
@@ -299,17 +302,17 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
             } else { // if(AInt.<(that.ub, this.ub)){
               (Set(this.intersect(that).justValue()), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
             }
-          } else if (AInt.<(this.lb, that.lb)) {
+          } else if (AInt.<(lb, that.lb)) {
             if(that.ub == None){
-             (Set(AInt(that.lb, this.ub)), Set(AInt(this.lb, AInt.binop(_ - _, that.lb, Some(1)))))
-            }else if(this.lb == None){
+             (Set(AInt(that.lb, ub)), Set(AInt(lb, AInt.binop(_ - _, that.lb, Some(1)))))
+            }else if(lb == None){
               (Set(this), Set())
-            } else if (this.ub == that.ub) {
-              (Set(this.intersect(that).justValue()), Set(AInt(this.lb, AInt.binop(_ - _, that.lb, Some(1)))))
-            } else if (AInt.<(this.ub, that.ub)) {
-              (Set(this.intersect(that).justValue()), Set(AInt(this.lb, AInt.binop(_ - _, that.lb, Some(1)))))
+            } else if (ub == that.ub) {
+              (Set(this.intersect(that).justValue()), Set(AInt(lb, AInt.binop(_ - _, that.lb, Some(1)))))
+            } else if (AInt.<(ub, that.ub)) {
+              (Set(intersect(that).justValue()), Set(AInt(lb, AInt.binop(_ - _, that.lb, Some(1)))))
             } else { //if(AInt.<(that.ub, this.ub))
-              (Set(this.intersect(that).justValue()), Set(AInt(this.lb, AInt.binop(_ - _, that.lb, Some(1))), AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
+              (Set(intersect(that).justValue()), Set(AInt(lb, AInt.binop(_ - _, that.lb, Some(1))), AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
             }
           } else { //if(AInt.<(that.lb, this.lb))
             if(that.ub == None){

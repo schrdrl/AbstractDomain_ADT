@@ -73,13 +73,14 @@ case class AWhile(test: ATest, body: AStmt, max: Int = Int.MaxValue)
     var k = max
 
     while (run) {
+      println(k)
       assert(k >= 0)
       k = k - 1
 
       val pos = test.positive(as)
-     // println("Test-pos: "+pos)
+      println("Test-pos: "+pos)
       val cs = body.execute(pos)
-      //println("cs: "+cs)
+      println("cs: "+cs)
 
       as = AState.widenAll(as ++ cs)
       run = (as != bs)
@@ -87,6 +88,7 @@ case class AWhile(test: ATest, body: AStmt, max: Int = Int.MaxValue)
     }
 
     val neg = test.negative(as)
+    println("Test-neg: "+neg)
     neg
   }
 }

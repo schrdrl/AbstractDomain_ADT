@@ -19,19 +19,49 @@ class unary extends AnyFunSuite {
   }
 
   test ("Unary: AInt") {
-    var i: AInt = AInt.one
-    println (i)
-    i = i.unary_-()
-    println (i)
-    i = i.unary_-()
-    println (i)
+    val test = APred("isPositive", "n")
+    var init = AState(Map("n"-> AInt(-5)))
+    println(init)
+    init = AAssign("n", AOp("-", List(AVar("n")))).execute(Set(init)).head
+    println(init)
+    var as1 = AAssert(test).execute(Set(init))
+    println(as1+"\n")
+
+    init = AState(Map("n"-> AInt(1)))
+    println(init)
+    init = AAssign("n", AOp("-", List(AVar("n")))).execute(Set(init)).head
+    println(init)
+    as1 = AAssert(!test).execute(Set(init))
+    println(as1+"\n")
+
+    init = AState(Map("n"-> AInt(None, Some(-1))))
+    println(init)
+    init = AAssign("n", AOp("-", List(AVar("n")))).execute(Set(init)).head
+    println(init)
+    as1 = AAssert(test).execute(Set(init))
+    println(as1+"\n")
   }
 
-  test ("Unary: AInt - AExpr") {
-    val init = AState(Map("n"-> AInt.one))
+  //TODO
+  test ("Unary: AInt - AStmt") {
+    var init = AState(Map("n"-> AInt(-5)))
+    println(init)
 
-    val op = AOp("-", List(AVar("n"))).evaluate(init)
-    println(op)
+    val as0 = Set(init)
+
+    val test = APred("isPositive", "n")
+
+    val body = ABlock(
+      AAssign("n", AOp("-", List(AVar("n"))))
+    )
+
+    val prog = ABlock(
+      AWhile(!test, body, 5),
+      AAssert(test)
+    )
+
+    val as1 = prog.execute(as0)
+    println(as1)
 
   }
 
@@ -50,39 +80,58 @@ class unary extends AnyFunSuite {
 
   }
 
-  test ("Unary: AList ") {
-    val xs : AList = ACons(AInt.one, ACons(AInt(Some(-5), Some(0)),ACons(AInt(Some(0), Some(115)),ACons(AInt.apply(-22), ANil))))
-    println(xs)
-    val init = AState(Map("n" -> AInt.top, "xs" -> xs, "ys" -> ANil))
-
+  test ("AbsoluteValue: AList ") {
+    val test_elem = APred("isPositive", "n")
     var test = APred("isNil", "xs")
 
+
+    val xs : AList = ACons(AInt.one, ACons(AInt(Some(-5), Some(0)),ACons(AInt(Some(25), Some(115)),ACons(AInt.apply(-22), ANil))))
+    println(xs)
+    val init = AState(Map("n" -> AInt.zero, "xs" -> xs, "ys" -> ANil))
+
+
+    println("first iteration")
     var ys = AAssign("n", AOp("head", List(AVar("xs")))).execute(Set(init))
     ys = AAssign("n", AOp("-", List(AVar("n")))).execute(Set(init))
     ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(Set(init))
     ys = AAssign("xs", AOp("tail", List(AVar("xs")))).execute(Set(init))
     println(ys)
+    var as1 = AAssert(test_elem).execute(ys)
+    println(as1 +"\n")
 
     //second iteration
+    println("second iteration")
     ys = AAssign("n", AOp("head", List(AVar("xs")))).execute(Set(ys.head))
     ys = AAssign("n", AOp("-", List(AVar("n")))).execute(Set(ys.head))
-    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(Set(ys.head))
+    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))).execute(Set(ys.head))
     ys = AAssign("xs", AOp("tail", List(AVar("xs")))).execute(Set(ys.head))
     println(ys)
+    as1 = AAssert(test_elem).execute(ys)
+    println(as1 +"\n")
+
 
     //third iteration
+    println("third iteration")
     ys = AAssign("n", AOp("head", List(AVar("xs")))).execute(Set(ys.head))
     ys = AAssign("n", AOp("-", List(AVar("n")))).execute(Set(ys.head))
     ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(Set(ys.head))
     ys = AAssign("xs", AOp("tail", List(AVar("xs")))).execute(Set(ys.head))
     println(ys)
+    as1 = AAssert(!test_elem).execute(ys)
+    println(as1 +"\n")
+
+
 
     //fourth iteration
+    println("fourth iteration")
     ys = AAssign("n", AOp("head", List(AVar("xs")))).execute(Set(ys.head))
     ys = AAssign("n", AOp("-", List(AVar("n")))).execute(Set(ys.head))
     ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(Set(ys.head))
     ys = AAssign("xs", AOp("tail", List(AVar("xs")))).execute(Set(ys.head))
     println(ys)
+    as1 = AAssert(test_elem).execute(ys)
+    println(as1 +"\n")
+
 
     AAssert(test).execute(Set(ys.head))
 
@@ -90,6 +139,12 @@ class unary extends AnyFunSuite {
     AAssert(!test).execute(Set(ys.head))
   }
 
+
+
+
+
+
+//TODO
   test ("Unary: AList - AExpr") {
     val xs : AList = ACons(AInt.one, ACons(AInt(Some(-5), Some(0)),ACons(AInt(Some(0), Some(115)),ACons(AInt.apply(-22), ANil))))
     println(xs)
