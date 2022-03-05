@@ -1,5 +1,6 @@
 package EvaluatingOperators
+import org.scalatest.funsuite.AnyFunSuite
 
-class union {
+class union extends AnyFunSuite {
 
 }

@@ -30,8 +30,8 @@ case class AOp(op: String, args: List[AExpr]) extends AExpr {
       case("intersect", List(l: AInt,r: AInt)) => l.intersect(r)
 
 
-      case ("!==", List(l:ABool, r:ABool)) => l.!==(r)
-      case ("===", List(l:ABool, r:ABool)) => l.===(r)
+      case ("!=", List(l:ABool, r:ABool)) => l.!=(r)
+      case ("==", List(l:ABool, r:ABool)) => l.==(r)
       case ("&&", List(l:ABool, r:ABool)) => l.&&(r)
       case ("||", List(l:ABool, r:ABool)) => l.||(r)
       case ("!", List(ab:ABool)) => ab.!()

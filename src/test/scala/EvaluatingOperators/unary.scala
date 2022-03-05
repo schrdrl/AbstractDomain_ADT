@@ -4,7 +4,6 @@ import AList_CleanCode.{AAssert, AAssign, ABlock, ACons, AConst, AInt, AList, AM
 import org.scalatest.funsuite.AnyFunSuite
 
 
-
 class unary extends AnyFunSuite {
 
   test ("Unary: Int") {

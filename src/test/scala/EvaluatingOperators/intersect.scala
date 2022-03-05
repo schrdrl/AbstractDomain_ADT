@@ -1,5 +1,6 @@
 package EvaluatingOperators
+import org.scalatest.funsuite.AnyFunSuite
 
-class intersect {
+class intersect extends AnyFunSuite {
 
 }

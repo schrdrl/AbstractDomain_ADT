@@ -7,15 +7,14 @@ class ConcatLists extends AnyFunSuite {
    * Two values of AList, both containing positive elements.
    * After concatenating these two values are all elements of the output value still positive?
    */
-
+//TODO -> adjust form of test
   test("concatenating two lists"){
     val axs = AMany(AInt(Some(2), Some(10)))
     val ays = AMany(AInt(Some(0), None))
 
-    val init1 = AState(Map("xs" -> axs)) //TODO "ys" -> ays, one init
-    val init2 = AState(Map("xs" -> ays))
+    val init = AState(Map("xs" -> axs, "ys" -> ays))
 
-    val as0 = Set(init1,init2)
+    val as0 = Set(init)
     val as1 = List(AConst(axs), AConst(ays))
 
     val test = APred("isPositive", "xs")
@@ -24,7 +23,7 @@ class ConcatLists extends AnyFunSuite {
     println("(is_pos,not_pos): "+arePos)
 
     //concatenating the lists
-    val op = AOp("concat", as1).evaluate(init1) //: AList
+    val op = AOp("concat", as1).evaluate(init) //: AList
     println("After concat: "+op)
     val init3 = AState(Map("xs" -> op))
     val as2 = Set(init3)

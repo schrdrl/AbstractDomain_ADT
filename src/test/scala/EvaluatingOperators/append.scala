@@ -1,5 +1,6 @@
 package EvaluatingOperators
+import org.scalatest.funsuite.AnyFunSuite
 
-class append {
+class append extends AnyFunSuite {
 
 }
