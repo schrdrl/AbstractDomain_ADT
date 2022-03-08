@@ -24,6 +24,8 @@ sealed trait ABool extends AVal {
       case (AUnknown, false) | (AUnknown, false) => true
     }
   }
+
+  //TODO necessary? -> is actually in ATest
   def ===(that: AVal): (Set[AVal], Set[AVal]) = {
     (this, that) match {
       case (AFalse, AFalse) => (Set(AFalse), Set())
@@ -42,6 +44,7 @@ sealed trait ABool extends AVal {
     }
   }
 
+  //TODO recheck
   def eq(that: ABool): ABool = {
     (this, that) match {
       case (AFalse, AFalse) | (ATrue, ATrue) => ATrue
@@ -50,6 +53,7 @@ sealed trait ABool extends AVal {
     }
   }
 
+  //TODO recheck
   def noneq(that: ABool): ABool = {
     (this, that) match {
       case (AFalse, AFalse) | (ATrue, ATrue) => AFalse
@@ -58,6 +62,7 @@ sealed trait ABool extends AVal {
     }
   }
 
+  //TODO recheck
   def &&(that: AVal): ABool = {
     (this, that) match {
       case (ATrue, ATrue) => ATrue
@@ -74,7 +79,7 @@ sealed trait ABool extends AVal {
     }
   }
 
-  def !(): ABool = {
+  def ! : ABool = {
     this match {
       case AFalse => ATrue
       case ATrue => AFalse
@@ -107,7 +112,7 @@ object AInt {
 
   def <(a: Option[Int], b: Option[Int]): Boolean = {
     (a, b) match {
-      case (_, None) => true //updated
+      case (_, None) => true
       case (None, _ ) => true
       case (Some(a), Some(b)) => a < b
     }
@@ -142,23 +147,32 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
-  def unary_-(): AInt = {
-    (lb,ub) match {
-      case (None, None) => AInt(Some(0), None)
-      case (_, None) => AInt(None, Some(-lb.get))
-      case (None,_) => AInt(Some(-ub.get),None)
-      case _ => AInt(Some(-ub.get), Some(-lb.get))
+  override def toString: String = {
+    (lb, ub) match {
+      case (None, None) => "(-∞,∞)"
+      case (Some(lb), None) => "[" + lb + ",∞)"
+      case (None, Some(ub)) => "(-∞," + ub + "]"
+      case (Some(lb), Some(ub)) => "[" + lb + "," + ub + "]"
     }
   }
 
-    def abs() : AInt = {
+  def unary_-(): AInt = {
+    (lb,ub) match {
+      case (None, None) => this
+      case (lb, None) => AInt(None, Some(lb.get.unary_-))
+      case (None,ub) => AInt(Some(ub.get.unary_-),None)
+      case _ => AInt(Some(ub.get.unary_-), Some(lb.get.unary_-))
+    }
+  }
+
+    def abs : AInt = {
       (lb, ub) match {
-        case (None, None) => AInt(None, None)
-        case (_, None) => if(AInt.<(this.lb, Some(0))) AInt(Some(-lb.get), None) else this
-        case (None, _) => if(AInt.<(this.ub, Some(0))) AInt(Some(-ub.get), None) else AInt(ub, None)
+        case (None, None) => AInt(Some(0), None)
+        case (_, None) => AInt(Some(lb.get.abs), None)
+        case (None, _) => AInt(Some(ub.get.abs), None)
         case _ =>
-          val newlb = if(AInt.<(this.lb, Some(0))) Some(-lb.get)else lb
-          val newub = if(AInt.<(this.ub, Some(0))) Some(-ub.get)else ub
+          val newlb = Some(lb.get.abs)
+          val newub = Some(ub.get.abs)
 
           val newInterval = if (AInt.<=(newlb, newub)) AInt(newlb, newub) else  AInt(newub, newlb)
           newInterval
@@ -203,33 +217,6 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
-
-  override def toString: String = {
-    (lb, ub) match {
-      case (None, None) => "(-∞,∞)"
-      case (Some(lb), None) => "[" + lb + ",∞)"
-      case (None, Some(ub)) => "(-∞," + ub + "]"
-      case (Some(lb), Some(ub)) => "[" + lb + "," + ub + "]"
-    }
-  }
-
-  def union(that: AVal): AInt = {
-    that match {
-      case that: AInt =>
-        val newlb = if (AInt.<(this.lb, that.lb)) this.lb else if (AInt.<(that.lb, this.lb)) that.lb else None
-        val newub = if (AInt.<(this.ub, that.ub)) that.ub else if (AInt.<(that.ub, this.ub)) this.ub else None
-        AInt(newlb, newub)
-    }
-  }
-
-  def contains(that: AVal): ABool = {
-    that match {
-      case that: AInt =>
-        if (AInt.<=(this.lb, that.lb) && AInt.<=(that.ub, this.ub)) ATrue
-        else AFalse
-    }
-  }
-
   def <(that: AVal) : Boolean = {
     that match {
       case that: AInt =>
@@ -244,6 +231,18 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
+
+  //TODO recheck
+  def union(that: AVal): AInt = {
+    that match {
+      case that: AInt =>
+        val newlb = if (AInt.<=(this.lb, that.lb)) this.lb else if (AInt.<(that.lb, this.lb)) that.lb else None
+        val newub = if (AInt.<=(this.ub, that.ub)) that.ub else if (AInt.<(that.ub, this.ub)) this.ub else None
+        AInt(newlb, newub)
+    }
+  }
+
+  //TODO recheck
   def intersect(that: AVal): AOption = {
     that match {
       case that: AInt =>
@@ -263,8 +262,16 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
+  //TODO: necessary?
+  def contains(that: AVal): ABool = {
+    that match {
+      case that: AInt =>
+        if (AInt.<=(this.lb, that.lb) && AInt.<=(that.ub, this.ub)) ATrue
+        else AFalse
+    }
+  }
 
-
+  //TODO necessary?
   //checks which parts of two intervals are the same (same part, part that's different from that)
   def ===(that: AVal): (Set[AVal], Set[AVal]) = {
     that match {
@@ -284,7 +291,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
         }
         else { //this and that have equal parts
           val intersect = this.intersect(that)
-          val test = APred("isASome", "n").positive(intersect).head
+          val test = APred("isSome", "n").positive(intersect).head
 
           if (this.lb == that.lb) {
 
@@ -324,7 +331,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
-
+//TODO necessary?
   def split(that: Option[Int], s: String): Set[AInt] = {
     that match {
       case that: Option[Int] =>
@@ -450,7 +457,8 @@ case class AMaybe(get: AVal) extends AOption
 sealed trait AList extends AVal {
 
   def length: AInt
-
+  def head: AOption
+  def tail: AOption
   def flatten: List[AVal]
 
   //TODO recheck: necessary
@@ -498,7 +506,7 @@ sealed trait AList extends AVal {
     }
   }
 
-
+  //TODO recheck
   def union(that: AVal): AList = {
     (this, that) match {
       case (ANil, ANil) => ANil
@@ -517,6 +525,7 @@ sealed trait AList extends AVal {
     }
   }
 
+  //TODO recheck
   def intersect(that: AVal): AList = {
     (this, that) match {
       case (ANil, ANil) => ANil
@@ -535,7 +544,7 @@ sealed trait AList extends AVal {
     }
   }
 
-
+//TODO recheck: necessary?
   //is that a subset of this
   def subset(that: AVal): ABool = {
     (this, that) match {
@@ -555,7 +564,7 @@ sealed trait AList extends AVal {
     }
   }
 
-
+//TODO recheck
   //reverses an AList value
   def reverse(): AList = {
     this match {
@@ -589,9 +598,11 @@ sealed trait AList extends AVal {
   }
 
 
+  //TODO recheck
   //prepends an element on the front a an AList value
   def prepend(elem: AVal): AList = ACons(elem, this)
 
+  //TODO recheck
   //appends an element the the end a an AList value
   def append(elem: AVal): AList =
     this match {
@@ -600,6 +611,7 @@ sealed trait AList extends AVal {
     case AMany(e) => AMany(e.widen(elem))
   }
 
+  //TODO recheck
   //Method concatenates two values of type AList
   def concat(that: AList): AList =
     (this, that) match {
@@ -615,7 +627,7 @@ sealed trait AList extends AVal {
   }
 
 
-  //TODO === (if it is even necessary)
+  //TODO recheck (necessary?)
   //checks which parts of this are equal to that: (same parts, parts that differ)
   def ===(that: AVal): (Set[AVal], Set[AVal]) = {
 
@@ -650,16 +662,22 @@ sealed trait AList extends AVal {
 
 
 case object ANil extends AList {
+  def head: AOption = ANone
+  def tail: AOption = ANone
   def flatten: List[AVal] = Nil
   def length: AInt = AInt.zero
 }
 
-case class ACons(head: AVal, tail: AList) extends AList {
-  def flatten: List[AVal] = head :: tail.flatten
+case class ACons(hd: AVal, tl: AList) extends AList {
+  def head: AOption = ASome(hd)
+  def tail: AOption = ASome(tl)
+  def flatten: List[AVal] = hd :: tl.flatten
   def length: AInt = AInt(Some(1), None)
 }
 
 case class AMany(elems: AVal) extends AList {
+  def head: AOption = AMaybe(elems)
+  def tail: AOption = AMaybe(elems)
   def flatten: List[AVal] = List(elems)
   def length: AInt = AInt(Some(0), None)
 

@@ -6,7 +6,6 @@ class length extends AnyFunSuite {
   test("length is positive (concrete)"){
     var n = 0
     var xs : List[Int] = List(9,7,4,5)  //only positive numbers
-
     while (!xs.isEmpty){
       xs = xs.tail
       n = n + 1

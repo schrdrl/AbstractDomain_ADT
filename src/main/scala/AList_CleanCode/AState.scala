@@ -15,8 +15,6 @@ case class AState(vars: Map[String, AVal]) {
 
     AState(vars.toMap)
   }
-
-
 }
 
 object AState {

@@ -6,6 +6,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class unary extends AnyFunSuite {
 
+  //integer value
   test ("Unary: Int") {
     var i: Int = - 1
     println (i)
@@ -18,51 +19,33 @@ class unary extends AnyFunSuite {
     println(j)
   }
 
-  test ("Unary: AInt") {
-    val test = APred("isPositive", "n")
-    var init = AState(Map("n"-> AInt(-5)))
-    println(init)
-    init = AAssign("n", AOp("-", List(AVar("n")))).execute(Set(init)).head
-    println(init)
-    var as1 = AAssert(test).execute(Set(init))
-    println(as1+"\n")
+  test("Unary (built-in method on abstract Domain AInt)") {
+    val a = AInt(-5)
+    val b = a.unary_-()
 
-    init = AState(Map("n"-> AInt(1)))
-    println(init)
-    init = AAssign("n", AOp("-", List(AVar("n")))).execute(Set(init)).head
-    println(init)
-    as1 = AAssert(!test).execute(Set(init))
-    println(as1+"\n")
+    assert(AInt.<=(Some(0), b.lb) && AInt.<=(Some(0), b.ub))
 
-    init = AState(Map("n"-> AInt(None, Some(-1))))
-    println(init)
-    init = AAssign("n", AOp("-", List(AVar("n")))).execute(Set(init)).head
-    println(init)
-    as1 = AAssert(test).execute(Set(init))
-    println(as1+"\n")
+    val c = AInt(5)
+    val d = c.unary_-()
+
+    assert(AInt.<=(d.lb, Some(0)) && AInt.<=(d.ub, Some(0)))
   }
 
-  //TODO
-  test ("Unary: AInt - AStmt") {
-    var init = AState(Map("n"-> AInt(-5)))
-    println(init)
 
-    val as0 = Set(init)
+  test("Unary (Tests integration of AInt.unary into AOp)"){
+    var test = APred("isPositive", "n")
 
-    val test = APred("isPositive", "n")
+    var prog = ABlock(AAssign("n", AOp("-", List(AVar("n")))), AAssert(test))
+    val as0 = Set(AState(Map("n"-> AInt(-5))), AState(Map("n"-> AInt(None,Some(-1))))) //negative values
+    val as1 = Set(AState(Map("n"-> AInt(5))), AState(Map("n"-> AInt(Some(1), None)))) //positive values
 
-    val body = ABlock(
-      AAssign("n", AOp("-", List(AVar("n"))))
-    )
+    val as2 = prog.execute(as0)
+    println(as2)
 
-    val prog = ABlock(
-      AWhile(!test, body, 5),
-      AAssert(test)
-    )
-
-    val as1 = prog.execute(as0)
-    println(as1)
-
+    test = APred("isNegative", "n")
+    prog = ABlock(AAssign("n", AOp("-", List(AVar("n")))), AAssert(test))
+    val as3 = prog.execute(as1)
+    println(as3)
   }
 
 
@@ -74,72 +57,14 @@ class unary extends AnyFunSuite {
       ys = -xs.head :: ys
       xs = xs.tail
     }
-    assert(xs.isEmpty)
-    ys = ys.reverse
-    println(ys)
-
+    //ys = ys.reverse
+    while (!ys.isEmpty) {
+      xs = ys.head :: xs
+      ys = ys.tail
+    }
+    assert(ys.isEmpty)
+    println(xs)
   }
-
-  test ("Unary: AList ") {
-    val test_elem = APred("isPositive", "n")
-    val test_AInt = APred("isASome", "n")
-    val test_AList = APred("isASome", "xs")
-    var test = APred("isNil", "xs")
-
-    val xs : AList = ACons(AInt.one, ACons(AInt(Some(-5), Some(0)),ACons(AInt(Some(25), Some(115)),ACons(AInt.apply(-22), ANil))))
-    println(xs +"\n")
-    val init = AState(Map("n" -> AInt.zero, "xs" -> xs, "ys" -> ANil))
-
-    println("first iteration")
-    var ys = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(init)).head)).execute(Set(init))
-    ys = AAssign("n", AOp("-", List(AVar("n")))).execute(ys)
-    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(ys)
-    ys = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
-
-    println(ys)
-    var as1 = AAssert(!test_elem).execute(ys)
-    println(as1 +"\n")
-
-    //second iteration
-    println("second iteration")
-    ys = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
-    ys = AAssign("n", AOp("-", List(AVar("n")))).execute(ys)
-    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(ys)
-    ys = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
-    println(ys)
-    as1 = AAssert(test_elem).execute(ys)
-    println(as1 +"\n")
-
-
-    //third iteration
-    println("third iteration")
-    ys = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
-    ys = AAssign("n", AOp("-", List(AVar("n")))).execute(ys)
-    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(ys)
-    ys = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
-    println(ys)
-    as1 = AAssert(!test_elem).execute(ys)
-    println(as1 +"\n")
-
-
-    //fourth iteration
-    println("fourth iteration")
-    ys = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
-    ys = AAssign("n", AOp("-", List(AVar("n")))).execute(ys)
-    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(ys)
-    ys = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
-    println(ys)
-
-    as1 = AAssert(test_elem).execute(ys)
-    println(as1 +"\n")
-
-    AAssert(test).execute(Set(ys.head))
-
-    test = APred("isNil", "ys")
-    AAssert(!test).execute(Set(ys.head))
-  }
-
-
 
 
 

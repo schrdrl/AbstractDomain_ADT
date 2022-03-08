@@ -27,16 +27,20 @@ case class APred(op: String, name: String) extends ATest {
       case ("isNil", ANil)         => Set(ANil)
       case ("isNil", ACons(_, _))  => Set()
       case ("isNil", AMany(_)) => Set(ANil)
-      case ("isATrue", ATrue) => Set(ATrue)
-      case ("isATrue", AFalse) => Set()
-      case ("isATrue", AUnknown) => Set(ATrue)
+
+      case ("isTrue", ATrue) => Set(ATrue)
+      case ("isTrue", AFalse) => Set()
+      case ("isTrue", AUnknown) => Set(ATrue)
+
+      case ("isSome", ANone) => Set()
+      case ("isSome", ASome(e)) => Set(ASome(e))
+      case ("isSome", AMaybe(e)) => Set(ASome(e))
+
       case ("isZero", ai : AInt) => if(ai.split(AInt.zero.lb, "neither").nonEmpty) Set(AInt.zero) else Set()
       case ("isOne", ai : AInt) => if(ai.split(AInt.one.lb, "neither").nonEmpty) Set(AInt.one) else Set()
       case ("isNegative", ai : AInt) => if(ai.===(AInt(None, Some(0)))._1.nonEmpty) ai.===(AInt(None, Some(0)))._1 else Set()
       case ("isPositive", ai : AInt) => if(ai.===(AInt(Some(0), None))._1.nonEmpty) ai.===(AInt(Some(0), None))._1 else Set()
-      case ("isASome", ANone) => Set()
-      case ("isASome", ASome(e)) => Set(e)
-      case ("isASome", AMaybe(e)) => Set(e)
+
 
     }
   }
@@ -46,16 +50,19 @@ case class APred(op: String, name: String) extends ATest {
       case ("isNil", ANil)                 => Set()
       case ("isNil", ACons(_, _))          => Set(value)
       case ("isNil", value @ AMany(elems)) => Set(ACons(elems, value))
-      case ("isATrue", ATrue) => Set()
-      case ("isATrue", AFalse) => Set(AFalse)
-      case ("isATrue", AUnknown) => Set(AFalse)
+
+      case ("isTrue", ATrue) => Set()
+      case ("isTrue", AFalse) => Set(AFalse)
+      case ("isTrue", AUnknown) => Set(AFalse)
+
+      case ("isSome", ANone) => Set(ANone)
+      case ("isSome", ASome(e)) => Set()
+      case ("isSome", AMaybe(e)) => Set(ANone)
+
       case ("isZero", ai : AInt) => if(ai.split(AInt.zero.lb, "neither").nonEmpty) ai.split(AInt.zero.lb, "neither").asInstanceOf[Set[AVal]] else Set(ai)
       case ("isOne", ai : AInt) => if(ai.split(AInt.one.lb, "neither").nonEmpty) ai.split(AInt.one.lb, "neither").asInstanceOf[Set[AVal]] else Set(ai)
       case ("isNegative", ai : AInt) => if(ai.===(AInt(None, Some(0)))._2.nonEmpty) ai.===(AInt(None, Some(0)))._2 else Set()
       case ("isPositive", ai : AInt) => if(ai.===(AInt(Some(0), None))._2.nonEmpty) ai.===(AInt(Some(0), None))._2 else Set()
-      case ("isASome", ANone) => Set(ANone)
-      case ("isASome", ASome(e)) => Set()
-      case ("isASome", AMaybe(e)) => Set(ANone)
     }
   }
 
