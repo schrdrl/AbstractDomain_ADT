@@ -7,14 +7,16 @@ class ConcatLists extends AnyFunSuite {
    * Two values of AList, both containing positive elements.
    * After concatenating these two values are all elements of the output value still positive?
    */
-//TODO -> adjust form of test
+
+  //TODO
   test("concatenating two lists"){
     val axs = AMany(AInt(Some(2), Some(10)))
     val ays = AMany(AInt(Some(0), None))
 
-    val init = AState(Map("xs" -> axs, "ys" -> ays))
+    val init = AState(Map("xs" -> AMany(AInt(Some(2), Some(10))), "ys" -> AMany(AInt(Some(0), None))))
 
     val as0 = Set(init)
+
     val as1 = List(AConst(axs), AConst(ays))
 
     val test = APred("isPositive", "xs")

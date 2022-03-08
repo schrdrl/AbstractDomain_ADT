@@ -22,30 +22,36 @@ class head extends AnyFunSuite {
     val xs = ACons(AInt(Some(5), Some(10)), ACons(AInt(Some(-3), Some(8)),ACons(AInt(Some(4), Some(4)), ANil)))
     val init = AState(Map("n" -> AInt.zero, "xs" -> xs))
 
+    val test = APred("isNil", "xs")
+    val test_AInt = APred("isASome", "n")
+    val test_AList = APred("isASome", "xs")
+
     //first iteration
-    var head = AAssign("n", AOp("head", List(AVar("xs")))).execute(Set(init))
-    var tail = AAssign("xs", AOp("tail", List(AVar("xs")))).execute(Set(init))
+    var head = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(init)).head)).execute(Set(init))
+    var tail = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(head.head)).head)).execute(head)
     println(head)
     println(tail)
     println("")
 
     //second iteration
-    head = AAssign("n", AOp("head", List(AVar("xs")))).execute(tail)
-    tail = AAssign("xs", AOp("tail", List(AVar("xs")))).execute(tail)
+    head = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(tail.head)).head)).execute(tail)
+    tail = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(head.head)).head)).execute(head)
     println(head)
     println(tail)
     println("")
 
     //second iteration
-    head = AAssign("n", AOp("head", List(AVar("xs")))).execute(tail)
-    tail = AAssign("xs", AOp("tail", List(AVar("xs")))).execute(tail)
+    head = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(tail.head)).head)).execute(tail)
+    tail = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(head.head)).head)).execute(head)
     println(head)
     println(tail)
     println("")
+
+    AAssert(test).execute(Set(tail.head))
   }
 
 
-
+//TODO
   test("head (abstract-ACons)"){
     val init = AState(Map("n" -> AInt.zero, "xs" -> ACons(AInt(Some(0), Some(9)), ACons(AInt(Some(-3), Some(8)), ACons(AInt(Some(4), Some(4)), ANil)))))
     val as0 = Set(init)
@@ -67,7 +73,7 @@ class head extends AnyFunSuite {
   }
 
 
-
+//TODO
   test("head (abstract-AMany)"){
     val init = AState(Map("n" -> AInt.zero, "xs" -> AMany(AInt(Some(0), None))))
     val as0 = Set(init)

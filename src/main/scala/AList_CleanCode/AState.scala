@@ -17,9 +17,6 @@ case class AState(vars: Map[String, AVal]) {
   }
 
 
-  //TODO equals(that: AState) ->if necessary
-
-
 }
 
 object AState {

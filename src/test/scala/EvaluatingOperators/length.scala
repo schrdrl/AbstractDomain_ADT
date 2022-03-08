@@ -15,7 +15,7 @@ class length extends AnyFunSuite {
     assert (n >= 0)
   }
 
-
+//TODO
   test("length is positive (abstract)"){
     val init = AState(Map("n" -> AInt.zero, "xs" -> AMany(AInt(Some(0), None))))
     val as0 = Set(init)
@@ -34,7 +34,6 @@ class length extends AnyFunSuite {
     )
 
     val as1 = prog.execute(as0)
-    println(as1.head.lookup("n"))
 
     println(as1)
   }
@@ -48,8 +47,6 @@ class length extends AnyFunSuite {
     val as1 = op.evaluate(init)
 
     println(as1)
-
-
   }
 
 }

@@ -1,5 +1,5 @@
 package EvaluatingOperators
-import AList_CleanCode.{AAssert, AAssign, ABlock, ACons, AInt, AList, ANil, AOp, APred, AState, AVar, AWhile}
+import AList_CleanCode.{AAssert, AAssign, ABlock, ACons, AConst, AInt, AList, ANil, AOp, APred, AState, AVar, AWhile}
 import org.scalatest.funsuite.AnyFunSuite
 
 class AbsoluteValue extends AnyFunSuite {
@@ -43,7 +43,7 @@ class AbsoluteValue extends AnyFunSuite {
 
   }
 
-  //TODO
+
   test("Absolute value (AStmt)"){
     val init = AState(Map("n"-> AInt(-5)))
     println(init)
@@ -84,31 +84,33 @@ class AbsoluteValue extends AnyFunSuite {
   }
 
 
+
   test ("AbsoluteValue: AList ") {
     val test_elem = APred("isPositive", "n")
+    val test_AInt = APred("isASome", "n")
+    val test_AList = APred("isASome", "xs")
     var test = APred("isNil", "xs")
 
-
     val xs : AList = ACons(AInt.one, ACons(AInt(Some(-5), Some(0)),ACons(AInt(Some(25), Some(115)),ACons(AInt.apply(-22), ANil))))
-    println(xs)
+    println(xs +"\n")
     val init = AState(Map("n" -> AInt.zero, "xs" -> xs, "ys" -> ANil))
 
-
     println("first iteration")
-    var ys = AAssign("n", AOp("head", List(AVar("xs")))).execute(Set(init))
-    ys = AAssign("n", AOp("abs", List(AVar("n")))).execute(Set(init))
-    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(Set(init))
-    ys = AAssign("xs", AOp("tail", List(AVar("xs")))).execute(Set(init))
+    var ys = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(init)).head)).execute(Set(init))
+    ys = AAssign("n", AOp("abs", List(AVar("n")))).execute(ys)
+    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(ys)
+    ys = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
+
     println(ys)
     var as1 = AAssert(test_elem).execute(ys)
     println(as1 +"\n")
 
     //second iteration
     println("second iteration")
-    ys = AAssign("n", AOp("head", List(AVar("xs")))).execute(Set(ys.head))
-    ys = AAssign("n", AOp("abs", List(AVar("n")))).execute(Set(ys.head))
-    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(Set(ys.head))
-    ys = AAssign("xs", AOp("tail", List(AVar("xs")))).execute(Set(ys.head))
+    ys = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
+    ys = AAssign("n", AOp("abs", List(AVar("n")))).execute(ys)
+    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(ys)
+    ys = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
     println(ys)
     as1 = AAssert(test_elem).execute(ys)
     println(as1 +"\n")
@@ -116,10 +118,10 @@ class AbsoluteValue extends AnyFunSuite {
 
     //third iteration
     println("third iteration")
-    ys = AAssign("n", AOp("head", List(AVar("xs")))).execute(Set(ys.head))
-    ys = AAssign("n", AOp("abs", List(AVar("n")))).execute(Set(ys.head))
-    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(Set(ys.head))
-    ys = AAssign("xs", AOp("tail", List(AVar("xs")))).execute(Set(ys.head))
+    ys = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
+    ys = AAssign("n", AOp("abs", List(AVar("n")))).execute(ys)
+    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(ys)
+    ys = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
     println(ys)
     as1 = AAssert(test_elem).execute(ys)
     println(as1 +"\n")
@@ -127,20 +129,22 @@ class AbsoluteValue extends AnyFunSuite {
 
     //fourth iteration
     println("fourth iteration")
-    ys = AAssign("n", AOp("head", List(AVar("xs")))).execute(Set(ys.head))
-    ys = AAssign("n", AOp("abs", List(AVar("n")))).execute(Set(ys.head))
-    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(Set(ys.head))
-    ys = AAssign("xs", AOp("tail", List(AVar("xs")))).execute(Set(ys.head))
+    ys = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
+    ys = AAssign("n", AOp("abs", List(AVar("n")))).execute(ys)
+    ys = AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))) .execute(ys)
+    ys = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(ys.head)).head)).execute(ys)
     println(ys)
+
     as1 = AAssert(test_elem).execute(ys)
     println(as1 +"\n")
-
 
     AAssert(test).execute(Set(ys.head))
 
     test = APred("isNil", "ys")
     AAssert(!test).execute(Set(ys.head))
   }
+
+
 
   //TODO
   test ("AbsoluteValue: AList - AExpr") {
@@ -150,12 +154,14 @@ class AbsoluteValue extends AnyFunSuite {
     val as0 = Set(init)
 
     val test = APred("isNil", "xs")
+    val test_AInt = APred("isASome", "n")
+    val test_AList = APred("isASome", "xs")
 
     val body = ABlock(
-      AAssign("n", AOp("head", List(AVar("xs")))),  //head
+      AAssign("n",AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(init)).head)),  //head
       AAssign("n", AOp("abs", List(AVar("n")))),      //abs
       AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))), //append
-      AAssign("xs", AOp("tail", List(AVar("xs")))) //tail
+      AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(init)).head)) //tail
     )
 
     val prog = ABlock(

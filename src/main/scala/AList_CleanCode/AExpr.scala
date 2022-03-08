@@ -30,19 +30,19 @@ case class AOp(op: String, args: List[AExpr]) extends AExpr {
       case("intersect", List(l: AInt,r: AInt)) => l.intersect(r)
 
 
-      case ("!=", List(l:ABool, r:ABool)) => l.!=(r)
-      case ("==", List(l:ABool, r:ABool)) => l.==(r)
+      case ("!=", List(l:ABool, r:ABool)) => l.noneq(r)
+      case ("==", List(l:ABool, r:ABool)) => l.eq(r)
       case ("&&", List(l:ABool, r:ABool)) => l.&&(r)
       case ("||", List(l:ABool, r:ABool)) => l.||(r)
       case ("!", List(ab:ABool)) => ab.!()
 
 
       case ("head", List(ANil)) => ANone
-      case ("head", List(ACons(head, _))) => ASome(head).justValue()
-      case ("head", List(AMany(elems))) =>  AMaybe(elems).justValue() //TODO AMaybe
+      case ("head", List(ACons(head, _))) => ASome(head)
+      case ("head", List(AMany(elems))) =>  AMaybe(elems)
       case ("tail", List(ANil)) => ANone
-      case ("tail", List(ACons(_, tail))) => ASome(tail).justValue()
-      case ("tail", List(AMany(elems))) => AMaybe(AMany(elems)).justValue() //TODO AMaybe
+      case ("tail", List(ACons(_, tail))) => ASome(tail)
+      case ("tail", List(AMany(elems))) => AMaybe(AMany(elems))
       case ("length", List(al: AList)) => al.length
       case("union", List(l: AList,r: AList)) => l.union(r)
       case("intersect", List(l: AList,r: AList)) => l.intersect(r)

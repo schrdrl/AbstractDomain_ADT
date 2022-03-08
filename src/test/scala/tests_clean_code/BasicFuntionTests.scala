@@ -71,10 +71,10 @@ class BasicFuntionTests extends AnyFunSuite {
     val f = ACons(a, ACons(b, AMany(c)))
     val g = ACons(c, ACons(b, ANil))
 
-    println(d.reverse())  //correct
-    println(e.reverse())  //correct
-    println(f.reverse()) //correct
-    println(g.reverse()) //correct
+    println(d.reverse())
+    println(e.reverse())
+    println(f.reverse())
+    println(g.reverse())
 
   }
 

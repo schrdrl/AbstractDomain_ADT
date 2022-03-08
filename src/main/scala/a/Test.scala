@@ -32,7 +32,7 @@ object Test {
 
     val as1 = prog.execute(as0)
     for(s <- as1) {
-      s.lookup("n") //.hasConcreteElement
+      s.lookup("n")//.hasConcreteElement
     }
 
     println(as1)
