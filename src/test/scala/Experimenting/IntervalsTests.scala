@@ -239,6 +239,17 @@ class IntervalsTests extends AnyFunSuite {
   }
 
 
+  test("%"){
+    val a = Intervals.Unbounded
+    val c = a.Interval(IntegerVal(3),IntegerVal(8))
+    val d = a.Interval(IntegerVal(3),IntegerVal(3))
+    val e = a.Interval(IntegerVal(8),IntegerVal(8))
+
+    println(a.%(c,d))
+    println(a.%(c,e))
+    println(a.%(d,d))
+  }
+
 /*
 //TODO AIntEqual needs improvement
   test("AIntEqual"){

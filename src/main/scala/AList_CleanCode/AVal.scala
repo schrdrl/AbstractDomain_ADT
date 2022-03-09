@@ -156,7 +156,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
-  def unary_-(): AInt = {
+  def unary_- : AInt = {
     (lb,ub) match {
       case (None, None) => this
       case (lb, None) => AInt(None, Some(lb.get.unary_-))
@@ -292,15 +292,15 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
         else { //this and that have equal parts
           val intersect = this.intersect(that)
           val test = APred("isSome", "n").positive(intersect).head
+          val value = AOp("just", List(AVar("n"))).evaluate(AState(Map("n"-> test)))
 
           if (this.lb == that.lb) {
-
             if(that.ub == None && lb == None){
               (Set(this), Set())
             } else if (AInt.<(this.ub, that.ub)) {
-              (Set(test), Set())
+              (Set(value), Set())
             } else { // if(AInt.<(that.ub, this.ub)){
-              (Set(test), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
+              (Set(value), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
             }
 
           }  else  if (AInt.<(that.lb, lb)){
@@ -309,9 +309,9 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
             } else if(that.ub == None || lb == None){
               (Set(this), Set())
             } else if(AInt.<=(ub, that.ub)) {
-              (Set(test), Set())
+              (Set(value), Set())
             }  else { //if(AInt.<(that.ub, this.ub))
-              (Set(test), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), ub)))
+              (Set(value), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), ub)))
             }
           }else {
             if(that.lb == None && that.ub == None){
@@ -321,9 +321,9 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
             }else if(lb == None){
               (Set(this), Set())
             } else if (AInt.<=(ub, that.ub)) {
-              (Set(test), Set(AInt(lb, AInt.binop(_ - _, that.lb, Some(1)))))
+              (Set(value), Set(AInt(lb, AInt.binop(_ - _, that.lb, Some(1)))))
             } else { //if(AInt.<(that.ub, this.ub))
-              (Set(test), Set(AInt(lb, AInt.binop(_ - _, that.lb, Some(1))), AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
+              (Set(value), Set(AInt(lb, AInt.binop(_ - _, that.lb, Some(1))), AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
             }
 
           }
@@ -668,10 +668,10 @@ case object ANil extends AList {
   def length: AInt = AInt.zero
 }
 
-case class ACons(hd: AVal, tl: AList) extends AList {
-  def head: AOption = ASome(hd)
-  def tail: AOption = ASome(tl)
-  def flatten: List[AVal] = hd :: tl.flatten
+case class ACons(h: AVal, t: AList) extends AList {
+  def head: AOption = ASome(h)
+  def tail: AOption = ASome(t)
+  def flatten: List[AVal] = h :: t.flatten
   def length: AInt = AInt(Some(1), None)
 }
 

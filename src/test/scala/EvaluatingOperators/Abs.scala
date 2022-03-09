@@ -54,7 +54,7 @@ class Abs extends AnyFunSuite {
     println(as1)
   }
 
-
+//TODO test with prepen
 //Lists containing integer values
   test ("Abs(concrete:List[Int])") {
     var xs: List[Int] = List(1, -3, 10, -22)
@@ -77,8 +77,9 @@ class Abs extends AnyFunSuite {
   }
 
 
+  //TODO: test with prepend
 
-  test ("Abs: (Tests integration of AInt.abs into AWhile: AList") {
+  test ("Abs: (Test: integration of AInt.abs into AWhile: AList") {
     val init = AState(Map("n" -> AInt.zero, "xs" -> AMany(AInt.top), "ys" -> ANil))
     val as0 = Set(init)
 

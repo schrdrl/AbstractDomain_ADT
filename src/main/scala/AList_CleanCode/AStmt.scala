@@ -28,10 +28,6 @@ case class AAssert(cond: ATest) extends AStmt {
   }
 }
 
-//TODO AVerify
-//case class AVerify
-
-
 case class AAssign(name: String, expr: AExpr) extends AStmt {
   def execute(as: Set[AState]): Set[AState] = {
     for (a <- as) yield {
@@ -80,7 +76,6 @@ case class AWhile(test: ATest, body: AStmt, max: Int = Int.MaxValue)
 
       val pos = test.positive(as)
       val cs = body.execute(pos)
-
       as = AState.widenAll(as ++ cs)
       run = (as != bs)
       bs = as

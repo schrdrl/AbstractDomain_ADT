@@ -3,7 +3,7 @@ import AList_CleanCode.{AAssert, AAssign, ABlock, AConst, AExpr, AInt, AList, AM
 import org.scalatest.funsuite.AnyFunSuite
 
 class length extends AnyFunSuite {
-  test("length is positive (concrete)"){
+  test("length (concrete)"){
     var n = 0
     var xs : List[Int] = List(9,7,4,5)  //only positive numbers
     while (!xs.isEmpty){
@@ -13,6 +13,12 @@ class length extends AnyFunSuite {
     println(n)
     assert (n >= 0)
   }
+
+  test("length (built-in method on abstract Domain AList)") {
+
+  }
+
+
 
 //TODO
   test("length is positive (abstract)"){

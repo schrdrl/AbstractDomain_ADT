@@ -19,7 +19,7 @@ case class AOp(op: String, args: List[AExpr]) extends AExpr {
     val aes = args map (_.evaluate(as))
 
     (op, aes) match {
-      case ("-", List(a: AInt)) => -a
+      case ("-", List(a: AInt)) => a.unary_-
       case ("abs", List(a: AInt)) => a.abs
 
       case ("+", List(l: AInt, r: AInt)) => l + r
