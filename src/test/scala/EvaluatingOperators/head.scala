@@ -1,11 +1,41 @@
 package EvaluatingOperators
-import AList_CleanCode.{AAssert, AAssign, ABlock, ACons, AConst, AInt, AMany, ANil, AOp, APred, AState, AVar, AWhile}
+import AList_CleanCode.{AAssert, AAssign, ABlock, ACons, AConst, AIf, AInt, AList, AMany, ANil, AOp, APred, AState, AVar, AWhile}
 import org.scalatest.funsuite.AnyFunSuite
 
 class head extends AnyFunSuite {
 
-//concrete
 
+  //1
+  test("head: concrete value(implemented method)"){
+    val xs : List[Int] = List(9,7,4)
+    val n = xs.head
+    println(n)
+  }
+
+
+  //2
+  test("head: absolute value(implemented method)"){
+    val xs : AList = ACons(AInt(9), ACons(AInt(7), AMany(AInt(4))))
+    val n = xs.head
+    println(n)
+  }
+
+
+  //3
+  test("head: absolute value(AOp)"){
+    val xs : AList = ACons(AInt(9), ACons(AInt(7), AMany(AInt(4))))
+
+    val test = APred("isSome", "n")
+
+    val prog = ABlock(AAssign("n", AOp("head", List(AVar("xs")))), AIf(test, AAssign("n", AOp("just", List(AVar("n"))))))
+
+    val as0 = Set(AState(Map("xs"-> xs, "n" ->AInt.zero)), AState(Map("xs"-> AMany(AInt.top), "n" ->AInt.zero)))
+    val as1 = prog.execute(as0)
+    println(as1)
+  }
+
+
+//concrete
   test("head (concrete)"){
     var n = 0
     var xs : List[Int] = List(9,7,4)
@@ -23,31 +53,30 @@ class head extends AnyFunSuite {
     val init = AState(Map("n" -> AInt.zero, "xs" -> xs))
 
     val test = APred("isNil", "xs")
-    val test_AInt = APred("isASome", "n")
-    val test_AList = APred("isASome", "xs")
+
 
     //first iteration
-    var head = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(init)).head)).execute(Set(init))
-    var tail = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(head.head)).head)).execute(head)
+    var head = ABlock(AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n"))))).execute(Set(init))
+    var tail = ABlock(AAssign("xs",AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("just", List(AVar("xs"))))).execute(head)
     println(head)
     println(tail)
     println("")
 
     //second iteration
-    head = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(tail.head)).head)).execute(tail)
-    tail = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(head.head)).head)).execute(head)
+    head = ABlock(AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n"))))).execute(tail)
+    tail = ABlock(AAssign("xs",AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("just", List(AVar("xs"))))).execute(head)
     println(head)
     println(tail)
     println("")
 
     //second iteration
-    head = AAssign("n", AConst(test_AInt.positive(AOp("head", List(AVar("xs"))).evaluate(tail.head)).head)).execute(tail)
-    tail = AAssign("xs", AConst(test_AList.positive(AOp("tail", List(AVar("xs"))).evaluate(head.head)).head)).execute(head)
+    head = ABlock(AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n"))))).execute(tail)
+    tail = ABlock(AAssign("xs",AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("just", List(AVar("xs"))))).execute(head)
     println(head)
     println(tail)
     println("")
 
-    AAssert(test).execute(Set(tail.head))
+    AAssert(test).execute(tail)
   }
 
 

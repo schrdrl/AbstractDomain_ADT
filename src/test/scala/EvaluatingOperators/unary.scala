@@ -50,69 +50,64 @@ class unary extends AnyFunSuite {
 
 
 
-
-
-
-/*
   test("Unary:List (sorting lists)"){
-    var xs : List[Int] = List()
+    var xs : List[Int] = List(1,2,3,4,5,6)
     var ys : List[Int] = List()
     var zs : List[Int] = List()
-    var n = 6
-    var i = 6
+    var n = xs.head
 
-    //fill list with values
-    while(i > 0){
-      n = n.unary_-
-      xs = n :: xs
-
-      if(n < 0) n = n + 1
-      else n = n-1
-
-      i = i-1
-    }
-    println("xs: "+xs)
-
-    //sorting values of xs
+    //sorting values of xs after applying unary_- on certain values
     while(!xs.isEmpty){
-      if(xs.head > 0){
-        ys = xs.head :: ys
+      if(0 <= n){
+        n = xs.head.unary_-
       }else{
-        zs = xs.head :: zs
+        n = xs.head
       }
-      xs = xs.tail
+
+      if(n < 0) {
+        ys = n :: ys
+      }else{
+        zs = n :: zs
+      }
+     xs = xs.tail
     }
+
     assert(xs.isEmpty)
     assert(!ys.isEmpty)
     assert(!zs.isEmpty)
 
+    println("xs: "+xs)
+    println("ys: "+ys)
+    println("zs: "+zs +"\n")
+
     ys = ys.reverse
     zs = zs.reverse
 
-    println("xs: "+xs)
     println("ys: "+ys)
     println("zs: "+zs)
 
   }
 
 
+  //TODO: rethink test case structure
   test ("Unary: (Test: integration of AInt.unary into AWhile") {
-    val init = AState(Map("i" -> AInt(6),"n" -> AInt(6), "xs" -> ANil)) //"ys" -> ANil, "zs" -> ANil
+    val xs = ACons(AInt(Some(0), None), ACons(AInt(Some(0), None), ACons(AInt(Some(0), None), ACons(AInt(Some(0), None), ACons(AInt(Some(0), None), ANil)))))
+    val init = AState(Map("n" -> AInt.zero, "xs" -> xs, "ys" -> ANil, "zs" -> ANil))
     val as0 = Set(init)
     println("init: "+ as0)
 
-    val test = APred("isZero", "i")
-    val test_elem = APred("isNegative", "n")
+    val test = APred("isNil", "xs")
+    val test_elem = APred("isPositive", "n")
+    val test_ys = APred("isNil", "ys")
+    val test_zs = APred("isNil", "zs")
 
 
-    //fill xs with values
+    //sorting values of xs after applying unary_- on certain values
     val body = ABlock(
-      AAssign("n", AOp("abs", List(AVar("n")))),
-      AAssign("n",AOp("-", List(AVar("n")))),                     //n.unary
-      AAssign("xs", AOp("append", List(AVar("xs"), AVar("n")))),  //xs = n :: xs
-                                                                  //AIf(n < 0) n = n+1 else n = n-1
-      AIf(test_elem, AAssign("n", AOp("+", List(AVar("n"), AConst(AInt.one)))), AAssign("n", AOp("-", List(AVar("n"), AConst(AInt.one))))),
-      AAssign("i", AOp("-", List(AVar("i"), AConst(AInt.one))))   //i = i - 1
+      AIf(test_elem, ABlock(AAssign("n", AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n")))), AAssign("n", AOp("-", List(AVar("n"))))),ABlock(AAssign("n", AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n")))))),
+      AIf(!test_elem, AAssign("ys", AOp("prepend", List(AVar("ys"), AVar("n")))), AAssign("zs", AOp("prepend", List(AVar("zs"), AVar("n"))))),
+      AAssign("xs", AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("just", List(AVar("xs"))))
+
     )
 
     val prog = ABlock(AWhile(!test, body, 5), AAssert(test))
@@ -120,10 +115,9 @@ class unary extends AnyFunSuite {
     val as1 = prog.execute(as0)
     println(as1)
 
-    //sort values of xs
 
   }
- */
+
 
 
 

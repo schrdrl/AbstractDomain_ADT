@@ -36,6 +36,7 @@ case class APred(op: String, name: String) extends ATest {
       case ("isSome", ASome(e)) => Set(ASome(e))
       case ("isSome", AMaybe(e)) => Set(ASome(e))
 
+      //TODO ===
       case ("isZero", ai : AInt) => if(ai.split(AInt.zero.lb, "neither").nonEmpty) Set(AInt.zero) else Set()  //TODO rethink
       case ("isOne", ai : AInt) => if(ai.split(AInt.one.lb, "neither").nonEmpty) Set(AInt.one) else Set()     //TODO rethink
       case ("isNegative", ai : AInt) => if(ai.===(AInt(None, Some(0)))._1.nonEmpty) ai.===(AInt(None, Some(0)))._1 else Set()
@@ -58,6 +59,8 @@ case class APred(op: String, name: String) extends ATest {
       case ("isSome", ANone) => Set(ANone)
       case ("isSome", ASome(e)) => Set()
       case ("isSome", AMaybe(e)) => Set(ANone)
+
+      //TODO zero, one
 
       case ("isZero", ai : AInt) => if(ai.split(AInt.zero.lb, "neither").nonEmpty) ai.split(AInt.zero.lb, "neither").asInstanceOf[Set[AVal]] else Set(ai)
       case ("isOne", ai : AInt) => if(ai.split(AInt.one.lb, "neither").nonEmpty) ai.split(AInt.one.lb, "neither").asInstanceOf[Set[AVal]] else Set(ai)

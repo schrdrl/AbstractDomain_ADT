@@ -54,15 +54,16 @@ class Abs extends AnyFunSuite {
     println(as1)
   }
 
-//TODO test with prepen
+
 //Lists containing integer values
-  test ("Abs(concrete:List[Int])") {
+  test ("Abs(concrete:List[Int]) -append") {
     var xs: List[Int] = List(1, -3, 10, -22)
     var ys: List[Int] = List()
     println(xs)
 
     while (!xs.isEmpty) {
-      ys = xs.head.abs :: ys
+      ys = ys :+ xs.head.abs
+      println(ys)
       xs = xs.tail
     }
     assert(xs.isEmpty)
@@ -77,9 +78,8 @@ class Abs extends AnyFunSuite {
   }
 
 
-  //TODO: test with prepend
 
-  test ("Abs: (Test: integration of AInt.abs into AWhile: AList") {
+  test ("Abs: (Test: integration of AInt.abs into AWhile/append: AList") {
     val init = AState(Map("n" -> AInt.zero, "xs" -> AMany(AInt.top), "ys" -> ANil))
     val as0 = Set(init)
 
@@ -111,6 +111,64 @@ class Abs extends AnyFunSuite {
     println(as2)
   }
 
+
+
+  //Lists containing integer values
+  test ("Abs(concrete:List[Int] - prepend)") {
+    var xs: List[Int] = List(1, -3, 10, -22)
+    var ys: List[Int] = List()
+    println(xs)
+
+    while (!xs.isEmpty) {
+      ys = xs.head.abs :: ys
+      println(ys)
+      xs = xs.tail
+    }
+    assert(xs.isEmpty)
+
+    //ys = ys.reverse
+    while (!ys.isEmpty) {
+      if(ys.head >= 0) xs = ys.head :: xs
+      ys = ys.tail
+    }
+    assert(ys.isEmpty)
+    println(xs)
+  }
+
+
+
+
+  test ("Abs: (Test: integration of AInt.abs into AWhile/prepend: AList") {
+    val init = AState(Map("n" -> AInt.zero, "xs" -> AMany(AInt.top), "ys" -> ANil))
+    val as0 = Set(init)
+
+    var test = APred("isNil", "xs")
+    val test_elem = APred("isPositive", "n")
+
+    //apply abs on list-element
+    var body = ABlock(
+      AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n")))),      //save xs.head in n
+      AAssign("n", AOp("abs", List(AVar("n")))),                                                  //n.abs
+      AAssign("ys", AOp("prepend", List(AVar("ys"), AVar("n")))),                                  //ys.append(n)
+      AAssign("xs", AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("just", List(AVar("xs"))))  //xs.tail
+    )
+
+    var prog = ABlock(AWhile(!test, body, 5), AAssert(test))
+
+    val as1 = prog.execute(as0)
+    println(as1)
+
+
+    //test_elem >= 0
+    test = APred("isNil", "ys")
+    body = ABlock(AAssign("n",AOp("head", List(AVar("ys")))),AAssign("n",AOp("just", List(AVar("n")))),     //save ys.head in n
+      AIf(test_elem, AAssign("xs", AOp("append", List(AVar("xs"), AVar("n"))))),                //if (n >= 0) xs.append(n)
+      AAssign("ys", AOp("tail", List(AVar("ys")))), AAssign("ys",AOp("just", List(AVar("ys")))) //ys.tail
+    )
+    prog = ABlock(AWhile(!test, body, 5), AAssert(test))
+    val as2 = prog.execute(as1)
+    println(as2)
+  }
 
 
 }
