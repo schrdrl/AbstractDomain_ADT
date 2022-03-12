@@ -25,7 +25,6 @@ sealed trait ABool extends AVal {
     }
   }
 
-
   def ===(that: AVal): (Set[AVal], Set[AVal]) = {
     (this, that) match {
       case (AFalse, AFalse) => (Set(AFalse), Set())
@@ -335,6 +334,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
   }
 
 //TODO necessary?
+  //rethink isZero and isOne -> only usage
   def split(that: Option[Int], s: String): Set[AInt] = {
     that match {
       case that: Option[Int] =>
@@ -465,6 +465,7 @@ sealed trait AList extends AVal {
   def flatten: List[AVal]
 
   //TODO recheck: necessary
+  //use flatten
   def flatten_All: AList = this match {
     case ANil => ANil
     case ACons(h, t) => AMany(h).union(t)
