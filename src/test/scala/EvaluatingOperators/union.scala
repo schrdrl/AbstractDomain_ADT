@@ -3,13 +3,10 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class union extends AnyFunSuite {
 
-  test("union: concrete-implemented method"){
-    val xs = 1 until(4)
-    val ys = 4 until(8)
-
-    val zs = xs.union(ys)
-    println(zs)
-
+  //1. -> built-in method is deprecated
+  test("union: concrete"){
+    val xs = List(1,2,3,4)
+    val ys = List(4,5,6,7)
 
   }
 

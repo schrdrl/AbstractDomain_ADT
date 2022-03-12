@@ -29,8 +29,8 @@ case class AOp(op: String, args: List[AExpr]) extends AExpr {
       case("union", List(l: AInt,r: AInt)) => l.union(r)
       case("intersect", List(l: AInt,r: AInt)) => l.intersect(r)
 
-      case ("!=", List(l:ABool, r:ABool)) => l.noneq(r)
-      case ("==", List(l:ABool, r:ABool)) => l.eq(r)
+      case ("!=", List(l:ABool, r:ABool)) => l.!=(r)
+      case ("==", List(l:ABool, r:ABool)) => l.==(r)
       case ("&&", List(l:ABool, r:ABool)) => l.&&(r)
       case ("||", List(l:ABool, r:ABool)) => l.||(r)
       case ("!", List(ab:ABool)) => ab.!
@@ -39,7 +39,7 @@ case class AOp(op: String, args: List[AExpr]) extends AExpr {
 
       case ("head", List(l:AList)) => l.head
       case ("tail", List(l:AList)) => l.tail
-      case ("length", List(al: AList)) => al.length
+      case ("length", List(l: AList)) => l.length
       case("union", List(l: AList,r: AList)) => l.union(r)
       case("intersect", List(l: AList,r: AList)) => l.intersect(r)
       case("subset", List(l: AList,r: AList)) => l.subset(r)

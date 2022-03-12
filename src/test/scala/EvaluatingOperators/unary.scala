@@ -49,7 +49,7 @@ class unary extends AnyFunSuite {
   }
 
 
-
+/*
   test("Unary:List (sorting lists)"){
     var xs : List[Int] = List(1,2,3,4,5,6)
     var ys : List[Int] = List()
@@ -119,7 +119,7 @@ class unary extends AnyFunSuite {
   }
 
 
-
+ */
 
 }
 

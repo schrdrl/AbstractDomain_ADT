@@ -2,7 +2,7 @@ package EvaluatingOperators
 import AList_CleanCode.{AAssert, AAssign, ABlock, AIf, AInt, AMany, ANil, AOp, APred, AState, AVar, AWhile}
 import org.scalatest.funsuite.AnyFunSuite
 
-class Abs extends AnyFunSuite {
+class abs extends AnyFunSuite {
 
   //integer values
   test("Abs (concrete:Int)"){

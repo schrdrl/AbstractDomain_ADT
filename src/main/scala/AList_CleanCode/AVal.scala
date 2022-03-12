@@ -25,14 +25,19 @@ sealed trait ABool extends AVal {
     }
   }
 
-  //TODO necessary? -> is actually in ATest
+
   def ===(that: AVal): (Set[AVal], Set[AVal]) = {
     (this, that) match {
       case (AFalse, AFalse) => (Set(AFalse), Set())
+      case (AFalse, ATrue)  => (Set(), Set(AFalse))
+      case (AFalse, AUnknown) => (Set(AFalse), Set())
+
       case (ATrue, ATrue) =>(Set(ATrue), Set())
-      case (AFalse, ATrue) | (ATrue, AFalse) => (Set(), Set(AFalse, ATrue))
-      case (AUnknown, ATrue) | (ATrue, AUnknown) => (Set(ATrue), Set(AFalse))
-      case (AFalse, AUnknown) | (AUnknown, AFalse) => (Set(AFalse), Set(ATrue))
+      case (ATrue, AFalse) => (Set(), Set(ATrue))
+      case (ATrue, AUnknown) => (Set(ATrue), Set())
+
+      case (AUnknown, ATrue) => (Set(ATrue), Set(AFalse))
+      case (AUnknown, AFalse) => (Set(AFalse), Set(ATrue))
     }
   }
 
@@ -44,8 +49,8 @@ sealed trait ABool extends AVal {
     }
   }
 
-  //TODO recheck
-  def eq(that: ABool): ABool = {
+
+  def ==(that: ABool): ABool = {
     (this, that) match {
       case (AFalse, AFalse) | (ATrue, ATrue) => ATrue
       case (AFalse, ATrue) | (ATrue, AFalse) => AFalse
@@ -53,8 +58,8 @@ sealed trait ABool extends AVal {
     }
   }
 
-  //TODO recheck
-  def noneq(that: ABool): ABool = {
+
+  def !=(that: ABool): ABool = {
     (this, that) match {
       case (AFalse, AFalse) | (ATrue, ATrue) => AFalse
       case (AFalse, ATrue) | (ATrue, AFalse) => ATrue
@@ -62,7 +67,7 @@ sealed trait ABool extends AVal {
     }
   }
 
-  //TODO recheck
+
   def &&(that: AVal): ABool = {
     (this, that) match {
       case (ATrue, ATrue) => ATrue
@@ -92,6 +97,7 @@ case object ATrue extends ABool
 case object AFalse extends ABool
 case object AUnknown extends ABool
 
+
 object AInt {
   val top: AInt = AInt(None, None)
   val zero: AInt = AInt(0)
@@ -108,7 +114,6 @@ object AInt {
       case (Some(a), Some(b)) => Some(op(a, b))
     }
   }
-
 
   def <(a: Option[Int], b: Option[Int]): Boolean = {
     (a, b) match {
@@ -231,8 +236,6 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
-
-  //TODO recheck
   def union(that: AVal): AInt = {
     that match {
       case that: AInt =>
@@ -253,7 +256,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
           val newub = if (AInt.<=(this.ub, that.ub)) this.ub else if (AInt.<(that.ub, this.ub)) that.ub else None
           if (newlb == None && newub == None) {
             ANone
-          } else if((this.contains(AInt(newlb,newub)).eq(ATrue)).&&(that.contains(AInt(newlb,newub)).eq (ATrue)) == ATrue) {
+          } else if((this.contains(AInt(newlb,newub)).==(ATrue)).&&(that.contains(AInt(newlb,newub)).==(ATrue)) == ATrue) {
             ASome(AInt.apply(newlb, newub))
           }else{
             ANone
@@ -544,7 +547,8 @@ sealed trait AList extends AVal {
     }
   }
 
-//TODO recheck: necessary?
+  //TODO recheck: necessary?
+  //TODO: should be is this a subset of that
   //is that a subset of this
   def subset(that: AVal): ABool = {
     (this, that) match {
@@ -564,7 +568,6 @@ sealed trait AList extends AVal {
     }
   }
 
-//TODO recheck
   //reverses an AList value
   def reverse(): AList = {
     this match {
@@ -573,23 +576,24 @@ sealed trait AList extends AVal {
       case ACons(_, _) =>
         var axs: AList = this
         var ays: AList = ANil
-        var tailIsAMany = false
-        val testCond = APred("isNil", "xs")
-        val testTail = APred("isASome", "xs")
-        var state = AState(Map(("xs", axs)))
+        var tailIsAMany = false //to avoid an endless loop
 
-        while (testCond.positive(axs).isEmpty && testCond.negative(axs).nonEmpty && !tailIsAMany) { //while !isNil
-          val head = AOp("head", List(AVar("xs"))).evaluate(state)
-          val tail = testTail.positive(AOp("tail", List(AVar("xs"))).evaluate(state)).head.asInstanceOf[AList]
+        val test = APred("isNil", "xs")
+        var state = AState(Map("xs" -> axs))
 
-          if (testCond.positive(tail).isEmpty && testCond.negative(tail).nonEmpty || tail == ANil) { //tail is not AMany but can be ACons or ANil
+        while (test.positive(axs).isEmpty && test.negative(axs).nonEmpty && !tailIsAMany) { //while !isNil
+
+          val head = AOp("just",List(AConst(axs.head))).evaluate(state)
+          val tail = AOp("just",List(AConst(axs.tail))).evaluate(state).asInstanceOf[AList]
+
+          if (test.positive(tail).isEmpty && test.negative(tail).nonEmpty || tail == ANil) { //tail is not AMany but can be ACons or ANil
             ays = ACons(head, ays)
             axs = tail
             state = state.updated("xs", axs)
-          } else if (testCond.positive(tail).nonEmpty && testCond.negative(tail).nonEmpty) { //tail is AMany
+          } else if(test.positive(tail).nonEmpty && test.negative(tail).nonEmpty){ //tail is AMany
             ays = this.flatten_All
             tailIsAMany = true
-          } else {
+          }else{
             throw new Exception("Exception thrown from reverse.")
           }
         }
@@ -598,32 +602,32 @@ sealed trait AList extends AVal {
   }
 
 
-  //TODO recheck
   //prepends an element on the front a an AList value
   def prepend(elem: AVal): AList = ACons(elem, this)
 
-  //TODO recheck
   //appends an element the the end a an AList value
   def append(elem: AVal): AList =
     this match {
     case ANil => ACons(elem, ANil)
     case ACons(h, t) => ACons(h, t.append(elem))
-    case AMany(e) => AMany(e.widen(elem))
+    case AMany(e) => AMany(e.asInstanceOf[AInt].union(elem)) // AMany(e.widen(elem))
   }
 
-  //TODO recheck
+
   //Method concatenates two values of type AList
   def concat(that: AList): AList =
     (this, that) match {
     case (ANil, ANil) => ANil
     case (ANil, ACons(h, t)) => ACons(h, t)
-    case (ACons(h, t), ANil) => ACons(h, t)
     case (ANil, AMany(e)) => AMany(e)
+
     case (AMany(e), ANil) => AMany(e)
-    case (AMany(e1), AMany(e2)) => AMany(e1.widen(e2))
-    case (AMany(_), ACons(_, _)) => this.widen(that)
+    case (AMany(e1), AMany(e2)) => AMany((e1.asInstanceOf[AInt].union(e2))) //AMany(e1.widen(e2))
+    case (AMany(_), ACons(_, _)) => this.union(that)  //this.widen(that)
+
+    case (ACons(h, t), ANil) => ACons(h, t)
     case (ACons(h, t), AMany(_)) => ACons(h, t.concat(that))
-    case (ACons(h1, t1), ACons(_, _)) => ACons(h1, this.concat(that))
+    case (ACons(h1, t1), ACons(_, _)) => ACons(h1, t1.concat(that))
   }
 
 
@@ -640,7 +644,7 @@ sealed trait AList extends AVal {
       case (ANil, ACons(h, t)) => (Set(), Set(ANil))
       case (ACons(h, t), ANil) => (Set(), Set(ACons(h, t)))
 
-      case (AMany(e), ACons(h, t)) => ??? //TODO use flatten to get the elements of ACons
+      case (AMany(e), ACons(h, t)) => ???//TODO use flatten to get the elements of ACons
       case (ACons(h, t), AMany(e)) => ???
 
       case (AMany(e1), AMany(e2)) =>
@@ -652,7 +656,10 @@ sealed trait AList extends AVal {
         else (Set(), Set(AMany(e1)))
 
       case (ACons(h1, t1), ACons(h2, t2)) =>  //TODO maybe foreach?
-       ???
+        val eq = h1.asInstanceOf[AInt].===(h2.asInstanceOf[AInt])._1
+        val noneq = h1.asInstanceOf[AInt].===(h2.asInstanceOf[AInt])._2
+        ???
+
     }
   }
 
