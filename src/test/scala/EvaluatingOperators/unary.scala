@@ -32,6 +32,7 @@ class unary extends AnyFunSuite {
   }
 
 
+
   test("Unary (Test: integration of AInt.unary into AOp)"){
     val as0 = Set(AState(Map("n"-> AInt(-5))), AState(Map("n"-> AInt(None,Some(-1))))) //negative values
     var test = APred("isPositive", "n")
@@ -104,9 +105,9 @@ class unary extends AnyFunSuite {
 
     //sorting values of xs after applying unary_- on certain values
     val body = ABlock(
-      AIf(test_elem, ABlock(AAssign("n", AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n")))), AAssign("n", AOp("-", List(AVar("n"))))),ABlock(AAssign("n", AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n")))))),
+      AIf(test_elem, ABlock(AAssign("n", AOp("head", List(AVar("xs")))), AAssign("n",AOp("get", List(AVar("n")))), AAssign("n", AOp("-", List(AVar("n"))))),ABlock(AAssign("n", AOp("head", List(AVar("xs")))), AAssign("n",AOp("get", List(AVar("n")))))),
       AIf(!test_elem, AAssign("ys", AOp("prepend", List(AVar("ys"), AVar("n")))), AAssign("zs", AOp("prepend", List(AVar("zs"), AVar("n"))))),
-      AAssign("xs", AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("just", List(AVar("xs"))))
+      AAssign("xs", AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("get", List(AVar("xs"))))
 
     )
 

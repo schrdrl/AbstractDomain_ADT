@@ -3,21 +3,7 @@ import AList_CleanCode.{ACons, AInt, AMany, AMaybe, ANil, ANone, ASome}
 import org.scalatest.funsuite.AnyFunSuite
 class BasicFuntionTests extends AnyFunSuite {
 
-  test("union:AList"){
-    val a = AInt.one
-    val b = AInt.apply(10)
-    val c = AInt.apply(-1, 5)
 
-    val d = ANil
-    val e = AMany(a)
-    val f = ACons(a, ACons(b, AMany(c)))
-
-
-    println(d.union(e))
-    println(d.union(f))
-    println(e.union(e))
-    println(e.union(f))
-  }
 
   test("intersect:AList"){
     val a = AInt.one
@@ -45,21 +31,6 @@ class BasicFuntionTests extends AnyFunSuite {
 
   }
 
-  test("subset:AList"){
-    val a = AInt.one
-    val b = AInt.apply(10)
-    val c = AInt.apply(-1, 5)
-
-    val d = ANil
-    val e = AMany(a)
-    val f = ACons(a, ACons(b, AMany(c)))
-
-    println(d.subset(e))
-    println(d.subset(f))
-    println(f.subset(d))
-    println(e.subset(e))
-    println(e.subset(f))
-  }
 
   test("reverse:AList"){
     val a = AInt.one
@@ -76,6 +47,38 @@ class BasicFuntionTests extends AnyFunSuite {
     println(f.reverse())
     println(g.reverse())
 
+  }
+
+  test("union: AInt"){
+    val a = AInt.one
+    val b = AInt.apply(10)
+    val c = AInt.apply(-1, 5)
+    val d = AInt.top
+    val e = AInt(Some(0), None)
+    val f = AInt(None, Some(0))
+
+    println(a.union(b)) //[1;10]
+    println(c.union(b)) //[-1;10]
+    println(d.union(b)) //[-Inf;Inf]
+    println(c.union(e)) //[-1;Inf]
+    println(e.union(f)) //[-Inf;Inf]
+    println(f.union(e)) //[-Inf;Inf]
+  }
+
+  test("intersect: AInt"){
+    val a = AInt.one
+    val b = AInt.apply(10)
+    val c = AInt.apply(-1, 5)
+    val d = AInt.top
+    val e = AInt(Some(0), None)
+    val f = AInt(None, Some(0))
+
+    println(a.intersect(b)) //ANone
+    println(c.intersect(b)) //ANone
+    println(d.intersect(b)) //TODO
+    println(c.intersect(e)) //TODO
+    println(e.intersect(f)) //TODO
+    println(f.intersect(e)) //TODO
   }
 
 
@@ -247,5 +250,56 @@ class BasicFuntionTests extends AnyFunSuite {
 
 
   }
+
+  test("hasConcreteElement: AInt"){
+    val a = AInt.one
+    val b = AInt(Some(-1), Some(5))
+    val c = AInt.top
+    val d = AInt(None, Some(5))
+
+    println(a.hasConcreteElement(1))
+    println(a.hasConcreteElement(-1))
+
+    println(b.hasConcreteElement(1))
+    println(b.hasConcreteElement(-1))
+
+    println(c.hasConcreteElement(1))
+    println(c.hasConcreteElement(-1))
+
+    println(d.hasConcreteElement(1))
+    println(d.hasConcreteElement(-1))
+    println(d.hasConcreteElement(6))
+
+
+  }
+
+  test("hasConcreteElement: AList"){
+    val a = List()
+    val b = List(1,2)
+    val c = List(1)
+
+
+    val d = ANil
+    val e = AMany(AInt.one)
+    val f = AMany(AInt.top)
+    val g = ACons(AInt.one, ACons(AInt.top, ANil))
+
+    println(d.hasConcreteElement(a))
+    println(d.hasConcreteElement(b))
+    println(d.hasConcreteElement(c) +"\n")
+
+    println(e.hasConcreteElement(a))
+    println(e.hasConcreteElement(b))
+    println(e.hasConcreteElement(c)+"\n")
+
+    println(f.hasConcreteElement(a))
+    println(f.hasConcreteElement(b))
+    println(f.hasConcreteElement(c)+"\n")
+
+    println(g.hasConcreteElement(a))
+    println(g.hasConcreteElement(b))
+    println(g.hasConcreteElement(c)+"\n")
+  }
+
 
 }

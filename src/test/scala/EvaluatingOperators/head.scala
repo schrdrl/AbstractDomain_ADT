@@ -37,7 +37,7 @@ class head extends AnyFunSuite {
   test("head: abstract(AOp)"){
     val test = APred("isSome", "n")
 
-    val prog = ABlock(AAssign("n", AOp("head", List(AVar("xs")))), AIf(test, AAssign("n", AOp("just", List(AVar("n"))))))
+    val prog = ABlock(AAssign("n", AOp("head", List(AVar("xs")))), AIf(test, AAssign("n", AOp("get", List(AVar("n"))))))
 
     val as0 = Set(AState(Map("xs"-> ACons(AInt(9), ACons(AInt(7), AMany(AInt(4)))), "n" ->AInt.zero)),
                  AState(Map("xs"-> ANil, "n" ->AInt.zero)),
@@ -70,22 +70,22 @@ class head extends AnyFunSuite {
 
 
     //first iteration
-    var head = ABlock(AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n"))))).execute(Set(init))
-    var tail = ABlock(AAssign("xs",AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("just", List(AVar("xs"))))).execute(head)
+    var head = ABlock(AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("get", List(AVar("n"))))).execute(Set(init))
+    var tail = ABlock(AAssign("xs",AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("get", List(AVar("xs"))))).execute(head)
     println(head)
     println(tail)
     println("")
 
     //second iteration
-    head = ABlock(AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n"))))).execute(tail)
-    tail = ABlock(AAssign("xs",AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("just", List(AVar("xs"))))).execute(head)
+    head = ABlock(AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("get", List(AVar("n"))))).execute(tail)
+    tail = ABlock(AAssign("xs",AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("get", List(AVar("xs"))))).execute(head)
     println(head)
     println(tail)
     println("")
 
     //second iteration
-    head = ABlock(AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n"))))).execute(tail)
-    tail = ABlock(AAssign("xs",AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("just", List(AVar("xs"))))).execute(head)
+    head = ABlock(AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("get", List(AVar("n"))))).execute(tail)
+    tail = ABlock(AAssign("xs",AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("get", List(AVar("xs"))))).execute(head)
     println(head)
     println(tail)
     println("")

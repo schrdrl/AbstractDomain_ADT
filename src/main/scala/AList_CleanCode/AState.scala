@@ -12,7 +12,6 @@ case class AState(vars: Map[String, AVal]) {
         val b = that.lookup(name)
         name -> (a widen b)
       }
-
     AState(vars.toMap)
   }
 }

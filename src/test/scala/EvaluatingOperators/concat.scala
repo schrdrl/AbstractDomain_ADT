@@ -19,15 +19,50 @@ class concat extends AnyFunSuite {
   test("concat (built-in method on abstract Domain AList)") {
     val a = ACons(AInt(-4), ACons(AInt(-3), ACons(AInt(-2), ACons(AInt(-1),ANil))))
     val b = ACons(AInt(0), ACons(AInt(1), ACons(AInt(2), ACons(AInt(3),ANil))))
-    val c = ANil
+    val c = AMany(AInt(10))
     val d = AMany(AInt.zero)
 
-    val e = a.concat(b)
-    println(e)
+    //ANil ++ ANil
+    val e = ANil.concat(ANil)
+    println(e) //ANil
 
-    val f = d.concat(b)
-    println(f)
+    //ANil ++ AMany
+    val f = ANil.concat(AMany(AInt.zero))
+    println(f) //AMany([0;0])
 
+    //AMany ++ ANil
+    val g = AMany(AInt.zero).concat(ANil)
+    println(g) //AMany([0;0])
+
+    //ANil ++ ACons
+    val h = ANil.concat(a)
+    println(h) //a
+
+    //ACons ++ ANil
+    val i = a.concat(ANil)
+    println(i) //a
+
+    //ACons ++ ACons
+    val j = a.concat(b)
+    println(j) //a++b
+
+    //AMany ++ ACons
+    val k = c.concat(b)
+    println(k) //AMany([0,10])
+
+    //ACons ++ AMany
+    val l = b.concat(c)
+    println(l) // b ++ c
+
+    //ACons ++ AMany
+    val b2 = ACons(AInt(0), ACons(AInt(1), ACons(AInt(2), ACons(AInt(3),AMany(AInt.zero)))))
+    val m = b2.concat(c)
+    println(m) // b ++ c
+
+
+    //AMany ++ AMany
+    val n = c.concat(d)
+    println(n) // AMany([0,10])
 
   }
 

@@ -17,6 +17,7 @@ class abs extends AnyFunSuite {
     j = j.abs
     println(j)
     assert(j >=0 )
+
   }
 
 
@@ -88,10 +89,10 @@ class abs extends AnyFunSuite {
 
     //apply abs on list-element
     var body = ABlock(
-      AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n")))),      //save xs.head in n
+      AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("get", List(AVar("n")))),      //save xs.head in n
       AAssign("n", AOp("abs", List(AVar("n")))),                                                  //n.abs
       AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))),                                  //ys.append(n)
-      AAssign("xs", AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("just", List(AVar("xs"))))  //xs.tail
+      AAssign("xs", AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("get", List(AVar("xs"))))  //xs.tail
     )
 
     var prog = ABlock(AWhile(!test, body, 5), AAssert(test))
@@ -102,9 +103,9 @@ class abs extends AnyFunSuite {
 
     //test_elem >= 0
     test = APred("isNil", "ys")
-    body = ABlock(AAssign("n",AOp("head", List(AVar("ys")))),AAssign("n",AOp("just", List(AVar("n")))),     //save ys.head in n
+    body = ABlock(AAssign("n",AOp("head", List(AVar("ys")))),AAssign("n",AOp("get", List(AVar("n")))),     //save ys.head in n
                   AIf(test_elem, AAssign("xs", AOp("append", List(AVar("xs"), AVar("n"))))),                //if (n >= 0) xs.append(n)
-                  AAssign("ys", AOp("tail", List(AVar("ys")))), AAssign("ys",AOp("just", List(AVar("ys")))) //ys.tail
+                  AAssign("ys", AOp("tail", List(AVar("ys")))), AAssign("ys",AOp("get", List(AVar("ys")))) //ys.tail
     )
     prog = ABlock(AWhile(!test, body, 5), AAssert(test))
     val as2 = prog.execute(as1)
@@ -147,10 +148,10 @@ class abs extends AnyFunSuite {
 
     //apply abs on list-element
     var body = ABlock(
-      AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n")))),      //save xs.head in n
+      AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("get", List(AVar("n")))),      //save xs.head in n
       AAssign("n", AOp("abs", List(AVar("n")))),                                                  //n.abs
       AAssign("ys", AOp("prepend", List(AVar("ys"), AVar("n")))),                                  //ys.append(n)
-      AAssign("xs", AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("just", List(AVar("xs"))))  //xs.tail
+      AAssign("xs", AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("get", List(AVar("xs"))))  //xs.tail
     )
 
     var prog = ABlock(AWhile(!test, body, 5), AAssert(test))
@@ -161,9 +162,9 @@ class abs extends AnyFunSuite {
 
     //test_elem >= 0
     test = APred("isNil", "ys")
-    body = ABlock(AAssign("n",AOp("head", List(AVar("ys")))),AAssign("n",AOp("just", List(AVar("n")))),     //save ys.head in n
+    body = ABlock(AAssign("n",AOp("head", List(AVar("ys")))),AAssign("n",AOp("get", List(AVar("n")))),     //save ys.head in n
       AIf(test_elem, AAssign("xs", AOp("append", List(AVar("xs"), AVar("n"))))),                //if (n >= 0) xs.append(n)
-      AAssign("ys", AOp("tail", List(AVar("ys")))), AAssign("ys",AOp("just", List(AVar("ys")))) //ys.tail
+      AAssign("ys", AOp("tail", List(AVar("ys")))), AAssign("ys",AOp("get", List(AVar("ys")))) //ys.tail
     )
     prog = ABlock(AWhile(!test, body, 5), AAssert(test))
     val as2 = prog.execute(as1)

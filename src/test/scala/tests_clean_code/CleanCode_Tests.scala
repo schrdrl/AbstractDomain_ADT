@@ -43,7 +43,7 @@ class CleanCode_Tests extends AnyFunSuite {
 
     val h = AInt(Some(1), Some(3)) //case class
         println(h)
-        println(h.unary_-())
+        println(h.unary_-)
         println(h.+(e))
 
     //AList

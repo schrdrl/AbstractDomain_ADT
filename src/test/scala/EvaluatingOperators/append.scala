@@ -86,9 +86,9 @@ class append extends AnyFunSuite {
     val test = APred("isNil", "xs")
 
     val body = ABlock(
-      AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("just", List(AVar("n")))),
+      AAssign("n",AOp("head", List(AVar("xs")))), AAssign("n",AOp("get", List(AVar("n")))),
       AAssign("ys", AOp("append", List(AVar("ys"), AVar("n")))),
-      AAssign("xs", AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("just", List(AVar("xs"))))
+      AAssign("xs", AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("get", List(AVar("xs"))))
     )
 
     val prog = ABlock(AWhile(!test, body, 5), AAssert(test))

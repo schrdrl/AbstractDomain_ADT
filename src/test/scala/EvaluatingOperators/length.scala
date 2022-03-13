@@ -70,7 +70,7 @@ class length extends AnyFunSuite {
     val test = APred("isNil", "xs")
 
     val body = ABlock(
-      AAssign("xs", AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("just", List(AVar("xs")))) ,
+      AAssign("xs", AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("get", List(AVar("xs")))) ,
       AAssign("n", AOp("+", List(AVar("n"), AConst(AInt.one))))
     )
 

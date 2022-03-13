@@ -36,7 +36,7 @@ class tail extends AnyFunSuite {
 
     val test = APred("isSome", "n")
 
-    val prog = ABlock(AAssign("n", AOp("tail", List(AVar("xs")))), AIf(test, AAssign("n", AOp("just", List(AVar("n"))))))
+    val prog = ABlock(AAssign("n", AOp("tail", List(AVar("xs")))), AIf(test, AAssign("n", AOp("get", List(AVar("n"))))))
 
     val as0 = Set(AState(Map("xs"-> ACons(AInt(9), ACons(AInt(7), AMany(AInt(4)))), "n" ->AInt.zero)),
       AState(Map("xs"-> ANil, "n" ->AInt.zero)),

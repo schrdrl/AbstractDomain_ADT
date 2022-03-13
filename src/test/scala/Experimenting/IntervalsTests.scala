@@ -250,6 +250,12 @@ class IntervalsTests extends AnyFunSuite {
     println(a.%(d,d))
   }
 
+
+  test("union"){
+
+
+  }
+
 /*
 //TODO AIntEqual needs improvement
   test("AIntEqual"){
