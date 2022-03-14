@@ -97,6 +97,7 @@ class BasicFuntionTests extends AnyFunSuite {
     val e = AInt(Some(0), None)
     val f = AInt(None, Some(0))
 
+
     println(a.intersect(b)) //ANone
     println(b.intersect(a) +"\n") //ANone
 
@@ -109,6 +110,9 @@ class BasicFuntionTests extends AnyFunSuite {
     println(c.intersect(e)) //ASome([0,5])
     println(e.intersect(c)+"\n") //ASome([0,5])
 
+    println(e.intersect(d)) //ASome([0,∞))
+    println(d.intersect(e)+"\n") //ASome([0,∞))
+
     println(e.intersect(f)) //ASome([0,0])
     println(f.intersect(e)+"\n") //ASome([0,0])
 
@@ -116,6 +120,9 @@ class BasicFuntionTests extends AnyFunSuite {
 
     println(c.intersect(a)) //ASome([1,1])
     println(a.intersect(c)) //ASome([1,1])
+
+
+
   }
 
 
@@ -177,7 +184,6 @@ class BasicFuntionTests extends AnyFunSuite {
     println(d.===(e)._1)
     println(d.===(e)._2+"\n")
 
-    //TODO
     println("this: "+e)
     println("that: "+d)
     println(e.===(d)._1)
@@ -188,13 +194,10 @@ class BasicFuntionTests extends AnyFunSuite {
     println(d.===(f)._1)
     println(d.===(f)._2+"\n")
 
-    //TODO
     println("this: "+f)
     println("that: "+d)
     println(f.===(d)._1)
     println(f.===(d)._2+"\n")
-
-
   }
 
 

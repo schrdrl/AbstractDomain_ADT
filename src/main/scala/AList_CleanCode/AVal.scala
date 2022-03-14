@@ -235,29 +235,25 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
         else {
           val newlb = if (AInt.<=(this.lb, that.lb) || this.lb == None) that.lb else this.lb
           val newub = if (this.ub == None) that.ub else if(that.ub == None) this.ub else if (AInt.<=(this.ub, that.ub)) this.ub else that.ub
-          if((AInt.<=(this.lb, newlb) && AInt.<=(newub, this.ub)) || (AInt.<=(that.lb, newlb) && AInt.<=(newub, that.ub))) {
             ASome(AInt.apply(newlb, newub))
-          }else{
-            ANone
-          }
         }
     }
   }
 
-  //TODO
+  //TODO comments and shorten code
   //checks which parts of two intervals are the same (same part, part that's different from that)
   def ===(that: AVal): (Set[AVal], Set[AVal]) = {
     that match {
       case that: AInt =>
         if ((that.lb != None && that.ub != None) && ((AInt.<(lb, that.lb) && AInt.<(ub, that.lb)) || (AInt.<(that.ub, lb) && AInt.<(that.ub, ub)))) {
-          (Set(), Set(this)) //that is not in this
+          (Set(), Set(this)) //no equal parts
         }else if((that.lb != None && that.ub == None) && (lb != None && ub != None) && (AInt.<(lb, that.lb) && AInt.<(ub, that.lb))) {
-          (Set(), Set(this))
+          (Set(), Set(this)) //that.ub == None && no equal parts
         } else if((that.ub != None && that.lb == None) && (lb != None && ub != None) && (AInt.<(that.ub, lb) && AInt.<(that.ub, ub))){
-          (Set(), Set(this))
-        } else if (this == that) {
-          (Set(this), Set()) //same intervals
-        } else if(lb == None && ub == None) {
+          (Set(), Set(this)) //that.lb == None && no equal parts
+        } else if (this == that) { //same intervals
+          (Set(this), Set())
+        } else if(this == AInt.top) { // this == AInt.top
           if(that.lb == None) (Set(AInt(None, that.ub)), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), None)))
           else if(that.ub == None) (Set(AInt(that.lb, None)), Set(AInt(None, AInt.binop(_-_, that.lb, Some(1)))))
           else (Set(that), Set(AInt(None,AInt.binop(_ - _, that.lb, Some(1))), AInt(AInt.binop(_ + _, that.ub, Some(1)), None)))
