@@ -17,18 +17,42 @@ class BasicFuntionTests extends AnyFunSuite {
     val g = AInt(None, Some(5))
     val h = AMany(g)
 
-    println(d.intersect(e))
-    println(d.intersect(f))
-    println(e.intersect(e))
-    println(AMany(c).intersect(e))
-    println(ACons(c, ANil).intersect(ACons(a, ANil)))
-    println(f.intersect(e))
-    println(e.intersect(f))
-    println(e.intersect(h))
-    println(h.intersect(e))
-    println(a.intersect(g))
+    println("this: " +d)
+    println("that: " +e)
+    println(d.intersect(e) +"\n") //ANil
+
+    println("this: " +d)
+    println("that: " +f)
+    println(d.intersect(f)+"\n") //ANil
+
+    println("this: " +e) //AMany([1,1])
+    println("that: " +e)
+    println(e.intersect(e)+"\n") //AMany([1,1])
+
+    println("this: " +AMany(c))
+    println("that: " +e)
+    println(AMany(c).intersect(e)+"\n") //AMany([1;1])
 
 
+    println("this: " +ACons(c, ANil))
+    println("that: " +ACons(a, ANil))
+    println(ACons(c, ANil).intersect(ACons(a, ANil))+"\n") //ACons([1,1],ANil)
+
+    println("this: " +f) //ACons([1,1],ACons([10,10],AMany([-1,5])))
+    println("that: " +e) //AMany([1,1])
+    println(f.intersect(e)+"\n") //ACons([1,1],ANil)
+
+    println("this: " +e)
+    println("that: " +f)
+    println(e.intersect(f)+"\n") //ACons([1,1],ANil)
+
+    println("this: " +e) //AMany([1,1])
+    println("that: " +h) //AMany((-∞,5])
+    println(e.intersect(h)+"\n") //AMany([1,1])
+
+    println("this: " +h)
+    println("that: " +e)
+    println(h.intersect(e)+"\n") //AMany([1,1])
   }
 
 
@@ -74,11 +98,24 @@ class BasicFuntionTests extends AnyFunSuite {
     val f = AInt(None, Some(0))
 
     println(a.intersect(b)) //ANone
+    println(b.intersect(a) +"\n") //ANone
+
     println(c.intersect(b)) //ANone
-    println(d.intersect(b)) //TODO
-    println(c.intersect(e)) //TODO
-    println(e.intersect(f)) //TODO
-    println(f.intersect(e)) //TODO
+    println(b.intersect(c)+"\n") //ANone
+
+    println(d.intersect(b)) //ASome([10,10])
+    println(b.intersect(d)+"\n") //ASome([10,10])
+
+    println(c.intersect(e)) //ASome([0,5])
+    println(e.intersect(c)+"\n") //ASome([0,5])
+
+    println(e.intersect(f)) //ASome([0,0])
+    println(f.intersect(e)+"\n") //ASome([0,0])
+
+    println(a.intersect(a)+"\n") //ASome([1,1])
+
+    println(c.intersect(a)) //ASome([1,1])
+    println(a.intersect(c)) //ASome([1,1])
   }
 
 
@@ -140,6 +177,7 @@ class BasicFuntionTests extends AnyFunSuite {
     println(d.===(e)._1)
     println(d.===(e)._2+"\n")
 
+    //TODO
     println("this: "+e)
     println("that: "+d)
     println(e.===(d)._1)
@@ -150,6 +188,7 @@ class BasicFuntionTests extends AnyFunSuite {
     println(d.===(f)._1)
     println(d.===(f)._2+"\n")
 
+    //TODO
     println("this: "+f)
     println("that: "+d)
     println(f.===(d)._1)
@@ -158,98 +197,6 @@ class BasicFuntionTests extends AnyFunSuite {
 
   }
 
-  //TODO
-  test("===: AList"){
-    val a = AInt.one
-    val b = AInt.apply(10)
-    val c = AInt.apply(-1, 5)
-
-    val d = ANil
-    val e = AMany(a)
-    val f = AMany(c)
-    val g = ACons(a, ACons(b, AMany(c)))
-    val h = ACons(c, ACons(b, ANil))
-
-    println("this: "+d)
-    println("that: "+d)
-    println(d.===(d)._1)
-    println(d.===(d)._2 +"\n")
-
-    println("this: "+d)
-    println("that: "+e)
-    println(d.===(e)._1)
-    println(d.===(e)._2+"\n")
-
-    println("this: "+e)
-    println("that: "+d)
-    println(e.===(d)._1)
-    println(e.===(d)._2+"\n")
-
-    println("this: "+e)
-    println("that: "+f)
-    println(e.===(f)._1)
-    println(e.===(f)._2+"\n")
-
-    println("this: "+f)
-    println("that: "+e)
-    println(f.===(e)._1)
-    println(f.===(e)._2+"\n")
-
-    //TODO ACons, ACons
-
-    //TODO AMany, ACons
-
-    //TODO ACons, AMany
-
-  }
-
-
-  test("===: AOption"){
-    val a = AInt.one
-    val b = AInt.apply(10)
-    val c = AInt.apply(-1, 5)
-
-    val d = ANone
-    val e = ASome(a)
-    val f = AMaybe(a)
-    val g = ASome(b)
-    val h = AMaybe(c)
-    val i = ASome(c)
-
-    println("this: "+d)
-    println("that: "+d)
-    println(d.===(d)+"\n")
-
-    println("this: "+d)
-    println("that: "+e)
-    println(d.===(e)+"\n")
-
-    println("this: "+d)
-    println("that: "+f)
-    println(d.===(f)+"\n")
-
-    println("this: "+e)
-    println("that: "+g)
-    println(e.===(g)+"\n")
-
-    println("this: "+h)
-    println("that: "+e)
-    println(h.===(e)+"\n")
-
-    println("this: "+h)
-    println("that: "+f)
-    println(h.===(f)+"\n")
-
-    println("this: "+i)
-    println("that: "+e)
-    println(i.===(e)+"\n")
-
-    println("this: "+i)
-    println("that: "+f)
-    println(i.===(f)+"\n")
-
-
-  }
 
   test("hasConcreteElement: AInt"){
     val a = AInt.one
