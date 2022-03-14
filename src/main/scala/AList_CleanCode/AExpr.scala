@@ -47,9 +47,6 @@ case class AOp(op: String, args: List[AExpr]) extends AExpr {
       case("append", List(l: AList,r: AInt)) => l.append(r)
       case("prepend", List(l: AList,r: AInt)) => l.prepend(r)
       case("reverse", List(l: AList)) => l.reverse()
-
-
-
     }
   }
 }

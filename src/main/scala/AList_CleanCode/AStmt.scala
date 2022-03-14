@@ -69,7 +69,6 @@ case class AWhile(test: ATest, body: AStmt, max: Int = Int.MaxValue)
     var run = true
 
     var k = max
-    println(k)
 
     while (run) {
       assert(k >= 0)

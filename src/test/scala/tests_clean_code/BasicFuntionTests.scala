@@ -135,6 +135,11 @@ class BasicFuntionTests extends AnyFunSuite {
     val f = AInt(None, Some(0))
 
     println("this: "+a)
+    println("that: "+a)
+    println(a.===(a)._1)
+    println(a.===(a)._2+"\n")
+
+    println("this: "+a)
     println("that: "+b)
     println(a.===(b)._1)
     println(a.===(b)._2+"\n")

@@ -240,20 +240,24 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
     }
   }
 
-  //TODO comments and shorten code
+
   //checks which parts of two intervals are the same (same part, part that's different from that)
   def ===(that: AVal): (Set[AVal], Set[AVal]) = {
     that match {
       case that: AInt =>
+        //no equal parts
         if ((that.lb != None && that.ub != None) && ((AInt.<(lb, that.lb) && AInt.<(ub, that.lb)) || (AInt.<(that.ub, lb) && AInt.<(that.ub, ub)))) {
-          (Set(), Set(this)) //no equal parts
+          (Set(), Set(this))
         }else if((that.lb != None && that.ub == None) && (lb != None && ub != None) && (AInt.<(lb, that.lb) && AInt.<(ub, that.lb))) {
-          (Set(), Set(this)) //that.ub == None && no equal parts
+          (Set(), Set(this))
         } else if((that.ub != None && that.lb == None) && (lb != None && ub != None) && (AInt.<(that.ub, lb) && AInt.<(that.ub, ub))){
-          (Set(), Set(this)) //that.lb == None && no equal parts
-        } else if (this == that) { //same intervals
+          (Set(), Set(this))
+
+          //same intervals
+        } else if (this == that) {
           (Set(this), Set())
-        } else if(this == AInt.top) { // this == AInt.top
+          //this == AInt.top
+        } else if(this == AInt.top) {
           if(that.lb == None) (Set(AInt(None, that.ub)), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), None)))
           else if(that.ub == None) (Set(AInt(that.lb, None)), Set(AInt(None, AInt.binop(_-_, that.lb, Some(1)))))
           else (Set(that), Set(AInt(None,AInt.binop(_ - _, that.lb, Some(1))), AInt(AInt.binop(_ + _, that.ub, Some(1)), None)))
@@ -266,39 +270,35 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
           if (this.lb == that.lb) {
             if(that.ub == None && lb == None){
               (Set(this), Set())
-            } else if (AInt.<(this.ub, that.ub)) {
+            } else if (AInt.<=(this.ub, that.ub)) {
               (Set(value), Set())
             } else { // if(AInt.<(that.ub, this.ub)){
               (Set(value), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
             }
 
-          }  else if (AInt.<(that.lb, lb)){
-            if(that.lb == None && that.ub == None){
-              (Set(this), Set())
-            } else if(that.ub == None || lb == None){
+          } else if (AInt.<(that.lb, lb)){
+            if((that == AInt.top) || (that.ub == None || lb == None)){
               (Set(this), Set())
             } else if(AInt.<=(ub, that.ub)) {
               (Set(value), Set())
             }  else { //if(AInt.<(that.ub, this.ub))
               (Set(value), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), ub)))
             }
-          }else {
-            if(that.lb == None && that.ub == None){
+          }else { //if (AInt.<(lb, that.lb))
+            if(that == AInt.top || lb == None){
               (Set(this), Set())
             } else if(that.ub == None){
               (Set(AInt(that.lb, ub)), Set(AInt(lb, AInt.binop(_ - _, that.lb, Some(1)))))
-            }else if(lb == None){
-              (Set(this), Set())
-            } else if (AInt.<=(ub, that.ub)) {
+            }else if (AInt.<=(ub, that.ub)) {
               (Set(value), Set(AInt(lb, AInt.binop(_ - _, that.lb, Some(1)))))
             } else { //if(AInt.<(that.ub, this.ub))
               (Set(value), Set(AInt(lb, AInt.binop(_ - _, that.lb, Some(1))), AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
             }
-
           }
         }
     }
   }
+
 }
 
 
