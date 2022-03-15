@@ -1,5 +1,5 @@
 package EvaluatingOperators
-import AList_CleanCode.{AAssert, AAssign, ABlock, ACons, AConst, AInt, AMany, ANil, AOp, APred, AState, AVar, AWhile}
+import AList_CleanCode.{AAssert, AAssign, ABlock, ACons, AConst, AIf, AInt, AMany, ANil, AOp, APred, AState, AVar, AWhile}
 import org.scalatest.funsuite.AnyFunSuite
 
 class concat extends AnyFunSuite {
@@ -158,15 +158,37 @@ class concat extends AnyFunSuite {
   }
 
 
-
-  //TODO
-  //1f. concat two lists with positive elements
+  //TODO recheck
+  //1f. concatenate two lists with positive elements, check whether the output list also contains only positive elements
   test("concat: positive elements"){
-    val init = AState(Map("n" -> AInt.zero,"xs" -> AMany(AInt(Some(2), Some(10))), "ys" -> AMany(AInt(Some(0), None))))
+    val init = AState(Map("n" -> AInt.zero,"xs" -> AMany(AInt(Some(2), Some(10))), "ys" -> AMany(AInt(Some(5), Some(1999)))))
     val as0 = Set(init)
 
-    //test whether all elements of the given lists are positive
-   val prog = ABlock()
+
+    //test whether all elements of the given lists (-> AMany) are positive
+   var prog = ABlock(AAssign("n", AOp("head", List(AVar("xs")))),  //test for xs
+                     AIf(APred("isSome", "n"), AAssign("n", AOp("get", List(AVar("n"))))),
+                     AAssert(APred("isPositive", "n")),                                  //TODO -> skip ANone
+                     AAssign("n", AOp("head", List(AVar("ys")))),  //test for ys
+                     AIf(APred("isSome", "n"), AAssign("n", AOp("get", List(AVar("n"))))),
+                     AAssert(APred("isPositive", "n"))
+               )
+
+    val as1 = prog.execute(as0)
+    println(as1)
+
+
+    //concatenating the lists
+    val as2 = AAssign("xs", AOp("concat", List(AVar("xs"), AVar("ys")))).execute(as1)
+    println(as2)
+
+    //check whether the output list also contains only positive elements
+    prog = ABlock(AAssign("n", AOp("head", List(AVar("xs")))),
+                  AIf(APred("isSome", "n"), AAssign("n", AOp("get", List(AVar("n"))))),
+                  AAssert(APred("isPositive", "n"))                                //TODO -> skip ANone
+            )
+    val as3 = prog.execute(as2)
+    println(as3)
 
 
 
