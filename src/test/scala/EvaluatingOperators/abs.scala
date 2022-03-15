@@ -6,7 +6,7 @@ import org.scalatest.funsuite.AnyFunSuite
 class abs extends AnyFunSuite {
 
   //1a. Concrete values + built-in method (Scala)
-  test("Abs (built-in method(Scala))"){
+  test("abs (built-in method(Scala))"){
     //test with negative Int
     var i: Int = -1
     println(i)
@@ -23,34 +23,34 @@ class abs extends AnyFunSuite {
   }
 
   //1b. Abstract value (AInt) + built-in method (AInt)
-  test("Abs (built-in method (abstract domain))") {
+  test("abs (built-in method (abstract domain))") {
     //test with negative AInt
     val a = AInt(-1)
     val h1 = a.hasConcreteElement(-1)
-    assert(h1 == true)
+    assert(h1)
 
     val b = a.abs
     val h2 = b.hasConcreteElement(1)
     val h3 = !b.hasConcreteElement(-1)
-    assert(h2 == true && h3 == true)
+    assert(h2 && h3)
 
     assert(AInt.zero.<=(b))
 
     //test with positive AInt
     val c = AInt(1)
     val h4 = c.hasConcreteElement(1)
-    assert(h4 == true)
+    assert(h4)
 
     val d = c.abs
     val h5 = b.hasConcreteElement(1)
     val h6 = !b.hasConcreteElement(-1)
-    assert(h5 == true && h6 == true)
+    assert(h5 && h6)
 
     assert(AInt.zero.<=(d))
   }
 
   //1c. Abstract value (AInt) + AOp
-  test("Abs (integration of AInt.abs into AOp)"){
+  test("abs (integration of AInt.abs into AOp)"){
     val test = APred("isPositive", "n")
 
     val prog = ABlock(AAssign("n", AOp("abs", List(AVar("n")))), AAssert(test))
@@ -62,7 +62,7 @@ class abs extends AnyFunSuite {
 
 
   //2a. Applying abs on all elements of a list
-  test ("Abs (applying abs on elements of a list)") {
+  test ("abs (applying abs on elements of a list)") {
     var xs: List[Int] = List(1, -3, 10, -22)
     var temp: List[Int] = List()
     println(xs)
@@ -86,9 +86,9 @@ class abs extends AnyFunSuite {
 
 
   //2b. Applying abs on all elements of an AList
-  test ("Abs: (applying abs on elements of an AList)") {
+  test ("abs: (applying abs on elements of an AList)") {
     val h1 = AMany(AInt.top).hasConcreteElement(List(1, -3, 10, -22))
-    assert(h1 == true)
+    assert(h1)
 
     val init = AState(Map("n" -> AInt.zero, "xs" -> AMany(AInt.top), "ys" -> ANil))
     val as0 = Set(init)
@@ -123,7 +123,7 @@ class abs extends AnyFunSuite {
     val as2 = prog.execute(as1)
     for(a <- as2){
       val h2 = a.lookup("xs").hasConcreteElement(List(1, 3, 10, 22))
-      assert(h2 == true)
+      assert(h2)
       println("out: " +a)
     }
   }

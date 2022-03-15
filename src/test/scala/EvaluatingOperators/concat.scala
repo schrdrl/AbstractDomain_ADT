@@ -1,22 +1,101 @@
 package EvaluatingOperators
-import AList_CleanCode.{AAssign, ACons, AInt, AMany, ANil, AOp, AState, AVar}
+import AList_CleanCode.{AAssert, AAssign, ABlock, ACons, AConst, AInt, AMany, ANil, AOp, APred, AState, AVar, AWhile}
 import org.scalatest.funsuite.AnyFunSuite
 
 class concat extends AnyFunSuite {
-
-  //1.
-  test("concat (concrete)"){
-    val xs: List[Int] = List(-1, -2, -3, -4)
-    val ys: List[Int] = List(0,1,2,3)
-
-    val zs = xs.concat(ys)
-    println(zs)
+  //not a lot of hasConcreteElement tests -> already multiple ones in the other tests
 
 
+  //1a. Concrete values + built-in method (Scala)
+  test("concat (built-in method (Scala))"){
+    //test on non-empty lists
+    val a: List[Int] = List(-1, -2, -3, -4)
+    val b: List[Int] = List(0,1,2,3)
+
+    val c = a.concat(b)
+    println(c)
+
+    //test on empty lists
+    val d: List[Int] = List()
+    val e: List[Int] = List()
+
+    val f = d.concat(e)
+    println(f)
+
+    //test on empty and non empty list
+    val g: List[Int] = List()
+    val h: List[Int] = List(1,2,3)
+
+    val i = g.concat(h)
+    val j = g.concat(h)
+    println(i)
+    println(j)
   }
 
-  //2.
-  test("concat (built-in method on abstract Domain AList)") {
+
+  /**
+   * 1b. Concrete values + built-in method (Scala) -> illustrated
+   *    To illustrate how the built-in concat method in Scala works
+   *    and how the built-in method in the abstract domain of AList
+   *    covers them all
+   */
+  test("concat (illustrated)") {
+    var xs: List[Int] = List(-4, -3, -2, -1)
+    var ys: List[Int] = List(0,1,2,3)
+    println("init: " +xs +", " +ys)
+
+    while (!ys.isEmpty) {
+      xs = xs :+ ys.head
+      ys = ys.tail
+    }
+    assert(ys.isEmpty)
+    assert(!xs.isEmpty)
+    println("out: " +xs)
+  }
+
+
+  /**
+   * 1c. Abstract value + built-in method (Scala) -> illustrated
+   *      - To illustrate that the principle is the same as in example 1b
+   *      - additional: widen, fixpoint iteration
+   */
+  test("concat (abstract: illustrated)") {
+    val xs = ACons(AInt(-4), ACons(AInt(-3), ACons(AInt(-2), ACons(AInt(-1), ANil))))
+    val ys = ACons(AInt(0), ACons(AInt(1), ACons(AInt(2), ACons(AInt(3), AMany(AInt.top)))))
+
+    val h1 = xs.hasConcreteElement(List(-4, -3, -2, -1))
+    val h2 = ys.hasConcreteElement(List(0,1,2,3))
+    assert(h1 && h2)
+
+
+    val init = AState(Map("n" -> AInt.zero,"xs" -> xs, "ys" -> ys))
+    val as0 = Set(init)
+
+    val test = APred("isNil", "ys")
+
+    val body = ABlock(
+      AAssign("n", AOp("head", List(AVar("ys")))),                //head of ys
+      AAssign("n", AOp("get", List(AVar("n")))),
+      AAssign("xs", AOp("append", List(AVar("xs"), AVar("n")))),  //append the head element to xs
+      AAssign("ys", AOp("tail", List(AVar("ys")))),               //reassign the tail of ys to ys
+      AAssign("ys", AOp("get", List(AVar("ys")))),
+    )
+
+    val prog = ABlock(
+      AWhile(!test, body, 5),
+      AAssert(test), //assert ys is empty
+      AAssert(!APred("isNil", "xs")) //assert xs is not empty
+    )
+
+    val as1 = prog.execute(as0)
+    for(a <- as1) {
+      assert(a.lookup("xs").hasConcreteElement(List(-4, -3, -2, -1, 0, 1, 2, 3))) // -> return value of test 1c
+      println("out: "+a)
+    }
+  }
+
+  //1d. Abstract value (AList) + built-in method (AList)
+  test("concat (built-in method (abstract domain))") {
     val a = ACons(AInt(-4), ACons(AInt(-3), ACons(AInt(-2), ACons(AInt(-1),ANil))))
     val b = ACons(AInt(0), ACons(AInt(1), ACons(AInt(2), ACons(AInt(3),ANil))))
     val c = AMany(AInt(10))
@@ -59,15 +138,14 @@ class concat extends AnyFunSuite {
     val m = b2.concat(c)
     println(m) // b ++ c
 
-
     //AMany ++ AMany
     val n = c.concat(d)
     println(n) // AMany([0,10])
 
   }
 
-  //3.
-  test("concat (Test: integration of AList.concat into AOp)"){
+  //1e. Abstract value (AList) + AOp
+  test("concat (integration into AOp)"){
     val a = AState(Map("xs" ->AMany(AInt(None, Some(0))), "ys" -> ANil, "zs"-> ANil))
     val b = AState(Map("xs" ->AMany(AInt(None, Some(0))), "ys" -> ACons(AInt(None, Some(0)),ANil), "zs"-> ANil))
     val c = AState(Map("xs" ->ACons(AInt(None, Some(0)),ANil), "ys" -> ANil, "zs"-> ANil))
@@ -80,8 +158,18 @@ class concat extends AnyFunSuite {
   }
 
 
-  //reverse
+
+  //concat two lists with positive elements
+  test("concat: positive elements"){
+    val init = AState(Map("n" -> AInt.zero,"xs" -> AMany(AInt(Some(2), Some(10))), "ys" -> AMany(AInt(Some(0), None))))
+    val as0 = Set(init)
+
+    //test whether all elements of the given lists are positive
+   val prog = ABlock()
 
 
-  //concat two lists
+
+  }
+
+  //TODO 1f:
 }

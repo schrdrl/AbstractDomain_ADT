@@ -112,6 +112,7 @@ object AInt {
       case (Some(a), Some(b)) => a < b || a == b
     }
   }
+
 }
 
 case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
@@ -268,11 +269,11 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
           val value = AOp("get", List(AVar("n"))).evaluate(AState(Map("n"-> test)))
 
           if (this.lb == that.lb) {
-            if(that.ub == None && lb == None){
+            if(that == AInt.top ||that.ub == None){
               (Set(this), Set())
-            } else if (AInt.<=(this.ub, that.ub)) {
+            } else if (AInt.<(this.ub, that.ub)) {
               (Set(value), Set())
-            } else { // if(AInt.<(that.ub, this.ub)){
+            } else { // if(AInt.<=(that.ub, this.ub)){
               (Set(value), Set(AInt(AInt.binop(_ + _, that.ub, Some(1)), this.ub)))
             }
 
@@ -485,7 +486,7 @@ case class ACons(h: AVal, t: AList) extends AList {
 
 case class AMany(elems: AVal) extends AList {
   def head: AOption = AMaybe(elems)
-  def tail: AOption = AMaybe(elems)
+  def tail: AOption = AMaybe(AMany(elems))
   def flatten: List[AVal] = List(elems)
   def length: AInt = AInt(Some(0), None)
 

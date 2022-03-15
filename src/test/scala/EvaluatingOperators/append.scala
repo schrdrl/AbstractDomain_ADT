@@ -3,16 +3,29 @@ import AList_CleanCode.{AAssert, AAssign, ABlock, ACons, AConst, AInt, AList, AM
 import org.scalatest.funsuite.AnyFunSuite
 
 class append extends AnyFunSuite {
-  test("Append (concrete)") {
+
+  //1a. Concrete values + built-in method (Scala)
+  test("append (built-in method(Scala))") {
+
+    //test with empty list
     var xs: List[Int] = List()
     xs = xs :+ 1
     xs = xs :+ 2
     xs = xs :+ 3
-    println(xs)
+    println(xs +"\n")
+    assert(!xs.isEmpty)
 
+    //test with non-empty list
+    var ys: List[Int] = List(0)
+    ys = ys :+ 1
+    ys = ys :+ 2
+    ys = ys :+ 3
+    println(ys)
+    assert(!ys.isEmpty)
   }
 
-  test("Append (built-in method on abstract Domain AList)") {
+  //1b. Abstract value (AList) + built-in method (AList)
+  test("append (built-in method on abstract Domain AList)") {
     //ANil
     var ws : AList = ANil
     ws = ws.append(AInt(1))
@@ -50,6 +63,7 @@ class append extends AnyFunSuite {
     println(zs+"\n")
   }
 
+  //1c. Abstract value (AList) + AOp
   test("Append (Test: integration of AList.append into AOp )") {
     val init = AState(Map("n" -> AInt.zero, "xs" -> ANil))
     val test = APred("isNil", "xs")

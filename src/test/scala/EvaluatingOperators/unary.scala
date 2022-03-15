@@ -6,121 +6,61 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class unary extends AnyFunSuite {
 
-  //integer value
-  test ("Unary: Int") {
-    var i: Int = - 1
-    println (i)
-    i = -i
-    println (i)
+  //1a. Concrete values + built-in method (Scala)
+  test("unary (built-in method(Scala))"){
+    //test with negative Int
+    var i: Int = -1
+    println(i)
+    i = i.unary_-
+    println(i)
+    assert(i >=0 )
 
+    //test with positive Int
     var j = 1
     println(j)
-    j = -j
+    j = j.unary_-
     println(j)
+    assert(j <=0 )
   }
 
-  test("Unary (built-in method on abstract Domain AInt)") {
-    val a = AInt(-5)
+  //1b. Abstract value (AInt) + built-in method (AInt)
+  test("unary (built-in method (abstract domain))") {
+    //test with negative AInt
+    val a = AInt(-1)
+    val h1 = a.hasConcreteElement(-1)
+    assert(h1)
+
     val b = a.unary_-
+    val h2 = b.hasConcreteElement(1)
+    val h3 = !b.hasConcreteElement(-1)
+    assert(h2 && h3)
 
-    assert(AInt.<=(Some(0), b.lb) && AInt.<=(Some(0), b.ub))
+    assert(AInt.zero.<=(b))
 
-    val c = AInt(5)
+    //test with positive AInt
+    val c = AInt(1)
+    val h4 = c.hasConcreteElement(1)
+    assert(h4)
+
     val d = c.unary_-
+    val h5 = b.hasConcreteElement(1)
+    val h6 = !b.hasConcreteElement(-1)
+    assert(h5 && h6)
 
-    assert(AInt.<=(d.lb, Some(0)) && AInt.<=(d.ub, Some(0)))
+    assert(AInt.zero.<=(d))
   }
 
 
+  //1c. Abstract value (AInt) + AOp
+  test("unary (integration of AInt.unary into AOp)"){
 
-  test("Unary (Test: integration of AInt.unary into AOp)"){
-    val as0 = Set(AState(Map("n"-> AInt(-5))), AState(Map("n"-> AInt(None,Some(-1))))) //negative values
-    var test = APred("isPositive", "n")
-    var prog = ABlock(AAssign("n", AOp("-", List(AVar("n")))), AAssert(test))
-
-    val as2 = prog.execute(as0)
-    println(as2)
-
-    val as1 = Set(AState(Map("n"-> AInt(5))), AState(Map("n"-> AInt(Some(1), None)))) //positive values
-    test = APred("isNegative", "n")
-    prog = ABlock(AAssign("n", AOp("-", List(AVar("n")))), AAssert(test))
-
-    val as3 = prog.execute(as1)
-    println(as3)
-  }
-
-
-/*
-  test("Unary:List (sorting lists)"){
-    var xs : List[Int] = List(1,2,3,4,5,6)
-    var ys : List[Int] = List()
-    var zs : List[Int] = List()
-    var n = xs.head
-
-    //sorting values of xs after applying unary_- on certain values
-    while(!xs.isEmpty){
-      if(0 <= n){
-        n = xs.head.unary_-
-      }else{
-        n = xs.head
-      }
-
-      if(n < 0) {
-        ys = n :: ys
-      }else{
-        zs = n :: zs
-      }
-     xs = xs.tail
-    }
-
-    assert(xs.isEmpty)
-    assert(!ys.isEmpty)
-    assert(!zs.isEmpty)
-
-    println("xs: "+xs)
-    println("ys: "+ys)
-    println("zs: "+zs +"\n")
-
-    ys = ys.reverse
-    zs = zs.reverse
-
-    println("ys: "+ys)
-    println("zs: "+zs)
-
-  }
-
-
-  //TODO: rethink test case structure
-  test ("Unary: (Test: integration of AInt.unary into AWhile") {
-    val xs = ACons(AInt(Some(0), None), ACons(AInt(Some(0), None), ACons(AInt(Some(0), None), ACons(AInt(Some(0), None), ACons(AInt(Some(0), None), ANil)))))
-    val init = AState(Map("n" -> AInt.zero, "xs" -> xs, "ys" -> ANil, "zs" -> ANil))
-    val as0 = Set(init)
-    println("init: "+ as0)
-
-    val test = APred("isNil", "xs")
-    val test_elem = APred("isPositive", "n")
-    val test_ys = APred("isNil", "ys")
-    val test_zs = APred("isNil", "zs")
-
-
-    //sorting values of xs after applying unary_- on certain values
-    val body = ABlock(
-      AIf(test_elem, ABlock(AAssign("n", AOp("head", List(AVar("xs")))), AAssign("n",AOp("get", List(AVar("n")))), AAssign("n", AOp("-", List(AVar("n"))))),ABlock(AAssign("n", AOp("head", List(AVar("xs")))), AAssign("n",AOp("get", List(AVar("n")))))),
-      AIf(!test_elem, AAssign("ys", AOp("prepend", List(AVar("ys"), AVar("n")))), AAssign("zs", AOp("prepend", List(AVar("zs"), AVar("n"))))),
-      AAssign("xs", AOp("tail", List(AVar("xs")))), AAssign("xs",AOp("get", List(AVar("xs"))))
-
-    )
-
-    val prog = ABlock(AWhile(!test, body, 5), AAssert(test))
+    val prog = AAssign("n", AOp("-", List(AVar("n"))))
+    val as0 = Set(AState(Map("n"-> AInt(-5))), AState(Map("n"-> AInt(1))), AState(Map("n"-> AInt.top)))
+    for (a <- as0) println("init: " +a)
 
     val as1 = prog.execute(as0)
-    println(as1)
-
-
+    for (a <- as1) println("out: " +a)
   }
-
-
- */
 
 }
 
