@@ -159,7 +159,8 @@ class concat extends AnyFunSuite {
 
 
 
-  //concat two lists with positive elements
+  //TODO
+  //1f. concat two lists with positive elements
   test("concat: positive elements"){
     val init = AState(Map("n" -> AInt.zero,"xs" -> AMany(AInt(Some(2), Some(10))), "ys" -> AMany(AInt(Some(0), None))))
     val as0 = Set(init)
@@ -171,5 +172,5 @@ class concat extends AnyFunSuite {
 
   }
 
-  //TODO 1f:
+
 }
