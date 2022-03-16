@@ -52,7 +52,6 @@ class reverse extends AnyFunSuite {
   }
 
 
-  //TODO -recheck
   /**
    * 1c. Abstract value + built-in method (Scala) -> illustrated
    *      - To illustrate that the principle is the same as in example 1b

@@ -1,5 +1,5 @@
 package EvaluatingOperators
-import AList_CleanCode.{AAssert, AAssign, ABlock, ACons, AConst, AIf, AInt, AMany, ANil, AOp, APred, AState, AVar, AWhile}
+import AList_CleanCode.{AAssert, AAssign, AAssume, ABlock, ACons, AConst, AIf, AInt, AMany, ANil, AOp, APred, ASkip, AState, AVar, AWhile}
 import org.scalatest.funsuite.AnyFunSuite
 
 class concat extends AnyFunSuite {
@@ -158,41 +158,45 @@ class concat extends AnyFunSuite {
   }
 
 
-  //TODO recheck
+
   //1f. concatenate two lists with positive elements, check whether the output list also contains only positive elements
   test("concat: positive elements"){
     val init = AState(Map("n" -> AInt.zero,"xs" -> AMany(AInt(Some(2), Some(10))), "ys" -> AMany(AInt(Some(5), Some(1999)))))
     val as0 = Set(init)
 
 
-    //test whether all elements of the given lists (-> AMany) are positive
-   var prog = ABlock(AAssign("n", AOp("head", List(AVar("xs")))),  //test for xs
-                     AIf(APred("isSome", "n"), AAssign("n", AOp("get", List(AVar("n"))))),
-                     AAssert(APred("isPositive", "n")),                                  //TODO -> skip ANone
-                     AAssign("n", AOp("head", List(AVar("ys")))),  //test for ys
+    //Assumption: AMany is not ANil
+    val as1 = AAssume(!APred("isNil", "xs")).execute(as0)
+    val as2 = AAssume(!APred("isNil", "ys")).execute(as1)
+
+    //Test whether all elements of the given lists (-> AMany) are positive
+   var prog = ABlock(AAssign("n", AOp("head", List(AVar("xs")))),                       //test for xs
+                     AIf(APred("isSome", "n"), AAssign("n", AOp("get", List(AVar("n")))), ASkip),
+                     AAssert(APred("isPositive", "n")),
+
+                     AAssign("n", AOp("head", List(AVar("ys")))),                       //test for ys
                      AIf(APred("isSome", "n"), AAssign("n", AOp("get", List(AVar("n"))))),
                      AAssert(APred("isPositive", "n"))
                )
 
-    val as1 = prog.execute(as0)
-    println(as1)
-
-
-    //concatenating the lists
-    val as2 = AAssign("xs", AOp("concat", List(AVar("xs"), AVar("ys")))).execute(as1)
-    println(as2)
-
-    //check whether the output list also contains only positive elements
-    prog = ABlock(AAssign("n", AOp("head", List(AVar("xs")))),
-                  AIf(APred("isSome", "n"), AAssign("n", AOp("get", List(AVar("n"))))),
-                  AAssert(APred("isPositive", "n"))                                //TODO -> skip ANone
-            )
     val as3 = prog.execute(as2)
     println(as3)
 
 
+    //concatenating the lists
+    val as4 = AAssign("xs", AOp("concat", List(AVar("xs"), AVar("ys")))).execute(as3)
+    println(as4)
 
+    //check whether the output list also contains only positive elements
+    prog = ABlock(AAssign("n", AOp("head", List(AVar("xs")))),
+                  AIf(APred("isSome", "n"), AAssign("n", AOp("get", List(AVar("n"))))),
+                  AAssert(APred("isPositive", "n"))
+            )
+    val as5 = prog.execute(as4)
+    println(as5)
   }
+
+  //concat: reverse -> append, prepend
 
 
 }
