@@ -232,7 +232,7 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
   def intersect(that: AVal): AOption = {
     that match {
       case that: AInt =>
-        if((this.lb != None && this.ub != None && that.lb != None && that.ub != None) && ((AInt.<(this.lb, that.lb) && AInt.<(this.ub, that.lb)) || (AInt.<(that.ub, this.lb) && AInt.<(that.ub, this.ub)))) ANone
+        if((this != AInt.top && that != AInt.top) && ((AInt.<(this.lb, that.lb) && AInt.<(this.ub, that.lb)) || (AInt.<(that.ub, this.lb) && AInt.<(that.ub, this.ub)))) ANone
         else {
           val newlb = if (AInt.<=(this.lb, that.lb) || this.lb == None) that.lb else this.lb
           val newub = if (this.ub == None) that.ub else if(that.ub == None) this.ub else if (AInt.<=(this.ub, that.ub)) this.ub else that.ub
