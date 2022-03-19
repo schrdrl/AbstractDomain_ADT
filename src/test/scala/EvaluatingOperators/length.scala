@@ -125,7 +125,7 @@ class length extends AnyFunSuite {
   //1e. Abstract value (AList) + AOp
   test("length (integration into AOp)") {
     val xs = ACons(AInt(Some(5), Some(10)), ACons(AInt(Some(-3), Some(8)), ACons(AInt(Some(4), Some(4)), ANil)))
-    val as0 = Set(AState(Map("n" -> AInt.top, "xs" -> xs)), AState(Map("n"-> AInt.top, "xs" -> ANil)) , AState(Map("n"-> AInt.top, "xs" -> AMany(AInt.top))))
+    val as0 = Set(AState(Map("n" -> AInt.zero, "xs" -> xs)), AState(Map("n"-> AInt.zero, "xs" -> ANil)) , AState(Map("n"-> AInt.zero, "xs" -> AMany(AInt.top))))
 
     val test = APred("isPositive", "n")
 
