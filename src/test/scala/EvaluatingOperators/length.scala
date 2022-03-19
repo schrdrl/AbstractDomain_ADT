@@ -6,7 +6,7 @@ import org.scalatest.funsuite.AnyFunSuite
 class length extends AnyFunSuite {
 
   //1a. Concrete values + built-in method (Scala)
-  test("head (built-in method (Scala))") {
+  test("length (built-in method (Scala))") {
 
     //test with empty-list
     val xs: List[Int] = List()
