@@ -144,7 +144,7 @@ class concat extends AnyFunSuite {
     //ACons ++ AMany
     val b2 = ACons(AInt(0), ACons(AInt(1), ACons(AInt(2), ACons(AInt(3),AMany(AInt.zero)))))
     val m = b2.concat(c)
-    assert(m == b_c) // b ++ c
+    assert(m == ACons(AInt(0), ACons(AInt(1), ACons(AInt(2), ACons(AInt(3),AMany(AInt(Some(0), Some(10)))))))) // b2 ++ c
 
     //AMany ++ AMany
     val n = c.concat(d)
