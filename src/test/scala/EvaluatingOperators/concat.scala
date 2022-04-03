@@ -13,14 +13,14 @@ class concat extends AnyFunSuite {
     val b: List[Int] = List(0,1,2,3)
 
     val c = a.concat(b)
-    println(c)
+    assert(c == List(-1, -2, -3, -4, 0, 1, 2, 3))
 
     //test on empty lists
     val d: List[Int] = List()
     val e: List[Int] = List()
 
     val f = d.concat(e)
-    println(f)
+    assert(f == List())
 
     //test on empty and non empty list
     val g: List[Int] = List()
@@ -28,8 +28,8 @@ class concat extends AnyFunSuite {
 
     val i = g.concat(h)
     val j = g.concat(h)
-    println(i)
-    println(j)
+    assert(i == List(1, 2, 3))
+    assert(j == List(1, 2, 3))
   }
 
 
@@ -101,46 +101,54 @@ class concat extends AnyFunSuite {
     val c = AMany(AInt(10))
     val d = AMany(AInt.zero)
 
+    val a_b = ACons(AInt(-4), ACons(AInt(-3), ACons(AInt(-2), ACons(AInt(-1),ACons(AInt(0), ACons(AInt(1), ACons(AInt(2), ACons(AInt(3),ANil))))))))
+    val b_a = ACons(AInt(0), ACons(AInt(1), ACons(AInt(2), ACons(AInt(3),ACons(AInt(-4), ACons(AInt(-3), ACons(AInt(-2), ACons(AInt(-1),ANil))))))))
+
+    val b_c = ACons(AInt(0), ACons(AInt(1), ACons(AInt(2), ACons(AInt(3),AMany(AInt(10))))))
+    val c_b = AMany(AInt(Some(0), Some(10)))
+
     //ANil ++ ANil
     val e = ANil.concat(ANil)
-    println(e) //ANil
+    assert(e == ANil) //ANil
 
     //ANil ++ AMany
     val f = ANil.concat(AMany(AInt.zero))
-    println(f) //AMany([0;0])
+    assert(f == AMany(AInt.zero)) //AMany([0;0])
 
     //AMany ++ ANil
     val g = AMany(AInt.zero).concat(ANil)
-    println(g) //AMany([0;0])
+    assert(g == AMany(AInt.zero))  //AMany([0;0])
 
     //ANil ++ ACons
     val h = ANil.concat(a)
-    println(h) //a
+    assert(h == a) //a
 
     //ACons ++ ANil
     val i = a.concat(ANil)
-    println(i) //a
+    assert(i == a) //a
 
     //ACons ++ ACons
     val j = a.concat(b)
-    println(j) //a++b
+    assert(j == a_b) //a++b
+    assert(j != b_a)
 
     //AMany ++ ACons
     val k = c.concat(b)
-    println(k) //AMany([0,10])
+    assert(k == c_b)//AMany([0,10])
 
     //ACons ++ AMany
     val l = b.concat(c)
-    println(l) // b ++ c
+    assert(l == b_c) // b ++ c
+    assert(l != c_b)
 
     //ACons ++ AMany
     val b2 = ACons(AInt(0), ACons(AInt(1), ACons(AInt(2), ACons(AInt(3),AMany(AInt.zero)))))
     val m = b2.concat(c)
-    println(m) // b ++ c
+    assert(m == b_c) // b ++ c
 
     //AMany ++ AMany
     val n = c.concat(d)
-    println(n) // AMany([0,10])
+    assert(n == c_b) // AMany([0,10])
 
   }
 
@@ -150,11 +158,13 @@ class concat extends AnyFunSuite {
     val b = AState(Map("xs" ->AMany(AInt(None, Some(0))), "ys" -> ACons(AInt(None, Some(0)),ANil), "zs"-> ANil))
     val c = AState(Map("xs" ->ACons(AInt(None, Some(0)),ANil), "ys" -> ANil, "zs"-> ANil))
     val d = AState(Map("xs" ->ACons(AInt(None, Some(0)),ANil), "ys" -> ACons(AInt(None, Some(0)),AMany(AInt.top)), "zs"-> ANil))
+    val as0 = Set(a,b,c,d)
+    for(a <- as0) println("input: " +a)
 
     val op = AAssign("zs", AOp("concat", List(AVar("xs"), AVar("ys"))))
 
-    val as0 = op.execute(Set(a,b,c,d))
-    for(a<-as0) println(a)
+    val as1 = op.execute(as0)
+    for(a <- as1) println("out: " +a)
   }
 
 
@@ -163,7 +173,6 @@ class concat extends AnyFunSuite {
   test("concat: positive elements"){
     val init = AState(Map("n" -> AInt.zero,"xs" -> AMany(AInt(Some(2), Some(10))), "ys" -> AMany(AInt(Some(5), Some(1999)))))
     val as0 = Set(init)
-
 
     //Assumption: AMany is not ANil
     val as1 = AAssume(!APred("isNil", "xs")).execute(as0)

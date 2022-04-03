@@ -25,6 +25,7 @@ class ATestTests extends AnyFunSuite {
     val a = AInt.one
     val b = AInt.apply(10)
     val c = AInt.apply(-1, 5)
+    val d = AInt.top
 
     val pred1 = APred("isNegative","n")
     println("pos: "+ pred1.positive(a))
@@ -37,6 +38,10 @@ class ATestTests extends AnyFunSuite {
     val pred3 = APred("isNegative","n")
     println("pos: "+pred3.positive(c))
     println("neg: "+pred3.negative(c))
+
+    val pred4 = APred("isNegative","n")
+    println("pos: "+pred4.positive(d))
+    println("neg: "+pred4.negative(d))
   }
 
   test("isPositive"){

@@ -11,14 +11,14 @@ class abs extends AnyFunSuite {
     var i: Int = -1
     println(i)
     i = i.abs
-    println(i)
+    assert(i == 1)
     assert(i >=0 )
 
     //test with positive Int
     var j = 1
     println(j)
     j = j.abs
-    println(j)
+    assert(j == 1)
     assert(j >=0 )
   }
 
@@ -42,23 +42,38 @@ class abs extends AnyFunSuite {
     assert(h4)
 
     val d = c.abs
-    val h5 = b.hasConcreteElement(1)
-    val h6 = !b.hasConcreteElement(-1)
+    val h5 = d.hasConcreteElement(1)
+    val h6 = !d.hasConcreteElement(-1)
     assert(h5 && h6)
 
     assert(AInt.zero.<=(d))
+
+    //test with any AInt
+    val e = AInt.top
+    val h7 = e.hasConcreteElement(1)
+    val h8 = e.hasConcreteElement(-1)
+    assert(h7 && h8)
+
+    val f = c.abs
+    val h9 = f.hasConcreteElement(1)
+    val h10 = !f.hasConcreteElement(-1)
+    assert(h9 && h10)
+
+    assert(AInt.zero.<=(f))
   }
 
   //1c. Abstract value (AInt) + AOp
   test("abs (integration of AInt.abs into AOp)"){
+    val as0 = Set(AState(Map("n"-> AInt(-1))), AState(Map("n"-> AInt(2))),AState(Map("n"-> AInt.top)))
+
     val test = APred("isPositive", "n")
 
     val prog = ABlock(AAssign("n", AOp("abs", List(AVar("n")))), AAssert(test))
-    val as0 = Set(AState(Map("n"-> AInt(-1))), AState(Map("n"-> AInt(1))), AState(Map("n"-> AInt.top)))
-    val as1 = prog.execute(as0)
-    println(as1)
-  }
+    for(a <- as0) println("init: " +a)
 
+    val as1 = prog.execute(as0)
+    for(a <- as1) println("out: "+a)
+  }
 
 
   //2a. Applying abs on all elements of a list
@@ -80,6 +95,7 @@ class abs extends AnyFunSuite {
       temp = temp.tail
     }
     assert(temp.isEmpty)
+    assert(xs == List(1,3,10,22))
     println(xs)
   }
 

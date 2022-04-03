@@ -11,13 +11,13 @@ class length extends AnyFunSuite {
     //test with empty-list
     val xs: List[Int] = List()
     val length_xs = xs.length
-    println(length_xs)
+    assert(length_xs == 0)
     assert(0 <= length_xs)
 
     //test with non-empty list
     val ys: List[Int] = List(9, 7, 4, 5)
     val length_ys = ys.length
-    println(length_ys)
+    assert(length_ys == 4)
     assert(0 <= length_ys)
   }
 
@@ -35,7 +35,7 @@ class length extends AnyFunSuite {
       xs = xs.tail
       n = n + 1
     }
-    println(n)  //returns 7
+    assert(n == 7)  //returns 7
     assert(n >= 0)
   }
 
