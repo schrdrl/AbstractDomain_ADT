@@ -32,7 +32,7 @@ sealed trait ABool extends AVal {
     }
   }
 
-  def ==(that: ABool): ABool = {
+  def eq(that: ABool): ABool = {
     (this, that) match {
       case (AFalse, AFalse) | (ATrue, ATrue) => ATrue
       case (AFalse, ATrue) | (ATrue, AFalse) => AFalse
@@ -41,13 +41,14 @@ sealed trait ABool extends AVal {
   }
 
 
-  def !=(that: ABool): ABool = {
+  def noneq(that: ABool): ABool = {
     (this, that) match {
       case (AFalse, AFalse) | (ATrue, ATrue) => AFalse
       case (AFalse, ATrue) | (ATrue, AFalse) => ATrue
       case (_: ABool, _: ABool) => AUnknown
     }
   }
+
 
 
   def &&(that: AVal): ABool = {
@@ -362,13 +363,13 @@ sealed trait AList extends AVal {
   def hasConcreteElement(that:Any) : Boolean ={
     (this, that) match {
       case (ANil, List()) => true
-      case (ANil, list: List[Int]) => false
+      case (ANil, list: List[Any]) => false
 
       case (ACons(h,t), List()) => false
-      case (ACons(h,t), list: List[Int]) => h.hasConcreteElement(list.head) && t.hasConcreteElement(list.tail)
+      case (ACons(h,t), list: List[Any]) => h.hasConcreteElement(list.head) && t.hasConcreteElement(list.tail)
 
       case (AMany(ae), List()) => true
-      case (AMany(ae), list: List[Int]) =>
+      case (AMany(ae), list: List[Any]) =>
         var hasElem = ae.hasConcreteElement(list.head)
         for (l <- list.tail) hasElem = hasElem && ae.hasConcreteElement(l)
         hasElem
@@ -390,7 +391,6 @@ sealed trait AList extends AVal {
       case (ACons(a, as), ACons(b, bs)) => ACons(a widen b, as widen bs)
     }
   }
-
 
   def intersect(that: AVal): AList = {
     (this, that) match {
@@ -425,6 +425,7 @@ sealed trait AList extends AVal {
 
         while (test.positive(axs).isEmpty && test.negative(axs).nonEmpty && !tailIsAMany) { //while !isNil
 
+          //TODO recheck
           val head = AOp("get",List(AConst(axs.head))).evaluate(state).asInstanceOf[AInt]
           val tail = AOp("get",List(AConst(axs.tail))).evaluate(state).asInstanceOf[AList]
 
@@ -447,6 +448,7 @@ sealed trait AList extends AVal {
   //prepends an element on the front a an AList value
   def prepend(elem: AVal): AList = ACons(elem, this)
 
+
   //appends an element the the end a an AList value
   def append(elem: AVal): AList =
     this match {
@@ -463,7 +465,7 @@ sealed trait AList extends AVal {
     case (ANil, AMany(e)) => AMany(e)
 
     case (AMany(e), ANil) => AMany(e)
-    case (AMany(e1), AMany(e2)) => AMany((e1.asInstanceOf[AInt].union(e2)))
+    case (AMany(e1), AMany(e2)) => AMany(e1.asInstanceOf[AInt].union(e2))
     case (AMany(e), ACons(h, t)) => AMany(e.asInstanceOf[AInt].union(h)).concat(t)
 
     case (ACons(h, t), ANil) => ACons(h, t)

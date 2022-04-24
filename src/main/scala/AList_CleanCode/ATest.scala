@@ -40,7 +40,6 @@ case class APred(op: String, name: String) extends ATest {
       case ("isPositive", ai : AInt) => if(ai.===(AInt(Some(0), None))._1.nonEmpty) ai.===(AInt(Some(0), None))._1 else Set()
 
       case _ => throw new Exception("this combination of op and name is not implemented")
-
     }
   }
 

@@ -1,5 +1,5 @@
 package EvaluatingOperators
-import AList_CleanCode.{AAssign, ABlock, ACons, AIf, AInt, AList, AMany, AMaybe, ANil, ANone, AOp, APred, ASome, AState, AVar}
+import AList_CleanCode.{AAssign, ABlock, ACons, AIf, AInt, AList, AMany, AMaybe, ANil, ANone, AOp, APred, ASome, AState, ATrue, AUnknown, AVar}
 import org.scalatest.funsuite.AnyFunSuite
 
 
@@ -26,19 +26,19 @@ class head extends AnyFunSuite {
   test("head (built-in method (abstract domain))"){
 
     //test with ANil -> workaround with AOption: ANone
-    val ys : AList = ANil
-    val o = ys.head
+    val xs : AList = ANil
+    val o = xs.head
     assert(o == ANone)
 
     val h1 = ANil.hasConcreteElement(List())
     assert(h1)
 
     //test with ACons
-    val xs : AList = ACons(AInt(9), ACons(AInt(7), AMany(AInt(4))))
-    val n = xs.head
+    val ys : AList = ACons(AInt(9), ACons(AInt(7), AMany(AInt(4))))
+    val n = ys.head
     assert(n == ASome(AInt(9)))
 
-    val h2 = xs.hasConcreteElement(List(9,7,4))
+    val h2 = ys.hasConcreteElement(List(9,7,4))
     assert(h2)
 
     //test with AMany -> workaround with AOption: AMaybe
@@ -68,5 +68,4 @@ class head extends AnyFunSuite {
 
     for(a <- as1) println("out: "+a)
   }
-
 }

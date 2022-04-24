@@ -29,8 +29,8 @@ case class AOp(op: String, args: List[AExpr]) extends AExpr {
       case ("/", List(l: AInt, r: AInt)) => l / r
 
       //ABool
-      case ("!=", List(l:ABool, r:ABool)) => l.!=(r)
-      case ("==", List(l:ABool, r:ABool)) => l.==(r)
+      case ("!=", List(l:ABool, r:ABool)) => l.noneq(r)
+      case ("==", List(l:ABool, r:ABool)) => l.eq(r)
       case ("&&", List(l:ABool, r:ABool)) => l.&&(r)
       case ("||", List(l:ABool, r:ABool)) => l.||(r)
       case ("!", List(ab:ABool)) => ab.!
