@@ -175,8 +175,8 @@ class concat extends AnyFunSuite {
     val as0 = Set(init)
 
     //Assumption: AMany is not ANil
-    val as1 = AAssume(!APred("isNil", "xs")).execute(as0)
-    val as2 = AAssume(!APred("isNil", "ys")).execute(as1)
+    val as1 = AAssume(APred("isNil", "xs").unary_!()).execute(as0)
+    val as2 = AAssume(APred("isNil", "ys").unary_!()).execute(as1)
 
     //Test whether all elements of the given lists (-> AMany) are positive
    var prog = ABlock(AAssign("n", AOp("head", List(AVar("xs")))),                       //test for xs

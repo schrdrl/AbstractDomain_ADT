@@ -36,8 +36,8 @@ case class APred(op: String, name: String) extends ATest {
       case ("isSome", ASome(e)) => Set(ASome(e))
       case ("isSome", AMaybe(e)) => Set(ASome(e))
 
-      case ("isNegative", ai : AInt) => if(ai.===(AInt(None, Some(0)))._1.nonEmpty) ai.===(AInt(None, Some(0)))._1 else Set()
-      case ("isPositive", ai : AInt) => if(ai.===(AInt(Some(0), None))._1.nonEmpty) ai.===(AInt(Some(0), None))._1 else Set()
+      case ("isNegative", ai : AInt) => if(ai.comp(AInt(None, Some(0)))._1.nonEmpty) ai.comp(AInt(None, Some(0)))._1 else Set()
+      case ("isPositive", ai : AInt) => if(ai.comp(AInt(Some(0), None))._1.nonEmpty) ai.comp(AInt(Some(0), None))._1 else Set()
 
       case _ => throw new Exception("this combination of op and name is not implemented")
     }
@@ -57,8 +57,8 @@ case class APred(op: String, name: String) extends ATest {
       case ("isSome", ASome(e)) => Set()
       case ("isSome", AMaybe(e)) => Set(ANone)
 
-      case ("isNegative", ai : AInt) => if(ai.===(AInt(None, Some(0)))._2.nonEmpty) ai.===(AInt(None, Some(0)))._2 else Set()
-      case ("isPositive", ai : AInt) => if(ai.===(AInt(Some(0), None))._2.nonEmpty) ai.===(AInt(Some(0), None))._2 else Set()
+      case ("isNegative", ai : AInt) => if(ai.comp(AInt(None, Some(0)))._2.nonEmpty) ai.comp(AInt(None, Some(0)))._2 else Set()
+      case ("isPositive", ai : AInt) => if(ai.comp(AInt(Some(0), None))._2.nonEmpty) ai.comp(AInt(Some(0), None))._2 else Set()
 
       case _ => throw new Exception("this combination of op and name is not implemented")
     }

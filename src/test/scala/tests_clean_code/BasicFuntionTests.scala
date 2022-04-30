@@ -126,7 +126,7 @@ class BasicFuntionTests extends AnyFunSuite {
   }
 
 
-  test("===: AInt"){
+  test("comp: AInt"){
     val a = AInt.one
     val b = AInt.apply(10)
     val c = AInt.apply(-1, 5)
@@ -136,84 +136,84 @@ class BasicFuntionTests extends AnyFunSuite {
 
     println("this: "+AInt.zero)
     println("that: "+e)
-    println(AInt.zero.===(e)._1)
-    println(AInt.zero.===(e)._2+"\n")
+    println(AInt.zero.comp(e)._1)
+    println(AInt.zero.comp(e)._2+"\n")
 
     println("this: "+e)
     println("that: "+AInt.zero)
-    println(e.===(AInt.zero)._1)
-    println(e.===(AInt.zero)._2+"\n")
+    println(e.comp(AInt.zero)._1)
+    println(e.comp(AInt.zero)._2+"\n")
 
 
     println("this: "+a)
     println("that: "+a)
-    println(a.===(a)._1)
-    println(a.===(a)._2+"\n")
+    println(a.comp(a)._1)
+    println(a.comp(a)._2+"\n")
 
     println("this: "+a)
     println("that: "+b)
-    println(a.===(b)._1)
-    println(a.===(b)._2+"\n")
+    println(a.comp(b)._1)
+    println(a.comp(b)._2+"\n")
 
     println("this: "+a)
     println("that: "+c)
-    println(a.===(c)._1)
-    println(a.===(c)._2+"\n")
+    println(a.comp(c)._1)
+    println(a.comp(c)._2+"\n")
 
     println("this: "+b)
     println("that: "+a)
-    println(b.===(a)._1)
-    println(b.===(a)._2+"\n")
+    println(b.comp(a)._1)
+    println(b.comp(a)._2+"\n")
 
     println("this: "+b)
     println("that: "+c)
-    println(b.===(c)._1)
-    println(b.===(c)._2+"\n")
+    println(b.comp(c)._1)
+    println(b.comp(c)._2+"\n")
 
     println("this: "+c)
     println("that: "+a)
-    println(c.===(a)._1)
-    println(c.===(a)._2+"\n")
+    println(c.comp(a)._1)
+    println(c.comp(a)._2+"\n")
 
     println("this: "+c)
     println("that: "+b)
-    println(c.===(b)._1)
-    println(c.===(b)._2+"\n")
+    println(c.comp(b)._1)
+    println(c.comp(b)._2+"\n")
 
     println("this: "+c)
     println("that: "+d)
-    println(c.===(d)._1)
-    println(c.===(d)._2+"\n")
+    println(c.comp(d)._1)
+    println(c.comp(d)._2+"\n")
 
     println("this: "+c)
     println("that: "+e)
-    println(c.===(e)._1)
-    println(c.===(e)._2+"\n")
+    println(c.comp(e)._1)
+    println(c.comp(e)._2+"\n")
 
     println("this: "+c)
     println("that: "+f)
-    println(c.===(f)._1)
-    println(c.===(f)._2+"\n")
+    println(c.comp(f)._1)
+    println(c.comp(f)._2+"\n")
 
     println("this: "+d)
     println("that: "+e)
-    println(d.===(e)._1)
-    println(d.===(e)._2+"\n")
+    println(d.comp(e)._1)
+    println(d.comp(e)._2+"\n")
 
     println("this: "+e)
     println("that: "+d)
-    println(e.===(d)._1)
-    println(e.===(d)._2+"\n")
+    println(e.comp(d)._1)
+    println(e.comp(d)._2+"\n")
 
     println("this: "+d)
     println("that: "+f)
-    println(d.===(f)._1)
-    println(d.===(f)._2+"\n")
+    println(d.comp(f)._1)
+    println(d.comp(f)._2+"\n")
 
     println("this: "+f)
     println("that: "+d)
-    println(f.===(d)._1)
-    println(f.===(d)._2+"\n")
+    println(f.comp(d)._1)
+    println(f.comp(d)._2+"\n")
   }
 
 
