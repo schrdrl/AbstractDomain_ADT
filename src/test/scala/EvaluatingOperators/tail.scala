@@ -26,7 +26,7 @@ class tail extends AnyFunSuite {
 
     //test with ANil -> workaround with AOption: ANone
     val ys : AList = ANil
-    val o = ys.tail
+    val o = ys.tailOption
     println(o)
 
     val h1 = ANil.hasConcreteElement(List())
@@ -34,7 +34,7 @@ class tail extends AnyFunSuite {
 
     //test with ACons
     val xs : AList = ACons(AInt(9), ACons(AInt(7), AMany(AInt(4))))
-    val n = xs.tail
+    val n = xs.tailOption
     println(n)
 
     val h2 = xs.hasConcreteElement(List(9,7,4))
@@ -42,7 +42,7 @@ class tail extends AnyFunSuite {
 
     //test with AMany -> workaround with AOption: AMaybe
     val zs : AList = AMany(AInt.top)
-    val p = zs.tail
+    val p = zs.tailOption
     println(p)
 
     val h3 = zs.hasConcreteElement(List(9,7,4))

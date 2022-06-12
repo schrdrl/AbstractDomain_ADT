@@ -23,7 +23,7 @@ case class AAssert(cond: ATest) extends AStmt {
 
     if(neg.isEmpty) pos
     else {
-      throw new Exception ("Exception occured while performing AAssert. Reason: neg is not empty")
+      throw new Exception ("Exception occured while performing AAssert. Reason: neg is not empty for condition " +cond)
     }
   }
 }
@@ -60,8 +60,7 @@ case class ABlock(stmts: List[AStmt]) extends AStmt {
 }
 
 //Abstract transformer: AWhile is an abstract representation of a while loop
-case class AWhile(test: ATest, body: AStmt, max: Int = Int.MaxValue)
-  extends AStmt {
+case class AWhile(test: ATest, body: AStmt, max: Int = Int.MaxValue) extends AStmt {
   def execute(as0: Set[AState]): Set[AState] = {
 
     var as = AState.widenAll(as0)

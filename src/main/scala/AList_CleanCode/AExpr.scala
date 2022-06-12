@@ -39,8 +39,8 @@ case class AOp(op: String, args: List[AExpr]) extends AExpr {
       case("get", List(ASome(e))) => e //ANone, AMaybe -> should throw exception
 
       //AList
-      case ("head", List(l:AList)) => l.head
-      case ("tail", List(l:AList)) => l.tail
+      case ("head", List(l:AList)) => l.headOption
+      case ("tail", List(l:AList)) => l.tailOption
       case ("length", List(l: AList)) => l.length
       case("intersect", List(l: AList,r: AList)) => l.intersect(r)
       case("concat", List(l: AList,r: AList)) => l.concat(r)
