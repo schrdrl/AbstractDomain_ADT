@@ -139,8 +139,8 @@ case class AInt(lb: Option[Int], ub: Option[Int]) extends AVal {
   def widen(that: AVal): AInt = {
     that match {
       case that: AInt =>
-        val lb = if (AInt.<(that.lb, this.lb)) None else this.lb
-        val ub = if (AInt.<(this.ub, that.ub)) None else this.ub
+        val lb = if (AInt.<(that.lb, this.lb) || that.lb == None) None else this.lb
+        val ub = if (AInt.<(this.ub, that.ub) || that.ub == None) None else this.ub
         AInt(lb, ub)
     }
   }

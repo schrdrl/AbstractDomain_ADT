@@ -68,7 +68,7 @@ class concat extends AnyFunSuite {
       AAssert(!APred("isNil", "xs"))).execute(as0)
 
     assert(prog.head.lookup("ys") == ANil)
-    assert(prog.head.lookup("xs") == ACons(AInt(-2), ACons(AInt(-1), AMany(AInt.top))))
+    assert(prog.head.lookup("xs") == ACons(AInt(-2), ACons(AInt(-1), AMany(AInt(Some(0), None)))))
   }
 
   //1d. Abstract value (AList) + built-in method (AList)
